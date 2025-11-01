@@ -33,7 +33,6 @@
   "dependencies": {
     "@trivago/prettier-plugin-sort-imports": "4.3.0",
     "lint-staged": "^15.5.1",
-    "npm-run-all": "^4.1.5",
     "oxlint": "^1.6.0",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.6.14",
@@ -61,5 +60,12 @@
       "axios": "1.6.8",
       "minimist": "^1.2.6"
     }
-  }
+  },
+  "devDependencies": {
+    "@nestjs/cli": "7.5.1",
+    "cross-env": "^7.0.3",
+    "npm-run-all": "^4.1.5",
+    "vite": "^5.4.10"
+  },
+  "packageManager": "pnpm@8.15.9+sha512.499434c9d8fdd1a2794ebf4552b3b25c0a633abcee5bb15e7b5de90f32f47b513aca98cd5cfd001c31f0db454bc3804edccd578501e4ca293a6816166bbd9f81"
 }

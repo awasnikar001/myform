@@ -131,8 +131,9 @@ export class FormService {
   }
 
   async findAllByFieldLength(maxLength = 2) {
+    // Use $expr + $size instead of deprecated/typed-out $where
     return this.formModel.find({
-      $where: `this.fields.length <= ${maxLength}`
+      $expr: { $lte: [{ $size: '$fields' }, maxLength] }
     })
   }
 
