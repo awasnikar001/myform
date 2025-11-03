@@ -305,15 +305,7 @@ export function Table<T, K>({
         loading: !isRefreshing && loading
       })
     }
-  }, [
-    onExpandedChange,
-    expandedIndex,
-    isRefreshing,
-    list,
-    loading,
-    pagination.current,
-    pagination.total
-  ])
+  }, [onExpandedChange, expandedIndex, isRefreshing, list, loading, pagination.total])
 
   return (
     <div className={className}>
