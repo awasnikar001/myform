@@ -133,9 +133,21 @@ export const ACCOUNT_DELETION_SCHEDULE_INTERVAL: string =
 export const UNSPLASH_CLIENT_ID: string = process.env.UNSPLASH_CLIENT_ID
 
 // OpenAI
-export const OPENAI_BASE_URL = process.env.OPENAI_BASE_URL
+export const OPENAI_BASE_URL =
+  process.env.OPENAI_BASE_URL && process.env.OPENAI_BASE_URL.trim() !== ''
+    ? process.env.OPENAI_BASE_URL.trim()
+    : 'https://api.openai.com/v1'
 export const OPENAI_API_KEY = process.env.OPENAI_API_KEY
 export const OPENAI_GPT_MODEL = process.env.OPENAI_GPT_MODEL || 'gpt-3.5-turbo-0125'
+
+// Temporary debug - remove after testing
+console.log('🔍 OPENAI Configuration:')
+console.log('   BASE_URL:', OPENAI_BASE_URL)
+console.log(
+  '   API_KEY:',
+  OPENAI_API_KEY ? '✅ YES (length: ' + OPENAI_API_KEY.length + ')' : '❌ NO'
+)
+console.log('   MODEL:', OPENAI_GPT_MODEL)
 
 // S3
 export const S3_ENDPOINT = process.env.S3_ENDPOINT

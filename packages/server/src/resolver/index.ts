@@ -39,6 +39,7 @@ export { UpdateIntegrationSettingsResolver } from './integration/update-integrat
 export { DeleteIntegrationSettingsResolver } from './integration/delete-integration-settings.resolver'
 export { UpdateIntegrationStatusResolver } from './integration/update-integration-status.resolver'
 
+export { FormAIResolver } from './form/form.ai.resolver'
 export { FormsResolver } from './form/forms.resolver'
 export { SearchFormsResolver } from './form/search-forms.resolver'
 export { FormAnalyticResolver } from './form/form-analytic.resolver'
