@@ -1,10 +1,13 @@
 import {
   CaptchaKindEnum,
+  Choice,
   FieldKindEnum,
   FormField,
   FormKindEnum,
   FormStatusEnum,
-  InteractiveModeEnum
+  InteractiveModeEnum,
+  Property,
+  Validation
 } from '@heyform-inc/shared-types-enums'
 import { Logger } from '@nestjs/common'
 import { OpenAI } from 'openai'
@@ -171,7 +174,7 @@ export class FormAIResolver {
       const properties = this.isPlainObject(field.properties) ? field.properties : undefined
       const layout = this.isPlainObject((field as any).layout) ? (field as any).layout : undefined
 
-      normalized.push({
+      const sanitized = this.sanitizeField({
         id: nanoid(12),
         kind,
         title,
@@ -180,6 +183,8 @@ export class FormAIResolver {
         properties,
         layout
       })
+
+      normalized.push(sanitized)
     }
 
     if (!normalized.some(field => field.kind === FieldKindEnum.THANK_YOU)) {
@@ -187,6 +192,89 @@ export class FormAIResolver {
     }
 
     return normalized.length > 0 ? normalized : this.createFallbackFields()
+  }
+
+  private sanitizeField(field: FormField): FormField {
+    const sanitized: FormField = {
+      ...field,
+      validations: this.sanitizeValidations(field.validations),
+      properties: this.sanitizeProperties(field.properties)
+    }
+
+    return sanitized
+  }
+
+  private sanitizeValidations(validations?: Validation): Validation | undefined {
+    if (!validations) {
+      return undefined
+    }
+
+    const { required, min, max, matchExpected } = validations as Record<string, any>
+    const cleaned: Validation = {}
+
+    if (typeof required !== 'undefined') {
+      cleaned.required = required
+    }
+    if (typeof min !== 'undefined') {
+      cleaned.min = min
+    }
+    if (typeof max !== 'undefined') {
+      cleaned.max = max
+    }
+    if (typeof matchExpected !== 'undefined') {
+      cleaned.matchExpected = matchExpected
+    }
+
+    return Object.keys(cleaned).length > 0 ? cleaned : undefined
+  }
+
+  private sanitizeProperties(properties?: Property): Property | undefined {
+    if (!properties) {
+      return undefined
+    }
+
+    const cloned = { ...(properties as Record<string, any>) }
+    delete cloned.placeholder
+
+    if (Array.isArray(cloned.choices)) {
+      const normalizedChoices: Choice[] = []
+
+      for (const item of cloned.choices) {
+        if (typeof item === 'string') {
+          normalizedChoices.push({
+            id: nanoid(12),
+            label: item
+          })
+          continue
+        }
+
+        if (item && typeof item === 'object') {
+          const id = helper.isValid((item as any).id) ? (item as any).id : nanoid(12)
+          const label = helper.isValid((item as any).label)
+            ? (item as any).label
+            : helper.isValid((item as any).value)
+              ? (item as any).value
+              : ''
+
+          normalizedChoices.push({
+            id,
+            label,
+            image: (item as any).image,
+            color: (item as any).color,
+            score: (item as any).score,
+            isExpected: (item as any).isExpected
+          })
+        }
+      }
+
+      cloned.choices = normalizedChoices
+    }
+
+    if (Array.isArray(cloned.fields)) {
+      cloned.fields = cloned.fields.map(field => this.sanitizeField(field))
+    }
+
+    return cloned as Property
   }
 
   private normalizeKind(kind?: string): FieldKindEnum {

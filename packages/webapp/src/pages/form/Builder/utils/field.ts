@@ -1,10 +1,12 @@
 import {
+  Choice,
   ChoiceBadgeEnum,
   FORM_FIELD_KINDS,
   FieldKindEnum,
   Logic,
   Property,
-  QUESTION_FIELD_KINDS
+  QUESTION_FIELD_KINDS,
+  Validation
 } from '@heyform-inc/shared-types-enums'
 
 import { htmlUtils } from '@heyform-inc/answer-utils'
@@ -273,6 +275,89 @@ export function getFieldFromKind(kind: FieldKindEnum | string): FormFieldType {
   return field
 }
 
+function sanitizeValidations(validations?: Validation): Validation | undefined {
+  if (!validations) {
+    return undefined
+  }
+
+  const { required, min, max, matchExpected } = validations as Record<string, any>
+  const cleaned: Validation = {}
+
+  if (typeof required !== 'undefined') {
+    cleaned.required = required
+  }
+  if (typeof min !== 'undefined') {
+    cleaned.min = min
+  }
+  if (typeof max !== 'undefined') {
+    cleaned.max = max
+  }
+  if (typeof matchExpected !== 'undefined') {
+    cleaned.matchExpected = matchExpected
+  }
+
+  return Object.keys(cleaned).length > 0 ? cleaned : undefined
+}
+
+function sanitizeProperties(properties?: Property): Property | undefined {
+  if (!properties) {
+    return undefined
+  }
+
+  const cloned = { ...(properties as Record<string, any>) }
+  delete cloned.placeholder
+
+  if (Array.isArray(cloned.choices)) {
+    const normalizedChoices: Choice[] = []
+
+    for (const item of cloned.choices) {
+      if (typeof item === 'string') {
+        normalizedChoices.push({
+          id: nanoid(12),
+          label: item
+        })
+        continue
+      }
+
+      if (item && typeof item === 'object') {
+        const id = helper.isValid((item as any).id) ? (item as any).id : nanoid(12)
+        const label = helper.isValid((item as any).label)
+          ? (item as any).label
+          : helper.isValid((item as any).value)
+            ? (item as any).value
+            : ''
+
+        normalizedChoices.push({
+          id,
+          label,
+          image: (item as any).image,
+          color: (item as any).color,
+          score: (item as any).score,
+          isExpected: (item as any).isExpected
+        })
+      }
+    }
+
+    cloned.choices = normalizedChoices
+  }
+
+  if (Array.isArray(cloned.fields)) {
+    cloned.fields = cloned.fields.map(field => sanitizeField(field as FormFieldType))
+  }
+
+  return cloned as Property
+}
+
+function sanitizeField(field: FormFieldType): FormFieldType {
+  const sanitized: FormFieldType = {
+    ...field,
+    validations: sanitizeValidations(field.validations),
+    properties: sanitizeProperties(field.properties)
+  }
+
+  return sanitized
+}
+
 export function getFilteredFields(fields?: FormFieldType[]) {
   const result = {
     fields: [] as FormFieldType[]
@@ -293,11 +378,11 @@ export function getFilteredFields(fields?: FormFieldType[]) {
       if (row.kind === FieldKindEnum.GROUP) {
         field.properties = {
           ...field.properties,
-          ...getFilteredFields(row.properties?.fields)
+          fields: getFilteredFields(row.properties?.fields).fields
         }
       }
 
-      result.fields.push(field)
+      result.fields.push(sanitizeField(field))
     }
   }
 
