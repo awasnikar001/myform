@@ -7,6 +7,12 @@ import { analyzer } from 'vite-bundle-analyzer'
 
 export default ({ mode }: ConfigEnv) => {
   const env = loadEnv(mode, process.cwd())
+  
+  // Default proxy target to localhost:9157 (default server port)
+  const proxyTarget = env.VITE_PROXY_TARGET || 'http://localhost:9157'
+  const cookieDomainRewrite = env.VITE_COOKIE_DOMAIN_REWRITE || 'localhost'
+  const cookieDomain = env.VITE_COOKIE_DOMAIN || 'localhost'
+  
   const plugins = [
     react(),
     svgr(),
@@ -73,13 +79,14 @@ export default ({ mode }: ConfigEnv) => {
     },
     server: {
       port: 3000,
+      strictPort: true,
       proxy: {
         '/graphql': {
-          target: env.VITE_PROXY_TARGET,
+          target: proxyTarget,
           secure: false,
           changeOrigin: true,
           cookieDomainRewrite: {
-            [env.VITE_COOKIE_DOMAIN_REWRITE]: env.VITE_COOKIE_DOMAIN
+            [cookieDomainRewrite]: cookieDomain
           },
           
           configure: (proxy: any) => {
@@ -96,7 +103,7 @@ export default ({ mode }: ConfigEnv) => {
           }
         },
         '/api': {
-          target: env.VITE_PROXY_TARGET,
+          target: proxyTarget,
           secure: false,
           changeOrigin: true
         }
