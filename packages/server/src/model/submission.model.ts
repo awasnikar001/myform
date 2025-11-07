@@ -6,7 +6,7 @@ import {
   Variable
 } from '@heyform-inc/shared-types-enums'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { Document } from 'mongoose'
+import { Document, Schema as MongooseSchema } from 'mongoose'
 
 import { UserAgent } from '@utils'
 
@@ -33,13 +33,13 @@ export class SubmissionModel extends Document {
   @Prop({ required: true })
   title: string
 
-  @Prop()
+  @Prop({ type: [MongooseSchema.Types.Mixed] })
   answers: Answer[]
 
-  @Prop({ default: [] })
+  @Prop({ default: [], type: [MongooseSchema.Types.Mixed] })
   hiddenFields?: HiddenFieldAnswer[]
 
-  @Prop({ default: [] })
+  @Prop({ default: [], type: [MongooseSchema.Types.Mixed] })
   variables?: Variable[]
 
   @Prop()
@@ -51,10 +51,9 @@ export class SubmissionModel extends Document {
   @Prop()
   ip: string
 
-  @Prop()
+  @Prop({ type: MongooseSchema.Types.Mixed })
   userAgent: UserAgent
 
-  @Prop()
   @Prop({
     type: Number,
     required: true,

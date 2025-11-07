@@ -32,7 +32,10 @@ export class DataMaskInterceptor implements NestInterceptor {
     return plainToClass(returnType, response, options)
   }
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(
+    context: ExecutionContext,
+    next: CallHandler
+  ): Observable<any> | Promise<Observable<any>> {
     const contextOptions = this.getContextOptions(context)
     const options = {
       ...DEFAULT_OPTIONS,

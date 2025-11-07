@@ -1,0 +1,40 @@
+# HeyForm Project Rules
+
+## Project Overview
+HeyForm is a monorepo form builder built with React (frontend) and NestJS (backend). Uses pnpm workspaces for package management.
+
+## Monorepo Structure
+- `packages/webapp` - React 19 frontend (Vite, TypeScript, TailwindCSS, Apollo Client)
+- `packages/server` - NestJS 7 backend (GraphQL, MongoDB/Mongoose)
+- `packages/form-renderer` - Form rendering library
+- `packages/embed` - Embed JavaScript library
+- `packages/answer-utils` - Form submission utilities
+- `packages/shared-types-enums` - Shared TypeScript types/enums
+- `packages/utils` - Common utilities
+
+## Critical Constraints
+- **Package Manager**: Use `pnpm` (>=8), never npm/yarn
+- **Node Version**: >=16 (webapp requires >=18 or >=20)
+- **Dependency Overrides**: Root package.json has critical overrides (React 19, axios, express, etc.) - preserve these
+- **Shared Packages**: Packages reference each other via `@heyform-inc/*` namespace
+
+## Code Style & Tools
+- **Linting**: oxlint (root level), ESLint (server)
+- **Formatting**: Prettier with `@trivago/prettier-plugin-sort-imports` and `prettier-plugin-tailwindcss`
+- **Git Hooks**: simple-git-hooks with lint-staged for pre-commit
+- **TypeScript**: Strict typing throughout, shared types in `shared-types-enums`
+
+## Important Patterns
+- Frontend uses React 19, Zustand/MobX for state, TailwindCSS for styling
+- Backend uses NestJS decorators, GraphQL resolvers, MongoDB models
+- Shared types must be updated in `shared-types-enums` package
+- Always run `pnpm install` from root after dependency changes
+- Use workspace filters: `pnpm --filter <package>` for package-specific commands
+
+## When Making Changes
+1. Check if changes affect shared packages - update accordingly
+2. Respect dependency overrides in root package.json
+3. Maintain TypeScript types consistency across packages
+4. Run type-check: `pnpm --filter <package> type-check` before committing
+5. Ensure Prettier formatting is applied
+

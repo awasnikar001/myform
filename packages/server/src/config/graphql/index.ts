@@ -1,35 +1,26 @@
-import { Injectable } from '@nestjs/common'
-import { UserInputError } from 'apollo-server-express'
-import { ValidationError } from 'class-validator'
+import { BadRequestException, Injectable } from '@nestjs/common'
 
 import { helper } from '@heyform-inc/utils'
 import { GqlModuleOptions, GqlOptionsFactory } from '@nestjs/graphql'
-import { LowerCaseDirective } from '@utils'
 
 @Injectable()
 export class GraphqlService implements GqlOptionsFactory {
   async createGqlOptions(): Promise<GqlModuleOptions> {
     return {
-      schemaDirectives: {
-        lower: LowerCaseDirective
-      },
-      resolverValidationOptions: {
-        requireResolversForResolveType: false
-      },
+      // Removed schemaDirectives - the lower directive was registered but never used
+      // LowerCaseScalar is used instead for lowercase string handling
       autoSchemaFile: true,
-      bodyParserConfig: { limit: '10mb' },
-      introspection: true,
-      playground: false,
       formatError: e => {
-        if (e instanceof ValidationError || e instanceof UserInputError) {
+        // Handle BadRequestException (replaces UserInputError)
+        if (e.extensions?.exception instanceof BadRequestException) {
           return {
-            code: e.extensions.code,
+            code: e.extensions.code || 'BAD_REQUEST',
             message: e.message
           }
         }
 
-        const response = e.extensions.exception?.response
-        let code = e.extensions.code
+        const response = e.extensions?.exception?.response
+        let code = e.extensions?.code
         let message = e.message as string
 
         if (helper.isValid(response)) {
@@ -44,12 +35,14 @@ export class GraphqlService implements GqlOptionsFactory {
           }
         }
 
-        delete e.extensions.exception.response
+        if (e.extensions?.exception?.response) {
+          delete e.extensions.exception.response
+        }
 
         return {
           code,
           message: e.message,
-          ...e.extensions.exception,
+          ...(e.extensions?.exception || {}),
           ...{ message }
         }
       },
@@ -62,6 +55,6 @@ export class GraphqlService implements GqlOptionsFactory {
         origin: true
       },
       uploads: false
-    }
+    } as GqlModuleOptions
   }
 }

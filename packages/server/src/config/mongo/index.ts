@@ -23,15 +23,19 @@ mongoose.set('debug', (collection: string, method: string, query: any, doc: any)
 
 export class MongoService implements MongooseOptionsFactory {
   createMongooseOptions(): Promise<MongooseModuleOptions> | MongooseModuleOptions {
-    return {
+    const options: MongooseModuleOptions = {
       uri: MONGO_URI,
       user: MONGO_USER,
-      pass: MONGO_PASSWORD,
-      sslCA: MONGO_SSL_CA_PATH,
-      useNewUrlParser: true,
-      useFindAndModify: false,
-      useCreateIndex: true,
-      useUnifiedTopology: true
+      pass: MONGO_PASSWORD
+      // Removed deprecated options (useNewUrlParser, useFindAndModify, useCreateIndex, useUnifiedTopology)
+      // These are now defaults in Mongoose v6+ and will cause deprecation warnings
     }
+
+    // sslCA can be Buffer[] or string, handle it conditionally
+    if (MONGO_SSL_CA_PATH) {
+      options.sslCA = MONGO_SSL_CA_PATH as any
+    }
+
+    return options
   }
 }

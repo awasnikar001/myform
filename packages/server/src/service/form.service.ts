@@ -214,7 +214,7 @@ export class FormService {
       },
       updates
     )
-    return !!result?.ok
+    return !!result?.acknowledged
   }
 
   public async updateMany(formIds: string[], updates: Record<string, any>): Promise<boolean> {
@@ -226,7 +226,7 @@ export class FormService {
       },
       updates
     )
-    return !!result?.ok
+    return !!result?.acknowledged
   }
 
   public async delete(formId: string | string[]): Promise<boolean> {
@@ -246,7 +246,7 @@ export class FormService {
       })
     }
 
-    return result?.n > 0
+    return (result?.deletedCount ?? 0) > 0
   }
 
   public async createField(formId: string, field: FormField): Promise<boolean> {
@@ -260,7 +260,7 @@ export class FormService {
         }
       }
     )
-    return !!result?.ok
+    return !!result?.acknowledged
   }
 
   public async updateField({ formId, fieldId, updates }: UpdateFiledOptions): Promise<boolean> {
@@ -273,7 +273,7 @@ export class FormService {
         $set: getUpdateQuery(updates, 'fields.$')
       }
     )
-    return !!result?.ok
+    return !!result?.acknowledged
   }
 
   public async deleteField(formId: string, fieldId: string): Promise<boolean> {
@@ -294,7 +294,7 @@ export class FormService {
         multi: true
       }
     )
-    return !!result?.ok
+    return !!result?.acknowledged
   }
 
   async checkQuota(teamId: string, formLimit: number): Promise<boolean> {

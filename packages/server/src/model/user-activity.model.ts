@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { Document } from 'mongoose'
+import { Document, Schema as MongooseSchema } from 'mongoose'
 
 import { UserAgent } from '@utils'
 
@@ -27,7 +27,7 @@ export class UserActivityModel extends Document {
   @Prop({ required: true })
   ip: string
 
-  @Prop()
+  @Prop({ type: MongooseSchema.Types.Mixed })
   userAgent: UserAgent
 
   @Prop()

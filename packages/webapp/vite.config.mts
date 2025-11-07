@@ -26,6 +26,13 @@ export default ({ mode }: ConfigEnv) => {
   return {
     assetsInclude: ['**/*.svg'],
     plugins,
+    css: {
+      preprocessorOptions: {
+        scss: {
+          api: 'modern-compiler' // Use modern Sass API to avoid deprecation warnings
+        }
+      }
+    },
     define: {
       'import.meta.env.PACKAGE_VERSION': JSON.stringify(process.env.npm_package_version),
       'process.env': {

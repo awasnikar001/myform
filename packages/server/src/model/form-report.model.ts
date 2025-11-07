@@ -1,6 +1,6 @@
 import { Choice, FieldKindEnum, Property } from '@heyform-inc/shared-types-enums'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { Document } from 'mongoose'
+import { Document, Schema as MongooseSchema } from 'mongoose'
 
 interface Choose extends Choice {
   count: number
@@ -26,7 +26,7 @@ export class FormReportModel extends Document {
   @Prop({ required: true, unique: true })
   formId: string
 
-  @Prop()
+  @Prop({ type: [MongooseSchema.Types.Mixed] })
   responses?: FormReportResponse[]
 }
 

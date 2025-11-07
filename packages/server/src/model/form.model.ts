@@ -11,7 +11,7 @@ import {
 } from '@heyform-inc/shared-types-enums'
 import { Logic, Variable } from '@heyform-inc/shared-types-enums'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { Document } from 'mongoose'
+import { Document, Schema as MongooseSchema } from 'mongoose'
 
 import { helper, nanoid, parseJson } from '@heyform-inc/utils'
 
@@ -56,31 +56,31 @@ export class FormModel extends Document {
   })
   kind: FormKindEnum
 
-  @Prop()
+  @Prop({ type: MongooseSchema.Types.Mixed })
   settings?: FormSettings
 
-  @Prop({ default: [] })
+  @Prop({ default: [], type: [MongooseSchema.Types.Mixed] })
   fields?: FormField[]
 
-  @Prop({ default: [] })
+  @Prop({ default: [], type: [MongooseSchema.Types.Mixed] })
   hiddenFields?: HiddenField[]
 
   @Prop({ type: Map, default: {} })
   translations?: IForModel['translations']
 
-  @Prop({ default: [] })
+  @Prop({ default: [], type: [MongooseSchema.Types.Mixed] })
   logics?: Logic[]
 
-  @Prop({ default: [] })
+  @Prop({ default: [], type: [MongooseSchema.Types.Mixed] })
   variables?: Variable[]
 
   @Prop({ default: 0 })
   fieldsUpdatedAt?: number
 
-  @Prop()
+  @Prop({ type: MongooseSchema.Types.Mixed })
   themeSettings?: ThemeSettings
 
-  @Prop()
+  @Prop({ type: MongooseSchema.Types.Mixed })
   stripeAccount?: StripeAccount
 
   @Prop({ default: -1 })

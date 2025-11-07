@@ -5,7 +5,7 @@ import {
   ThemeSettings
 } from '@heyform-inc/shared-types-enums'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { Document } from 'mongoose'
+import { Document, Schema as MongooseSchema } from 'mongoose'
 
 @Schema({
   timestamps: true
@@ -42,13 +42,13 @@ export class TemplateModel extends Document {
   })
   kind: FormKindEnum
 
-  @Prop({ default: [] })
+  @Prop({ default: [], type: [MongooseSchema.Types.Mixed] })
   fields?: FormField[]
 
   @Prop()
   fieldsUpdatedAt?: number
 
-  @Prop()
+  @Prop({ type: MongooseSchema.Types.Mixed })
   themeSettings?: ThemeSettings
 
   @Prop({ required: false, default: 0 })
