@@ -23,6 +23,10 @@ overrides:
   busboy: 1.6.0
   axios: 1.6.8
   minimist: ^1.2.6
+  punycode: ^2.3.1
+  rxjs: ^7.8.1
+  whatwg-url: ^11.0.0
+  tr46: ^6.0.0
 
 importers:
 
@@ -648,7 +652,7 @@ packages:
       ajv: 6.12.3
       fast-json-stable-stringify: 2.1.0
       magic-string: 0.25.7
-      rxjs: 6.5.5
+      rxjs: 7.8.2
       source-map: 0.7.3
     dev: true
 
@@ -659,7 +663,7 @@ packages:
       ajv: 6.12.3
       fast-json-stable-stringify: 2.1.0
       magic-string: 0.25.7
-      rxjs: 6.5.4
+      rxjs: 7.8.2
       source-map: 0.7.3
     dev: true
 
@@ -673,7 +677,7 @@ packages:
       '@schematics/schematics': 0.1000.7
       inquirer: 7.1.0
       minimist: 1.2.8
-      rxjs: 6.5.5
+      rxjs: 7.8.2
       symbol-observable: 1.2.0
     dev: true
 
@@ -683,7 +687,7 @@ packages:
     dependencies:
       '@angular-devkit/core': 10.0.7
       ora: 4.0.4
-      rxjs: 6.5.5
+      rxjs: 7.8.2
     dev: true
 
   /@angular-devkit/schematics@9.1.12:
@@ -692,7 +696,7 @@ packages:
     dependencies:
       '@angular-devkit/core': 9.1.12
       ora: 4.0.3
-      rxjs: 6.5.4
+      rxjs: 7.8.2
     dev: true
 
   /@apollo/client@3.14.0(@types/react@19.2.2)(graphql@15.3.0)(react-dom@19.2.0)(react@19.2.0):
@@ -3706,7 +3710,7 @@ packages:
     resolution: {integrity: sha512-Cj94FJrnLcAU4URJrRmnsHRODZPJpX+EKKJ/Or9qvL9ULQwRWYmFcGQYaJ0nVV0hSBjn/jaAV1Cgqw74uk21KA==}
     peerDependencies:
       reflect-metadata: ^0.1.12
-      rxjs: ^6.0.0
+      rxjs: ^7.8.1
     dependencies:
       axios: 1.6.8
       cli-color: 2.0.0
@@ -3725,7 +3729,7 @@ packages:
     peerDependencies:
       '@nestjs/common': ^7.0.0
       reflect-metadata: ^0.1.12
-      rxjs: ^6.0.0
+      rxjs: ^7.8.1
     dependencies:
       '@nestjs/common': 7.4.4(reflect-metadata@0.1.13)(rxjs@7.8.2)
       '@nuxtjs/opencollective': 0.2.2
@@ -3797,7 +3801,7 @@ packages:
       '@nestjs/core': ^8.0.0 || ^9.0.0
       mongoose: ^6.0.2 || ^7.0.0
       reflect-metadata: ^0.1.12
-      rxjs: ^7.0.0
+      rxjs: ^7.8.1
     dependencies:
       '@nestjs/common': 7.4.4(reflect-metadata@0.1.13)(rxjs@7.8.2)
       '@nestjs/core': 7.4.4(@nestjs/common@7.4.4)(reflect-metadata@0.1.13)(rxjs@7.8.2)
@@ -12186,7 +12190,7 @@ packages:
       lodash: 4.17.21
       mute-stream: 0.0.8
       run-async: 2.4.1
-      rxjs: 6.6.3
+      rxjs: 7.8.2
       string-width: 4.2.3
       strip-ansi: 6.0.1
       through: 2.3.8
@@ -12205,7 +12209,7 @@ packages:
       lodash: 4.17.21
       mute-stream: 0.0.8
       run-async: 2.4.1
-      rxjs: 6.6.3
+      rxjs: 7.8.2
       string-width: 4.2.3
       strip-ansi: 6.0.1
       through: 2.3.8
@@ -13115,6 +13119,7 @@ packages:
 
   /lodash.sortby@4.7.0:
     resolution: {integrity: sha512-HDWXG8isMntAyRF5vZ7xKuEvOhT4AhlRt/3czTSjvGUxjYCBVRQY48ViDHyfYz9VIoBkW4TMGQNapx+l3RUwdA==}
+    dev: false
 
   /lodash.toarray@4.4.0:
     resolution: {integrity: sha512-QyffEA3i5dma5q2490+SgCvDN0pXLmRGSyAANuVi0HQ01Pkfr9fuoKQW8wm1wGBnJITs/mS7wQvS6VshUEBFCw==}
@@ -14158,7 +14163,7 @@ packages:
       encoding:
         optional: true
     dependencies:
-      whatwg-url: 5.0.0
+      whatwg-url: 11.0.0
     dev: false
 
   /node-forge@1.3.1:
@@ -14190,7 +14195,7 @@ packages:
       os-browserify: 0.3.0
       path-browserify: 0.0.1
       process: 0.11.10
-      punycode: 1.4.1
+      punycode: 2.3.1
       querystring-es3: 0.2.1
       readable-stream: 2.3.8
       stream-browserify: 2.0.2
@@ -15161,10 +15166,6 @@ packages:
       pump: 2.0.1
     dev: true
 
-  /punycode@1.4.1:
-    resolution: {integrity: sha512-jmYNElW7yvO7TV33CjSmvSiE2yco3bV2czu/OzDKdMNVZQWfxCblURLhf+47syQRBntjfLdd/H0egrzIG+oaFQ==}
-    dev: true
-
   /punycode@2.3.1:
     resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
     engines: {node: '>=6'}
@@ -15934,32 +15935,10 @@ packages:
       aproba: 1.2.0
     dev: true
 
-  /rxjs@6.5.4:
-    resolution: {integrity: sha512-naMQXcgEo3csAEGvw/NydRA0fuS2nDZJiw1YUWFKU7aPPAPGZEsD4Iimit96qwCieH6y614MCLYwdkrWx7z/7Q==}
-    engines: {npm: '>=2.0.0'}
-    dependencies:
-      tslib: 1.14.1
-    dev: true
-
-  /rxjs@6.5.5:
-    resolution: {integrity: sha512-WfQI+1gohdf0Dai/Bbmk5L5ItH5tYqm3ki2c5GdWhKjalzjg93N3avFjVStyZZz+A2Em+ZxKH5bNghw9UeylGQ==}
-    engines: {npm: '>=2.0.0'}
-    dependencies:
-      tslib: 1.14.1
-    dev: true
-
-  /rxjs@6.6.3:
-    resolution: {integrity: sha512-trsQc+xYYXZ3urjOiJOuCOa5N3jAZ3eiSpQB5hIT8zGlL2QfnHLJ2r7GMkBGuIausdJN1OneaI6gQlsqNHHmZQ==}
-    engines: {npm: '>=2.0.0'}
-    dependencies:
-      tslib: 1.14.1
-    dev: true
-
   /rxjs@7.8.2:
     resolution: {integrity: sha512-dhKf903U/PQZY6boNNtAGdWbG85WAbjT/1xYoZIC7FAY0yWapOBQVsVrDl58W86//e1VpMNBtRV4MaXfdMySFA==}
     dependencies:
       tslib: 2.8.1
-    dev: false
 
   /safe-array-concat@1.1.3:
     resolution: {integrity: sha512-AURm5f0jYEOydBj7VQlVvDrjeFgthDdEF5H1dP+6mNpoXOMo1quQqJ4wvJDyRZ9+pO3kGWoOdmV08cSv2aJV6Q==}
@@ -16479,7 +16458,7 @@ packages:
     engines: {node: '>= 8'}
     deprecated: The work that was done in this beta branch won't be included in future versions
     dependencies:
-      whatwg-url: 7.1.0
+      whatwg-url: 11.0.0
     dev: true
 
   /sourcemap-codec@1.4.8:
@@ -17227,19 +17206,9 @@ packages:
     engines: {node: '>=0.6'}
     dev: false
 
-  /tr46@0.0.3:
-    resolution: {integrity: sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==}
-    dev: false
-
-  /tr46@1.0.1:
-    resolution: {integrity: sha512-dTpowEjclQ7Kgx5SdBkqRzVhERQXov8/l9Ft9dVM9fmg0W0KQSVaXX9T4i6twCPNtYiZM53lpSSUAwJbFPOHxA==}
-    dependencies:
-      punycode: 2.3.1
-    dev: true
-
-  /tr46@3.0.0:
-    resolution: {integrity: sha512-l7FvfAHlcmulp8kr+flpQZmVwtu7nfRV7NZujtN0OqES8EL4O4e0qqzL0DC5gAvx/ZC/9lk6rhcUwYvkBnBnYA==}
-    engines: {node: '>=12'}
+  /tr46@6.0.0:
+    resolution: {integrity: sha512-bLVMLPtstlZ4iMQHpFHTR7GAGj2jxi8Dg0s2h2MafAE4uSWF98FC/3MomU51iQAMf8/qDUbKWf5GxuvvVcXEhw==}
+    engines: {node: '>=20'}
     dependencies:
       punycode: 2.3.1
 
@@ -17724,7 +17693,7 @@ packages:
     resolution: {integrity: sha512-oCwdVC7mTuWiPyjLUz/COz5TLk6wgp0RCsN+wHZ2Ekneac9w8uuV0njcbbie2ME+Vs+d6duwmYuR3HgQXs1fOg==}
     engines: {node: '>= 0.4'}
     dependencies:
-      punycode: 1.4.1
+      punycode: 2.3.1
       qs: 6.14.0
     dev: true
 
@@ -18186,14 +18155,6 @@ packages:
     engines: {node: '>= 14'}
     dev: false
 
-  /webidl-conversions@3.0.1:
-    resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
-    dev: false
-
-  /webidl-conversions@4.0.2:
-    resolution: {integrity: sha512-YQ+BmxuTgd6UXZW3+ICGfyqRyHXVlD5GtQr5+qjiNW7bF0cqrzX500HVXPBOvgXb5YnzDd+h0zqyv61KUD7+Sg==}
-    dev: true
-
   /webidl-conversions@7.0.0:
     resolution: {integrity: sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g==}
     engines: {node: '>=12'}
@@ -18275,23 +18236,8 @@ packages:
     resolution: {integrity: sha512-RKT8HExMpoYx4igMiVMY83lN6UeITKJlBQ+vR/8ZJ8OCdSiN3RwCq+9gH0+Xzj0+5IrM6i4j/6LuvzbZIQgEcQ==}
     engines: {node: '>=12'}
     dependencies:
-      tr46: 3.0.0
+      tr46: 6.0.0
       webidl-conversions: 7.0.0
-
-  /whatwg-url@5.0.0:
-    resolution: {integrity: sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==}
-    dependencies:
-      tr46: 0.0.3
-      webidl-conversions: 3.0.1
-    dev: false
-
-  /whatwg-url@7.1.0:
-    resolution: {integrity: sha512-WUu7Rg1DroM7oQvGWfOiAK21n74Gg+T4elXEQYkOhtyLeWiJFoOGLXPKI/9gzIie9CtwVLm8wtw6YJdKyxSjeg==}
-    dependencies:
-      lodash.sortby: 4.7.0
-      tr46: 1.0.1
-      webidl-conversions: 4.0.2
-    dev: true
 
   /which-boxed-primitive@1.1.1:
     resolution: {integrity: sha512-TbX3mj8n0odCBFVlY8AxkqcHASw3L60jIuF8jFP78az3C2YhmGvqbHBpAjTRH2/xqYunrJ9g1jSyjCjpoWzIAA==}
