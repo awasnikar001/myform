@@ -16,7 +16,11 @@ export class TeamMemberModel extends Document {
   @Prop({ required: true, index: true })
   memberId: string
 
-  @Prop({ type: Number, required: true, enum: Object.values(TeamRoleEnum) })
+  @Prop({
+    type: Number,
+    required: true,
+    enum: Object.values(TeamRoleEnum).filter(v => typeof v === 'number') as number[]
+  })
   role: TeamRoleEnum
 
   @Prop({ default: 0 })

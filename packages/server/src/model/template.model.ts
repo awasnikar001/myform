@@ -29,7 +29,7 @@ export class TemplateModel extends Document {
   @Prop({
     type: Number,
     required: true,
-    enum: Object.values(InteractiveModeEnum),
+    enum: Object.values(InteractiveModeEnum).filter(v => typeof v === 'number') as number[],
     default: InteractiveModeEnum.GENERAL
   })
   interactiveMode: InteractiveModeEnum
@@ -37,7 +37,7 @@ export class TemplateModel extends Document {
   @Prop({
     type: Number,
     required: true,
-    enum: Object.values(FormKindEnum),
+    enum: Object.values(FormKindEnum).filter(v => typeof v === 'number') as number[],
     default: FormKindEnum.SURVEY
   })
   kind: FormKindEnum
