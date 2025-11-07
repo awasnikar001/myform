@@ -1,7 +1,8 @@
 import { Transform } from 'class-transformer'
-import { IsInt, IsOptional, IsString, IsUrl } from 'class-validator'
+import { IsEnum, IsInt, IsOptional, IsString, IsUrl } from 'class-validator'
 
 import { APP_HOMEPAGE_URL } from '@environments'
+import { ExportSubmissionFormatEnum } from '@model'
 
 export class ImageResizingDto {
   @IsUrl({
@@ -32,4 +33,8 @@ export class ImageResizingDto {
 export class ExportSubmissionsDto {
   @IsString()
   formId: string
+
+  @IsOptional()
+  @IsEnum(ExportSubmissionFormatEnum)
+  format?: ExportSubmissionFormatEnum = ExportSubmissionFormatEnum.CSV
 }

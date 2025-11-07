@@ -8,8 +8,10 @@ import {
 import {
   IconAdjustmentsHorizontal,
   IconDownload,
+  IconFileText,
   IconMaximize,
   IconMinimize,
+  IconTable,
   IconTrash
 } from '@tabler/icons-react'
 import { useBoolean, useRequest } from 'ahooks'
@@ -23,6 +25,7 @@ import { flattenFields } from '@heyform-inc/answer-utils'
 import IconMove from '@/assets/move.svg?react'
 import {
   Button,
+  Dropdown,
   EmptyState,
   Repeat,
   Select,
@@ -188,8 +191,8 @@ export default function FormSubmissions() {
     toggle()
   }
 
-  function handleDownload() {
-    window.open(`/api/export/submissions?formId=${formId}`)
+  function handleDownload(format: 'csv' | 'pdf') {
+    window.open(`/api/export/submissions?formId=${formId}&format=${format}`)
   }
 
   function handleClose() {
@@ -246,11 +249,26 @@ export default function FormSubmissions() {
           </div>
 
           <div className="flex items-center gap-x-2.5">
-            <Tooltip label={t('form.submissions.downloadCSV')}>
-              <Button.Ghost size="md" iconOnly onClick={handleDownload}>
+            <Dropdown
+              options={[
+                {
+                  value: 'csv',
+                  label: 'form.submissions.downloadCSV',
+                  icon: <IconTable className="h-4 w-4" />
+                },
+                {
+                  value: 'pdf',
+                  label: 'form.submissions.downloadPDF',
+                  icon: <IconFileText className="h-4 w-4" />
+                }
+              ]}
+              multiLanguage
+              onClick={handleDownload}
+            >
+              <Button.Ghost size="md" iconOnly title={t('form.submissions.download')}>
                 <IconDownload className="h-5 w-5" />
               </Button.Ghost>
-            </Tooltip>
+            </Dropdown>
 
             <Tooltip
               label={isMaximized ? t('form.submissions.minimize') : t('form.submissions.maximize')}
