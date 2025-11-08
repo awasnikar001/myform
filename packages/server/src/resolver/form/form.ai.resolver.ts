@@ -106,11 +106,20 @@ export class FormAIResolver {
       const prompt = {
         topic: input.topic,
         reference: input.reference ?? null,
-        instructions:
-          'Generate a professional, production-ready form with appropriate field types, validations, and visual layouts. Include welcome and thank you screens.'
+        instructions: helper.isValid(input.reference)
+          ? 'Generate a professional, production-ready form based on the topic. CRITICAL: You MUST strictly adhere to the reference provided. All questions, options, and content must be within the scope and constraints specified in the reference. Do not add questions or options that are not mentioned or implied in the reference. Include appropriate field types, validations, and visual layouts. Include welcome and thank you screens.'
+          : 'Generate a professional, production-ready form with appropriate field types, validations, and visual layouts. Include welcome and thank you screens.'
       }
 
       const systemPrompt = `You are an expert form designer creating production-ready Heyform schemas. Respond ONLY with valid JSON matching this interface: {"fields": FormField[]}
+
+REFERENCE FIELD USAGE:
+- If a "reference" is provided in the prompt, you MUST generate questions and options STRICTLY within the scope specified by the reference
+- Do not add questions, options, or content that goes beyond what is specified in the reference
+- Use the reference as the authoritative source for what should be included in the form
+- The "topic" provides high-level context, but the "reference" provides specific constraints and requirements that must be followed precisely
+- When reference is provided, prioritize accuracy to the reference over generic form patterns
+- Extract specific questions, options, and requirements from the reference and implement them exactly as specified
 
 AVAILABLE FIELD TYPES (use exact values):
 - welcome: Welcome/intro screen (use for first field if introducing the form)

@@ -828,9 +828,17 @@
       },
       "reference": {
         "label": "Reference (optional)",
-        "description": "After providing the Reference, the AI will generate questions and options strictly within the scope specified by the Reference."
+        "description": "After providing the Reference, the AI will generate questions and options strictly within the scope specified by the Reference.",
+        "hint": "Use this to specify exact questions, options, or constraints you want in the form.",
+        "examplesTitle": "Reference Examples:",
+        "examples": [
+          "Include questions about: work experience (years), education level (High School, Bachelor's, Master's, PhD), preferred work location (Remote, Hybrid, On-site), and salary expectations.",
+          "The survey should cover: product quality (1-5 scale), delivery time satisfaction, customer service rating, and likelihood to recommend (0-10).",
+          "Collect: full name, email, phone number, dietary restrictions (Vegetarian, Vegan, Gluten-free, None), emergency contact name and phone."
+        ]
       },
-      "submit": "Generate questions"
+      "submit": "Generate questions",
+      "generating": "Generating..."
     },
     "chat": {
       "title": "HeyForm AI Assistant",
