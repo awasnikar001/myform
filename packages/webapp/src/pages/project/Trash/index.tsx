@@ -5,6 +5,7 @@ import { Trans, useTranslation } from 'react-i18next'
 
 import { FormService } from '@/services'
 import { useParam } from '@/utils'
+import { apollo } from '@/utils/apollo'
 import { helper } from '@heyform-inc/utils'
 
 import { Async, EmptyState, Repeat } from '@/components'
@@ -25,8 +26,40 @@ export default function ProjectTrash() {
     return helper.isValid(result)
   }
 
-  function handleChange(_: string, form: FormType) {
-    setForms(f => f.filter(row => row.id !== form.id))
+  function handleChange(type: string, form: FormType) {
+    if (type === 'delete' || type === 'restore') {
+      // Optimistically update UI immediately
+      const updatedForms = forms.filter(row => row.id !== form.id)
+      setForms(updatedForms)
+
+      // Clear Apollo cache for forms query to ensure fresh data
+      try {
+        apollo.client.cache.evict({
+          fieldName: 'forms'
+        })
+        apollo.client.cache.gc()
+      } catch (e) {
+        // Cache eviction failed, continue with refetch
+      }
+
+      // Manually refetch to ensure we have latest data from server
+      // Use requestAnimationFrame + setTimeout to ensure DOM updates and mutation completion
+      requestAnimationFrame(() => {
+        setTimeout(async () => {
+          try {
+            // Force a fresh fetch with network-only policy (already set in FormService)
+            const result = await FormService.forms(projectId, FormStatusEnum.TRASH)
+            if (Array.isArray(result)) {
+              setForms(result)
+            }
+          } catch (error) {
+            // If refetch fails, revert to optimistic update
+            console.error('Failed to refetch forms after deletion:', error)
+            // Keep the optimistic update
+          }
+        }, 500)
+      })
+    }
   }
 
   return (

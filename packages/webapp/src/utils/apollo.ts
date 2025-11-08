@@ -81,6 +81,8 @@ function responseInterceptor<T = Any>(response: ApolloQueryResult<T>): T {
 }
 
 export const apollo = {
+  client,
+
   async mutate<T = Any>(options: MutationOptions): Promise<T> {
     const result = await client.mutate(options)
 
@@ -91,5 +93,18 @@ export const apollo = {
     const result = await client.query(options)
 
     return responseInterceptor<T>(result.data)
+  },
+
+  // Clear cache for a specific query
+  clearQueryCache(query: any, variables?: any) {
+    client.cache.evict({
+      fieldName: Object.keys(client.cache.extract())[0]
+    })
+    client.cache.gc()
+  },
+
+  // Reset entire cache
+  resetCache() {
+    client.cache.reset()
   }
 }

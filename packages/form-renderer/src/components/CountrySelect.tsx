@@ -155,6 +155,7 @@ export const CountrySelect: FC<CountrySelectProps> = ({
     setIsOpen(false)
     setTriggerStyle(undefined)
     setHighlighted(undefined)
+    setKeyword(undefined)
   }
 
   function handleChange(newValue: string) {
@@ -184,7 +185,12 @@ export const CountrySelect: FC<CountrySelectProps> = ({
         onMouseLeave={() => setHighlighted(undefined)}
       >
         <div className="w-full">
-          <Input placeholder={t('Search country')} onChange={handleKeywordChangeCallback} />
+          <Input
+            placeholder={t('Search country')}
+            value={keyword || ''}
+            onChange={handleKeywordChangeCallback}
+            
+          />
           {countries.map(country => (
             <Item
               key={country.value}
@@ -248,26 +254,37 @@ export const CountrySelect: FC<CountrySelectProps> = ({
   useEffect(() => {
     startTransition(() => {
       if (helper.isNil(keyword) || keyword!.length < 1) {
-        return setCountries(COUNTRIES)
+        setCountries(COUNTRIES)
+        // Reset highlighted when clearing search
+        setHighlighted(undefined)
+        return
       }
 
       const lowerKeyword = keyword!.toLowerCase()
 
-      setCountries(
-        COUNTRIES.filter(country => {
-          const label = country.label.toLowerCase()
-          const localeLabel = t(country.label).toLowerCase()
-          const valueText = country.value.toLowerCase()
+      const filtered = COUNTRIES.filter(country => {
+        const label = country.label.toLowerCase()
+        const localeLabel = t(country.label).toLowerCase()
+        const valueText = country.value.toLowerCase()
 
-          return (
-            label.includes(lowerKeyword) ||
-            localeLabel.includes(lowerKeyword) ||
-            valueText.includes(lowerKeyword)
-          )
-        })
-      )
+        return (
+          label.includes(lowerKeyword) ||
+          localeLabel.includes(lowerKeyword) ||
+          valueText.includes(lowerKeyword)
+        )
+      })
+
+      setCountries(filtered)
+
+      // Reset highlighted if current highlighted country is not in filtered list
+      setHighlighted(prevHighlighted => {
+        if (prevHighlighted && !filtered.find(c => c.value === prevHighlighted)) {
+          return filtered.length > 0 ? filtered[0].value : undefined
+        }
+        return prevHighlighted
+      })
     })
-  }, [keyword])
+  }, [keyword, t])
 
   useEffect(() => {
     if (isOpen) {
