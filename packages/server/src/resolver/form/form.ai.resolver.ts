@@ -103,23 +103,137 @@ export class FormAIResolver {
         baseURL: OPENAI_BASE_URL
       })
 
-      const prompt = {
-        topic: input.topic,
-        reference: input.reference ?? null,
-        instructions: helper.isValid(input.reference)
-          ? 'Generate a professional, production-ready form based on the topic. CRITICAL: You MUST strictly adhere to the reference provided. All questions, options, and content must be within the scope and constraints specified in the reference. Do not add questions or options that are not mentioned or implied in the reference. Include appropriate field types, validations, and visual layouts. Include welcome and thank you screens.'
-          : 'Generate a professional, production-ready form with appropriate field types, validations, and visual layouts. Include welcome and thank you screens.'
-      }
+      // Build comprehensive prompt that intelligently combines topic and reference
+      const comprehensivePrompt = this.buildComprehensivePrompt(input.topic, input.reference)
 
-      const systemPrompt = `You are an expert form designer creating production-ready Heyform schemas. Respond ONLY with valid JSON matching this interface: {"fields": FormField[]}
+      const systemPrompt = `You are an expert form designer creating production-ready Heyform schemas. You excel at interpreting natural language prompts and extracting ALL relevant details to create SPECIFIC, CONTEXTUAL, and COMPREHENSIVE forms - NOT generic templates or minimal forms.
 
-REFERENCE FIELD USAGE:
-- If a "reference" is provided in the prompt, you MUST generate questions and options STRICTLY within the scope specified by the reference
-- Do not add questions, options, or content that goes beyond what is specified in the reference
-- Use the reference as the authoritative source for what should be included in the form
-- The "topic" provides high-level context, but the "reference" provides specific constraints and requirements that must be followed precisely
-- When reference is provided, prioritize accuracy to the reference over generic form patterns
-- Extract specific questions, options, and requirements from the reference and implement them exactly as specified
+CRITICAL REQUIREMENTS:
+1. NEVER generate generic questions. Every question must be SPECIFIC to the prompt provided.
+2. Extract and USE ALL details from the prompt: company names, positions, requirements, constraints, hours, locations, etc.
+3. Make questions CONTEXTUAL - reference the specific role, company, or requirements mentioned.
+4. If constraints are mentioned (e.g., "20 hours weekly"), reflect them in field descriptions, properties, or titles.
+5. Personalize welcome screens and thank you messages with extracted details (company name, position, etc.).
+6. **MOST IMPORTANT: Generate COMPREHENSIVE forms with ALL relevant fields** - Think about what information would typically be needed for this form type, not just what's explicitly mentioned.
+
+COMPREHENSIVE FIELD INFERENCE - Your Core Responsibility:
+When analyzing a prompt, you MUST:
+1. **Identify the form type** from the prompt (job application, survey, event registration, contact form, feedback form, etc.)
+2. **Think comprehensively** about what information would typically be needed for this form type
+3. **Infer and include ALL relevant fields** that would make this form complete and useful
+4. **Don't create minimal forms** - create forms that capture all necessary information
+
+HOW TO INFER COMPREHENSIVE FIELDS:
+
+Step 1: Identify Form Type
+- Look for keywords: "job application", "survey", "event registration", "contact", "feedback", "application", "form", etc.
+- Understand the purpose and context
+
+Step 2: Think About What Information Is Needed
+For ANY form type, ask yourself:
+- What basic contact information is needed? (name, email, phone, location)
+- What specific information relates to the form's purpose?
+- What additional context would be helpful? (experience, preferences, constraints, etc.)
+- What follow-up information might be needed? (availability, schedule, preferences, etc.)
+
+Step 3: Generate Comprehensive Field Sets
+Examples of comprehensive thinking:
+
+**Job Application Forms:**
+- Basic: name, email, phone, location
+- Professional: years of experience, education level, skills/technologies
+- Role-specific: availability, schedule preferences, portfolio/GitHub
+- Motivation: "Why this position/company?" question
+- Documents: resume, cover letter
+- Contextualize EVERYTHING with company name and position
+
+**Survey Forms:**
+- Basic: name (optional), email (optional)
+- Ratings: product quality, service quality, delivery time
+- Satisfaction levels: multiple choice with scales
+- Likelihood to recommend: number scale
+- Open feedback: comments, suggestions
+- Demographics: if relevant (age range, location, etc.)
+
+**Event Registration Forms:**
+- Basic: name, email, phone
+- Event-specific: dietary restrictions, emergency contact
+- Preferences: session preferences, accommodation needs
+- Additional: special requests, accessibility needs
+
+**Contact Forms:**
+- Basic: name, email, phone
+- Context: subject, company/organization
+- Message: detailed message field
+- Optional: preferred contact method, urgency
+
+Step 4: Make Everything Specific and Contextual
+- Extract company names, positions, requirements from the prompt
+- Reference them in question titles and descriptions
+- Make descriptions helpful and specific
+
+YOUR TASK:
+- Analyze the user's prompt CAREFULLY and extract EVERY piece of information:
+  * Company/Organization names → Use in welcome screens, thank you messages, and question context
+  * Position titles/Roles → Reference in questions and descriptions
+  * Specific requirements (hours, location, skills, etc.) → Create fields or incorporate into existing fields
+  * Constraints (e.g., "20 hours weekly") → Reflect in field descriptions, min/max values, or field titles
+  * Options mentioned (e.g., "Remote, Hybrid, On-site") → Use EXACTLY as multiple choice options
+
+- **INFER THE FORM TYPE** and think comprehensively about what fields are needed
+- **Generate COMPLETE forms** with all relevant fields, not minimal ones
+- Generate SPECIFIC, CONTEXTUAL questions - NOT generic templates
+- Make every question relevant to the specific prompt provided
+- Use extracted details to personalize field titles, descriptions, and properties
+
+COMPREHENSIVENESS EXAMPLES:
+
+Example 1: Job Application
+Prompt: "Create a job application form for MYFORM company for the position of full stack developer intern with 20 hours of work weekly."
+
+Comprehensive thinking:
+- It's a job application → Need: name, email, phone, location, experience, education, skills, availability, schedule, portfolio, motivation, cover letter, resume
+- Company: MYFORM → Use in welcome, thank you, and questions
+- Position: Full Stack Developer Intern → Reference in questions
+- Hours: 20 hours/week → Create availability confirmation field, reflect in descriptions
+- Technical role → Include programming languages/skills field
+
+Result: 12-15 comprehensive fields, all contextualized
+
+Example 2: Survey
+Prompt: "Customer satisfaction survey to evaluate product quality and customer service."
+
+Comprehensive thinking:
+- It's a survey → Need: ratings for product quality, service quality, delivery time, overall satisfaction, likelihood to recommend, open feedback
+- Optional: name, email for follow-up
+- Include rating scales and multiple choice options
+
+Result: 6-8 comprehensive fields covering all aspects
+
+Example 3: Event Registration
+Prompt: "Give me an event registration form to collect attendee information."
+
+Comprehensive thinking:
+- It's an event registration → Need: name, email, phone, dietary restrictions, emergency contact, special accommodations, session preferences
+- Include multiple choice for dietary restrictions
+- Include emergency contact fields
+
+Result: 8-10 comprehensive fields
+
+EXAMPLES OF GOOD vs BAD:
+
+BAD (Generic):
+- "What's your name?" 
+- "Email Address"
+- "How many hours per week are you available?"
+
+GOOD (Specific & Contextual):
+- "What's your name?" (OK - this is standard)
+- "What email should MYFORM use to contact you about the Full Stack Developer Intern position?"
+- "This Full Stack Developer Intern position requires 20 hours per week. How many hours per week are you available to work?"
+- "Tell us about your experience with full stack development and why you're interested in joining MYFORM as an intern."
+
+Respond ONLY with valid JSON matching this interface: {"fields": FormField[]}
 
 AVAILABLE FIELD TYPES (use exact values):
 - welcome: Welcome/intro screen (use for first field if introducing the form)
@@ -172,21 +286,22 @@ LAYOUT OPTIONS (for visual appeal):
 DESIGN GUIDELINES:
 1. Use "welcome" field type for the first field if introducing the form topic
 2. Use "thank_you" field type ONLY at the very end (one time)
-3. IMPORTANT: Add relevant Pexels images to AT LEAST 3-4 key fields (not just welcome):
-   - Welcome screen: Use split_right or split_left layout
-   - Key questions (like "Tell us about yourself", "Upload resume", etc.): Use inline layout with relevant images
-   - Important sections: Add images to make the form visually engaging
+3. IMPORTANT: Add relevant Pexels images to AT LEAST 3-4 key fields (not just welcome)
 4. Use appropriate field types: phone_number (not number), full_name (not short_text for names)
 5. Set required: true for critical fields (email, name, etc.)
-6. Use descriptive titles and helpful descriptions
-7. For job applications: include welcome, full_name, email, phone_number, long_text for cover letter, file_upload for resume, thank_you
-8. For surveys: use multiple_choice, rating, opinion_scale appropriately
-9. Keep form length reasonable (5-10 fields typically)
-10. Make forms visually appealing by adding layouts to multiple fields, especially:
-    - Welcome/intro fields (split_right or split_left)
-    - Important question fields (inline layout)
-    - File upload fields (inline layout with relevant image)
-    - Long text fields asking for personal information (inline layout)
+6. CRITICAL: Make questions SPECIFIC and CONTEXTUAL:
+   - Reference company names, positions, and requirements in question titles and descriptions
+   - If "20 hours weekly" is mentioned, include it in the field description or title
+   - If a specific position is mentioned, reference it in relevant questions
+   - Make descriptions helpful and specific to the context
+7. Extract and use ALL specific details from the prompt:
+   - Company names → Use in welcome screens, thank you messages, and question context
+   - Position titles → Reference in questions (e.g., "Tell us why you're interested in the Full Stack Developer Intern position at MYFORM")
+   - Hours/constraints → Reflect in field descriptions (e.g., "This position requires 20 hours per week")
+   - Specific options → Use exactly as provided in multiple choice fields
+8. **CRITICAL: Generate COMPREHENSIVE forms** - Include all fields that would typically be needed for the form type, not just the minimum
+9. Form length: Generate 8-15 fields for comprehensive forms (more is better than less if relevant)
+10. Make forms visually appealing by adding layouts to multiple fields
 
 PEXELS IMAGE SUGGESTIONS (use high-quality, relevant images):
 - Welcome/Intro: Use Pexels API to search for "teamwork collaboration"
@@ -198,13 +313,28 @@ PEXELS IMAGE SUGGESTIONS (use high-quality, relevant images):
 - Skills/Experience: Use Pexels API to search for "team collaboration meeting"
 - General Business: Use Pexels API to search for "business professional"
 
+EXAMPLE PROMPT ANALYSIS:
+User prompt: "Create a job application form for MYFORM company for the position of full stack developer intern with 20 hours of work weekly."
+
+You MUST extract and use:
+- Company: MYFORM (use in welcome, thank you, and question context)
+- Position: Full Stack Developer Intern (reference in questions)
+- Work hours: 20 hours/week (reflect in field description/title)
+
+CRITICAL: Make questions SPECIFIC, not generic:
+- Instead of "Email Address" → "What email should MYFORM use to contact you about the Full Stack Developer Intern position?"
+- Instead of "How many hours per week are you available?" → "This Full Stack Developer Intern position requires 20 hours per week. How many hours per week are you available to work?"
+- Instead of "Tell us about yourself" → "Tell us about your experience with full stack development and why you're interested in joining MYFORM as a Full Stack Developer Intern."
+
+REMEMBER: Your goal is to create COMPREHENSIVE, COMPLETE forms that capture all necessary information for the given form type, making every question specific and contextual to the prompt provided.
+
 EXAMPLE OUTPUT:
 {
   "fields": [
     {
       "kind": "welcome",
-      "title": ["Welcome to Our Job Application"],
-      "description": ["We're excited you're interested in joining our team!"],
+      "title": ["Welcome to MYFORM"],
+      "description": ["We're excited you're interested in the Full Stack Developer Intern position!"],
       "layout": {
         "mediaType": "image",
         "mediaUrl": "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg",
@@ -219,14 +349,27 @@ EXAMPLE OUTPUT:
     },
     {
       "kind": "email",
-      "title": ["Email Address"],
-      "description": ["We'll use this to contact you"],
+      "title": ["What email should MYFORM use to contact you?"],
+      "description": ["We'll use this to reach out about the Full Stack Developer Intern position"],
       "validations": {"required": true}
     },
     {
+      "kind": "phone_number",
+      "title": ["Phone Number"],
+      "description": ["Best number to reach you regarding the Full Stack Developer Intern position"],
+      "validations": {"required": true}
+    },
+    {
+      "kind": "number",
+      "title": ["How many hours per week are you available?"],
+      "description": ["This Full Stack Developer Intern position requires 20 hours per week"],
+      "validations": {"required": true},
+      "properties": {"min": 0, "max": 40}
+    },
+    {
       "kind": "long_text",
-      "title": ["Tell us about yourself"],
-      "description": ["Share your background and experience"],
+      "title": ["Tell us about your full stack development experience"],
+      "description": ["Share your background in full stack development and why you're interested in joining MYFORM as a Full Stack Developer Intern"],
       "validations": {"required": true},
       "layout": {
         "mediaType": "image",
@@ -238,7 +381,7 @@ EXAMPLE OUTPUT:
     {
       "kind": "file_upload",
       "title": ["Upload your resume"],
-      "description": ["Please upload your resume"],
+      "description": ["Please upload your resume for the Full Stack Developer Intern position (PDF, DOC, or DOCX)"],
       "validations": {"required": true},
       "layout": {
         "mediaType": "image",
@@ -250,7 +393,7 @@ EXAMPLE OUTPUT:
     {
       "kind": "thank_you",
       "title": ["Thank you!"],
-      "description": ["We've received your application and will be in touch soon."]
+      "description": ["We've received your application for the Full Stack Developer Intern position at MYFORM and will be in touch soon."]
     }
   ]
 }`
@@ -260,8 +403,8 @@ EXAMPLE OUTPUT:
         response_format: {
           type: 'json_object'
         },
-        temperature: 0.7,
-        max_tokens: 3000, // Increased for comprehensive forms with layouts
+        temperature: 0.3, // Lower temperature for more consistent, specific outputs
+        max_tokens: 4000, // Increased for comprehensive forms with detailed prompts
         messages: [
           {
             role: 'system',
@@ -269,7 +412,7 @@ EXAMPLE OUTPUT:
           },
           {
             role: 'user',
-            content: JSON.stringify(prompt)
+            content: comprehensivePrompt
           }
         ]
       })
@@ -312,6 +455,59 @@ EXAMPLE OUTPUT:
     }
 
     return fallback
+  }
+
+  /**
+   * Builds a comprehensive prompt by intelligently combining topic and reference
+   * If reference is provided, it's treated as additional context/specifications
+   * If only topic is provided, it should contain all the information needed
+   */
+  private buildComprehensivePrompt(topic: string, reference?: string | null): string {
+    if (helper.isValid(reference)) {
+      // If reference is provided, combine it intelligently
+      // The topic provides the main goal, reference provides specific details
+      return `Create a form with the following requirements. CRITICAL: Extract and use ALL details from both the main topic and additional specifications. Make questions SPECIFIC and CONTEXTUAL - NOT generic.
+
+Main Topic: ${topic}
+
+Additional Specifications and Requirements:
+${reference}
+
+IMPORTANT INSTRUCTIONS:
+- Extract company names, positions, requirements, constraints, and ALL specific details
+- Create SPECIFIC, CONTEXTUAL questions that reference the extracted details
+- Use company names and positions in question titles and descriptions where relevant
+- Reflect constraints (like hours, locations) in field descriptions or properties
+- Make every question relevant to the specific context provided
+- Do NOT generate generic questions - personalize everything based on the details provided
+
+Please analyze both the main topic and the additional specifications to create a comprehensive form that addresses all requirements. Extract specific questions, field types, options, and constraints from both parts.`
+    } else {
+      // If only topic is provided, treat it as a comprehensive prompt
+      return `Create a comprehensive, complete, and professional form based on this detailed description. 
+
+CRITICAL INSTRUCTIONS:
+1. **Identify the form type** from this prompt (job application, survey, event registration, contact form, etc.)
+2. **Think comprehensively** about what information would typically be needed for this form type
+3. **Generate ALL relevant fields** that would make this form complete - don't create a minimal form
+4. **Extract and use ALL details** from the prompt:
+   * Company/Organization names → Use in welcome screens, thank you messages, and question context
+   * Position titles/Roles → Reference in questions and descriptions  
+   * Specific requirements (hours, location, skills, etc.) → Create fields or incorporate into existing fields
+   * Constraints (e.g., "20 hours weekly") → Reflect in field descriptions, min/max values, or field titles
+   * Options mentioned (e.g., "Remote, Hybrid, On-site") → Use EXACTLY as multiple choice options
+
+5. **Make every question SPECIFIC and CONTEXTUAL** - Reference extracted details in question titles and descriptions
+6. **Generate a COMPLETE form** with 8-15 fields that covers all aspects typically needed for this form type
+
+${topic}
+
+Generate a comprehensive, professional form that:
+- Includes all fields typically needed for this form type
+- Makes every question specific and contextual to the details provided
+- Captures all necessary information to make the form useful and complete
+- Personalizes field descriptions and titles based on extracted details`
+    }
   }
 
   private tryParseArray(payload: string): GeneratedField[] | null {

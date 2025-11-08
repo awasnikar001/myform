@@ -816,20 +816,20 @@
     },
     "ai": {
       "topic": {
-        "label": "What do you want to create?",
-        "description": "Please provide as much detail as possible about the form you would like to create.",
-        "ideasForYou": "Ideas for you",
+        "label": "Describe your form",
+        "description": "Describe what kind of form you want to create. Be as specific as possible - include company names, positions, requirements, and any details you want captured.",
+        "ideasForYou": "💡 Ideas for you",
         "examples": [
-          "Create a job application form to collect candidate details and resumes.",
+          "Create a job application form for MYFORM company for the position of full stack developer intern with 20 hours of work weekly.",
           "Customer satisfaction survey to evaluate product quality and customer service.",
           "Give me an event registration form to collect attendee information."
         ],
         "required": "This field is not allowed to be empty"
       },
       "reference": {
-        "label": "Reference (optional)",
-        "description": "After providing the Reference, the AI will generate questions and options strictly within the scope specified by the Reference.",
-        "hint": "Use this to specify exact questions, options, or constraints you want in the form.",
+        "label": "Additional Specifications",
+        "description": "Optional: Add specific questions, options, or constraints if you want more control over the form structure.",
+        "hint": "You can leave this empty - the AI will intelligently extract details from your main description above.",
         "examplesTitle": "Reference Examples:",
         "examples": [
           "Include questions about: work experience (years), education level (High School, Bachelor's, Master's, PhD), preferred work location (Remote, Hybrid, On-site), and salary expectations.",
