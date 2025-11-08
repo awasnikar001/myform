@@ -425,6 +425,11 @@
         "search": "搜索 Unsplash 圖片",
         "emptyState": "未找到結果"
       },
+      "pexels": {
+        "title": "Pexels",
+        "search": "搜索 Pexels 圖片",
+        "emptyState": "未找到圖片"
+      },
       "gradient": {
         "title": "漸層"
       }

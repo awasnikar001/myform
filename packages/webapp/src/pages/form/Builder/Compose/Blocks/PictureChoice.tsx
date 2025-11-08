@@ -367,7 +367,7 @@ export const PictureChoice: FC<BlockProps> = ({ field, locale, ...restProps }) =
 
       <ImagePicker
         ref={imagePickerRef}
-        tabs={['image', 'unsplash']}
+        tabs={['image', 'pexels']}
         onOpenChange={handleClose}
         onChange={handleImageChangeCallback}
       />

@@ -425,6 +425,11 @@
         "search": "Rechercher des images sur Unsplash",
         "emptyState": "Aucun résultat trouvé"
       },
+      "pexels": {
+        "title": "Pexels",
+        "search": "Rechercher des images sur Pexels",
+        "emptyState": "Aucune image trouvée"
+      },
       "gradient": {
         "title": "Dégradé"
       }

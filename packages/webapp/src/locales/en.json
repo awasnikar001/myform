@@ -426,6 +426,11 @@
         "search": "Search Unsplash images",
         "emptyState": "No results found"
       },
+      "pexels": {
+        "title": "Pexels",
+        "search": "Search Pexels images",
+        "emptyState": "No images found"
+      },
       "gradient": {
         "title": "Gradient"
       }

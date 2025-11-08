@@ -425,6 +425,11 @@
         "search": "Szukaj obrazów Unsplash",
         "emptyState": "Nie znaleziono wyników"
       },
+      "pexels": {
+        "title": "Pexels",
+        "search": "Szukaj obrazów Pexels",
+        "emptyState": "Nie znaleziono obrazów"
+      },
       "gradient": {
         "title": "Gradient"
       }

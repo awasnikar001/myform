@@ -1360,6 +1360,19 @@ export const SHARE_TO_AUDIENCE_GQL = gql`
   }
 `
 
+export const PEXELS_SEARCH_GQL = gql`
+  query pexelsSearch($input: PexelsSearchInput!) {
+    pexelsSearch(input: $input) {
+      id
+      url
+      thumbUrl
+      downloadUrl
+      author
+      authorUrl
+    }
+  }
+`
+
 export const UNSPLASH_SEARCH_GQL = gql`
   query unsplashSearch($input: UnsplashSearchInput!) {
     unsplashSearch(input: $input) {

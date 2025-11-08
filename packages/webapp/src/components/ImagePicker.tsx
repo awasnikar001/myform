@@ -20,11 +20,12 @@ import { Avatar } from './Avatar'
 import { Button } from './Button'
 import { GradientPicker } from './GradientPicker'
 import { ImageProps } from './Image'
+import { PexelsPicker } from './PexelsPicker'
 import { Tabs } from './Tabs'
 import { UnsplashPicker } from './UnsplashPicker'
 import { Uploader } from './Uploader'
 
-type TabType = 'image' | 'unsplash' | 'gradient'
+type TabType = 'image' | 'pexels' | 'unsplash' | 'gradient'
 
 interface ImagePickerProps extends Pick<ImageProps, 'resize'>, DOMProps {
   ref?: Ref<ImagePickerRef>
@@ -105,6 +106,17 @@ export const ImagePicker: FC<ImagePickerProps> = ({
         )
       },
       {
+        value: 'pexels',
+        label: t('components.imagePicker.pexels.title'),
+        content: (
+          <PexelsPicker
+            {...tabConfigs.pexels}
+            className="scrollbar h-full px-4 pt-4"
+            onChange={handleChange}
+          />
+        )
+      },
+      {
         value: 'unsplash',
         label: t('components.imagePicker.unsplash.title'),
         content: (
@@ -116,7 +128,7 @@ export const ImagePicker: FC<ImagePickerProps> = ({
         )
       }
     ],
-    [handleChange, t, tabConfigs.image, tabConfigs.unsplash]
+    [handleChange, t, tabConfigs.image, tabConfigs.pexels, tabConfigs.unsplash]
   )
   const tabs = useMemo(
     () => configs.filter(tab => rawTabs.includes(tab.value as TabType)),

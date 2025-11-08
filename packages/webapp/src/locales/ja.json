@@ -425,6 +425,11 @@
         "search": "Unsplash 画像を検索",
         "emptyState": "結果が見つかりませんでした"
       },
+      "pexels": {
+        "title": "Pexels",
+        "search": "Pexels 画像を検索",
+        "emptyState": "画像が見つかりませんでした"
+      },
       "gradient": {
         "title": "グラデーション"
       }

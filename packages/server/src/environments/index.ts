@@ -129,8 +129,12 @@ export const VERIFICATION_CODE_LIMIT: number = +process.env.VERIFICATION_CODE_LI
 export const ACCOUNT_DELETION_SCHEDULE_INTERVAL: string =
   process.env.ACCOUNT_DELETION_SCHEDULE_INTERVAL || '2d'
 
-// Unsplash
+// Unsplash (deprecated - use Pexels)
 export const UNSPLASH_CLIENT_ID: string = process.env.UNSPLASH_CLIENT_ID
+
+// Pexels
+export const PEXELS_API_KEY: string =
+  process.env.PEXELS_API_KEY || 'QE7HmuybfxOkqVq6MMbrJXJUqVP2sFShqOH9o3dCzS8sOkSeo2rDvZ2P'
 
 // OpenAI
 export const OPENAI_BASE_URL =

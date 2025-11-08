@@ -93,3 +93,4 @@ export { UseTemplateResolver } from './template/use-template.resolver'
 
 export { UnsplashSearchResolver } from './unsplash/unsplash-search.resolver'
 export { UnsplashTrackDownloadResolver } from './unsplash/unsplash-track-download.resolver'
+export { PexelsSearchResolver } from './pexels/pexels-search.resolver'
