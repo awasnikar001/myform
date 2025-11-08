@@ -142,7 +142,8 @@ export const OPENAI_BASE_URL =
     ? process.env.OPENAI_BASE_URL.trim()
     : 'https://api.openai.com/v1'
 export const OPENAI_API_KEY = process.env.OPENAI_API_KEY
-export const OPENAI_GPT_MODEL = process.env.OPENAI_GPT_MODEL || 'gpt-3.5-turbo-0125'
+// Default to latest GPT-4 model (gpt-4o), can be overridden via OPENAI_GPT_MODEL env var
+export const OPENAI_GPT_MODEL = process.env.OPENAI_GPT_MODEL || 'gpt-4o'
 
 // Temporary debug - remove after testing
 console.log('🔍 OPENAI Configuration:')

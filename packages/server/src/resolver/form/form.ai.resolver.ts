@@ -86,6 +86,14 @@ export class FormAIResolver {
     const fallback = this.createFallbackFields()
 
     if (helper.isEmpty(OPENAI_API_KEY)) {
+      this.logger.warn('OPENAI_API_KEY is not set, using fallback fields')
+      return fallback
+    }
+
+    if (helper.isEmpty(OPENAI_GPT_MODEL)) {
+      this.logger.error(
+        'OPENAI_GPT_MODEL is not set. Please set the OPENAI_GPT_MODEL environment variable.'
+      )
       return fallback
     }
 
@@ -273,11 +281,25 @@ EXAMPLE OUTPUT:
           }
         }
       }
-    } catch (error) {
-      this.logger.error(
-        'Failed to generate form with AI',
-        error instanceof Error ? error.stack : undefined
-      )
+    } catch (error: any) {
+      if (
+        error?.status === 404 ||
+        error?.message?.includes('does not exist') ||
+        error?.message?.includes('not found')
+      ) {
+        this.logger.error(
+          `Invalid OpenAI model: "${OPENAI_GPT_MODEL}". Please check that the model name is correct and you have access to it. Error: ${error?.message || 'Unknown error'}`
+        )
+      } else if (error?.status === 401 || error?.status === 403) {
+        this.logger.error(
+          `OpenAI API authentication failed. Please check your OPENAI_API_KEY. Error: ${error?.message || 'Unknown error'}`
+        )
+      } else {
+        this.logger.error(
+          `Failed to generate form with AI: ${error?.message || 'Unknown error'}`,
+          error instanceof Error ? error.stack : undefined
+        )
+      }
     }
 
     return fallback

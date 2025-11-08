@@ -69,50 +69,81 @@ export class TranslateFormQueue extends BaseQueue {
     })
 
     if (helper.isValid(translations)) {
-      const openai = new OpenAI({
-        apiKey: OPENAI_API_KEY,
-        baseURL: OPENAI_BASE_URL
-      })
+      if (helper.isEmpty(OPENAI_API_KEY)) {
+        return this.logger.warn('OPENAI_API_KEY is not set, skipping translation')
+      }
 
-      const { choices } = await openai.chat.completions.create({
-        model: OPENAI_GPT_MODEL,
-        response_format: {
-          type: 'json_object'
-        },
-        temperature: 0,
-        max_tokens: 1000,
-        top_p: 1,
-        frequency_penalty: 1,
-        presence_penalty: 1,
-        stream: false,
-        messages: [
-          {
-            role: 'user',
-            content: `Translate this JSON to ${LANGUAGES[language]}, and keep all HTML tags and their attributes!`
+      if (helper.isEmpty(OPENAI_GPT_MODEL)) {
+        return this.logger.error(
+          'OPENAI_GPT_MODEL is not set. Please set the OPENAI_GPT_MODEL environment variable.'
+        )
+      }
+
+      try {
+        const openai = new OpenAI({
+          apiKey: OPENAI_API_KEY,
+          baseURL: OPENAI_BASE_URL
+        })
+
+        const { choices } = await openai.chat.completions.create({
+          model: OPENAI_GPT_MODEL,
+          response_format: {
+            type: 'json_object'
           },
-          {
-            role: 'user',
-            content: JSON.stringify(translations)
-          }
-        ]
-      })
-
-      if (helper.isValidArray(choices) && helper.isValid(choices[0].message.content)) {
-        const translation = JSON.parse(choices[0].message.content)
-
-        Object.keys(translation).forEach(id => {
-          if (translation[id].title) {
-            translation[id].title = htmlUtils.parse(translation[id].title)
-          }
-
-          if (translation[id].description) {
-            translation[id].description = htmlUtils.parse(translation[id].description)
-          }
+          temperature: 0,
+          max_tokens: 1000,
+          top_p: 1,
+          frequency_penalty: 1,
+          presence_penalty: 1,
+          stream: false,
+          messages: [
+            {
+              role: 'user',
+              content: `Translate this JSON to ${LANGUAGES[language]}, and keep all HTML tags and their attributes!`
+            },
+            {
+              role: 'user',
+              content: JSON.stringify(translations)
+            }
+          ]
         })
 
-        await this.formService.update(formId, {
-          [`translations.${language}`]: translation
-        })
+        if (helper.isValidArray(choices) && helper.isValid(choices[0].message.content)) {
+          const translation = JSON.parse(choices[0].message.content)
+
+          Object.keys(translation).forEach(id => {
+            if (translation[id].title) {
+              translation[id].title = htmlUtils.parse(translation[id].title)
+            }
+
+            if (translation[id].description) {
+              translation[id].description = htmlUtils.parse(translation[id].description)
+            }
+          })
+
+          await this.formService.update(formId, {
+            [`translations.${language}`]: translation
+          })
+        }
+      } catch (error: any) {
+        if (
+          error?.status === 404 ||
+          error?.message?.includes('does not exist') ||
+          error?.message?.includes('not found')
+        ) {
+          this.logger.error(
+            `Invalid OpenAI model: "${OPENAI_GPT_MODEL}". Please check that the model name is correct and you have access to it. Error: ${error?.message || 'Unknown error'}`
+          )
+        } else if (error?.status === 401 || error?.status === 403) {
+          this.logger.error(
+            `OpenAI API authentication failed. Please check your OPENAI_API_KEY. Error: ${error?.message || 'Unknown error'}`
+          )
+        } else {
+          this.logger.error(
+            `Failed to translate form: ${error?.message || 'Unknown error'}`,
+            error instanceof Error ? error.stack : undefined
+          )
+        }
       }
     }
   }
