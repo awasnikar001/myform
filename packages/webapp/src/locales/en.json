@@ -817,27 +817,27 @@
     "ai": {
       "topic": {
         "label": "Describe your form",
-        "description": "Describe what kind of form you want to create. Be as specific as possible - include company names, positions, requirements, and any details you want captured.",
+        "description": "Tell us what kind of form you need. Include specific details like company names, roles, or requirements for better results.",
         "ideasForYou": "💡 Ideas for you",
         "examples": [
-          "Create a job application form for MYFORM company for the position of full stack developer intern with 20 hours of work weekly.",
-          "Customer satisfaction survey to evaluate product quality and customer service.",
-          "Give me an event registration form to collect attendee information."
+          "Job application form for a Senior Product Designer position at TechCorp",
+          "Customer feedback survey for our new mobile app launch",
+          "Event registration form for a tech conference in San Francisco"
         ],
         "required": "This field is not allowed to be empty"
       },
       "reference": {
         "label": "Additional Specifications",
-        "description": "Optional: Add specific questions, options, or constraints if you want more control over the form structure.",
+        "description": "Optional: Add specific questions, options, or constraints for more control over the form structure.",
         "hint": "You can leave this empty - the AI will intelligently extract details from your main description above.",
-        "examplesTitle": "Reference Examples:",
+        "examplesTitle": "Examples:",
         "examples": [
-          "Include questions about: work experience (years), education level (High School, Bachelor's, Master's, PhD), preferred work location (Remote, Hybrid, On-site), and salary expectations.",
-          "The survey should cover: product quality (1-5 scale), delivery time satisfaction, customer service rating, and likelihood to recommend (0-10).",
-          "Collect: full name, email, phone number, dietary restrictions (Vegetarian, Vegan, Gluten-free, None), emergency contact name and phone."
+          "Include fields for: years of relevant experience, highest education level (High School, Bachelor's, Master's, PhD, or Other), preferred work arrangement (Remote, Hybrid, On-site), availability start date, and salary range expectations. Add a required field for portfolio or GitHub link.",
+          "Measure satisfaction across: overall product quality (1-5 Likert scale), delivery time expectations vs. actual, customer support responsiveness, feature usefulness, and Net Promoter Score (0-10). Include an optional open-text field for additional feedback.",
+          "Request: full legal name, professional email address, mobile phone number, dietary restrictions/allergies (with options: None, Vegetarian, Vegan, Gluten-free, Nut allergy, Other), emergency contact full name and relationship, and emergency contact phone number."
         ]
       },
-      "submit": "Generate questions",
+      "submit": "Generate form",
       "generating": "Generating..."
     },
     "chat": {
