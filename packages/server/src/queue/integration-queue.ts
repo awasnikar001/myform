@@ -39,11 +39,29 @@ export class IntegrationQueue extends BaseQueue {
       if (integration && submission && form) {
         const config = mapToObject(integration.config)
 
-        await app.run({
-          submission,
-          form,
-          config
-        })
+        try {
+          await app.run({
+            submission,
+            form,
+            config
+          })
+
+          this.logger.info(`Integration ${appId} executed successfully`, {
+            integrationId,
+            formId,
+            submissionId,
+            appId
+          })
+        } catch (error) {
+          this.logger.errorWithContext(`Integration ${appId} failed`, error, {
+            integrationId,
+            formId,
+            submissionId,
+            appId,
+            endpointUrl: config?.endpointUrl
+          })
+          throw error // Re-throw to trigger Bull retry
+        }
       }
     }
   }
