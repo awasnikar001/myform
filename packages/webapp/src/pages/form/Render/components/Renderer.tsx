@@ -152,6 +152,121 @@ export const Renderer: FC<RendererProps> = ({ form, query, locale, contactId }) 
       <link href={fontURL} rel="stylesheet" />
       <style dangerouslySetInnerHTML={{ __html: getThemeStyle(theme, query) }} />
 
+      {/* Critical CSS overrides to remove blue boxes and ensure grey placeholders */}
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+        /* Remove blue box from block main */
+        .heyform-block-main::before {
+          display: none !important;
+        }
+        
+        /* Remove blue gradient background from root */
+        .heyform-root::after {
+          display: none !important;
+        }
+        
+        input,
+        input[type='text'],
+        input[type='email'],
+        input[type='number'],
+        input[type='tel'],
+        textarea,
+        .heyform-input,
+        input.heyform-input,
+        input.input.heyform-input,
+        .input.heyform-input {
+          background-color: transparent !important;
+          background: transparent !important;
+          border: none !important;
+          border-bottom: 2px solid var(--heyform-answer-opacity-60-color) !important;
+          border-top: none !important;
+          border-left: none !important;
+          border-right: none !important;
+          border-radius: 0 !important;
+          -webkit-appearance: none !important;
+          -moz-appearance: none !important;
+          appearance: none !important;
+        }
+        input:hover,
+        input:focus,
+        .heyform-input:hover,
+        .heyform-input:focus,
+        input.heyform-input:hover,
+        input.heyform-input:focus {
+          background-color: transparent !important;
+          background: transparent !important;
+        }
+        input::placeholder,
+        input::-webkit-input-placeholder,
+        input::-moz-placeholder,
+        input:-ms-input-placeholder,
+        input:not(:focus)::placeholder,
+        input:not(:focus)::-webkit-input-placeholder,
+        input:not(:focus)::-moz-placeholder,
+        input:not(:focus):-ms-input-placeholder,
+        textarea::placeholder,
+        textarea::-webkit-input-placeholder,
+        textarea::-moz-placeholder,
+        textarea:-ms-input-placeholder,
+        textarea:not(:focus)::placeholder,
+        textarea:not(:focus)::-webkit-input-placeholder,
+        textarea:not(:focus)::-moz-placeholder,
+        textarea:not(:focus):-ms-input-placeholder,
+        .heyform-input::placeholder,
+        .heyform-input::-webkit-input-placeholder,
+        .heyform-input::-moz-placeholder,
+        .heyform-input:-ms-input-placeholder,
+        .heyform-input:not(:focus)::placeholder,
+        .heyform-input:not(:focus)::-webkit-input-placeholder,
+        .heyform-input:not(:focus)::-moz-placeholder,
+        .heyform-input:not(:focus):-ms-input-placeholder,
+        input.heyform-input::placeholder,
+        input.heyform-input::-webkit-input-placeholder,
+        input.heyform-input::-moz-placeholder,
+        input.heyform-input:-ms-input-placeholder,
+        input.input.heyform-input::placeholder,
+        input.input.heyform-input::-webkit-input-placeholder,
+        input.input.heyform-input::-moz-placeholder,
+        input.input.heyform-input:-ms-input-placeholder,
+        input.input.heyform-input:not(:focus)::placeholder,
+        input.input.heyform-input:not(:focus)::-webkit-input-placeholder,
+        input.input.heyform-input:not(:focus)::-moz-placeholder,
+        input.input.heyform-input:not(:focus):-ms-input-placeholder,
+        .heyform-full-name input.input.heyform-input::placeholder,
+        .heyform-full-name input.input.heyform-input::-webkit-input-placeholder,
+        .heyform-full-name input.input.heyform-input::-moz-placeholder,
+        .heyform-full-name input.input.heyform-input:-ms-input-placeholder,
+        .heyform-full-name input.input.heyform-input:not(:focus)::placeholder,
+        .heyform-full-name input.input.heyform-input:not(:focus)::-webkit-input-placeholder,
+        .heyform-full-name input.input.heyform-input:not(:focus)::-moz-placeholder,
+        .heyform-full-name input.input.heyform-input:not(:focus):-ms-input-placeholder {
+          color: #999999 !important;
+          opacity: 1 !important;
+        }
+        .heyform-full-name input,
+        .heyform-full-name input.input,
+        .heyform-full-name input.heyform-input {
+          background-color: transparent !important;
+          background: transparent !important;
+          border: none !important;
+          border-bottom: 2px solid var(--heyform-answer-opacity-60-color) !important;
+        }
+        .heyform-full-name input::placeholder,
+        .heyform-full-name input::-webkit-input-placeholder,
+        .heyform-full-name input::-moz-placeholder,
+        .heyform-full-name input:-ms-input-placeholder,
+        .heyform-full-name input:not(:focus)::placeholder,
+        .heyform-full-name input:not(:focus)::-webkit-input-placeholder,
+        .heyform-full-name input:not(:focus)::-moz-placeholder,
+        .heyform-full-name input:not(:focus):-ms-input-placeholder {
+          color: #999999 !important;
+          opacity: 1 !important;
+        }
+      `
+        }}
+      />
+
       {form.settings?.captchaKind === CaptchaKindEnum.GOOGLE_RECAPTCHA && (
         <script
           src={`https://www.google.com/recaptcha/api.js?render=${window.heyform.googleRecaptchaKey}`}

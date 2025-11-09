@@ -97,6 +97,38 @@
   }
 }
 
+// Skeleton loading states
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.heyform-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--heyform-answer-opacity-5-color) 0%,
+    var(--heyform-answer-opacity-10-color) 50%,
+    var(--heyform-answer-opacity-5-color) 100%
+  );
+  background-size: 1000px 100%;
+  animation: skeleton-shimmer 2s infinite;
+  border-radius: 0.5rem;
+}
+
+.heyform-skeleton-input {
+  @apply h-12 w-full;
+  @extend .heyform-skeleton;
+}
+
+.heyform-skeleton-radio {
+  @apply h-14 w-full mb-2;
+  @extend .heyform-skeleton;
+}
+
 button.button {
   @apply relative border border-gray-300 px-4 py-2 font-medium text-slate-700 sm:text-sm;
 
@@ -375,6 +407,26 @@ button.button-icon-only {
     0 1px 3px rgba(0, 0, 0, 0.05),
     0 1px 2px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(8px);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(99, 102, 241, 0.1);
+    transform: translate(-50%, -50%);
+    transition: width 0.4s, height 0.4s;
+  }
+
+  &:active::before {
+    width: 200px;
+    height: 200px;
+  }
 
   &:hover {
     background-color: var(--heyform-answer-opacity-10-color);
@@ -530,7 +582,7 @@ button.button-icon-only {
 
   &:before {
     content: attr(data-placeholder);
-    color: var(--heyform-answer-opacity-30-color);
+    color: #999999 !important;
     @apply pointer-events-none absolute hidden truncate text-2xl;
   }
 
@@ -582,6 +634,11 @@ button.button-icon-only {
 
 .heyform-root {
   background-color: var(--heyform-background-color);
+  position: relative;
+
+  &::after {
+    display: none;
+  }
 }
 
 .heyform-root-android {
@@ -737,6 +794,11 @@ button.button-icon-only {
 .heyform-block-main {
   @apply mx-auto w-full;
   max-width: 50rem;
+  position: relative;
+
+  &::before {
+    display: none;
+  }
 }
 
 .heyform-block-wrapper {
@@ -886,10 +948,84 @@ button.button-icon-only {
   .heyform-block-title {
     @apply mb-5 text-3xl font-bold leading-tight tracking-tight lg:text-4xl;
     letter-spacing: -0.03em;
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .heyform-block-description {
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
   }
 
   .heyform-layout-inline img {
     @apply rounded-none;
+    animation: fadeInScale 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
+  }
+}
+
+.heyform-thank-you {
+  .heyform-block-title {
+    position: relative;
+    padding-left: 3rem;
+
+    &::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 2.5rem;
+      height: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--heyform-button-color) 0%, var(--heyform-button-opacity-80-color) 100%);
+      color: var(--heyform-button-text-color);
+      border-radius: 50%;
+      font-size: 1.5rem;
+      font-weight: bold;
+      animation: checkmarkAnimation 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 
+        0 4px 14px rgba(99, 102, 241, 0.3),
+        0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  .heyform-block-description {
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes checkmarkAnimation {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(-180deg);
+  }
+  50% {
+    transform: scale(1.2) rotate(10deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
   }
 }
 
@@ -907,40 +1043,171 @@ button.button-icon-only {
 
 // ----------------------------------------------------------------------------
 // Short text
+// Override Tailwind Forms plugin and any other input styles
+// CRITICAL: These rules must override all other styles including Tailwind Forms plugin
+input,
+input[type='text'],
+input[type='email'],
+input[type='number'],
+input[type='tel'],
+textarea,
 .heyform-input,
 .heyform-input[type='email'],
 .heyform-input[type='number'],
 .heyform-input[type='tel'],
 .heyform-textarea,
-.heyform-autoresize-textarea {
+.heyform-autoresize-textarea,
+input.heyform-input,
+input.input.heyform-input,
+.input.heyform-input {
   @apply w-full border-none p-0 pb-2 text-2xl shadow-none outline-none transition-all duration-300 ease-out;
-  color: var(--heyform-answer-color);
-  border-radius: 0.5rem;
-  background-color: var(--heyform-answer-opacity-5-color);
-  border: 1.5px solid transparent;
-  backdrop-filter: blur(8px);
+  color: var(--heyform-answer-color) !important;
+  background-color: transparent !important;
+  background: transparent !important;
+  border-bottom: 2px solid var(--heyform-answer-opacity-60-color) !important;
+  border-radius: 0 !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-width: 0 !important;
+  border-style: none !important;
+  box-shadow: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
 
   &:hover {
-    background-color: var(--heyform-answer-opacity-8-color);
-    border-color: var(--heyform-answer-opacity-30-color);
+    background-color: transparent !important;
+    background: transparent !important;
+    border-bottom-color: var(--heyform-answer-opacity-80-color) !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-width: 0 !important;
+    border-style: none !important;
   }
 
   &:focus {
-    background-color: var(--heyform-answer-opacity-10-color);
-    border-color: var(--heyform-answer-color);
-    box-shadow: 
-      0 0 0 3px var(--heyform-answer-opacity-20-color),
-      0 4px 12px rgba(0, 0, 0, 0.08);
+    background-color: transparent !important;
+    background: transparent !important;
+    border-bottom-color: var(--heyform-answer-color) !important;
+    box-shadow: 0 2px 0 0 var(--heyform-answer-color) !important;
     transform: translateY(-1px);
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-width: 0 !important;
+    border-style: none !important;
+    outline: none !important;
+    ring: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
   }
 
-  &::placeholder {
-    color: var(--heyform-answer-opacity-40-color);
+  &::placeholder,
+  &::-webkit-input-placeholder,
+  &::-moz-placeholder,
+  &:-ms-input-placeholder {
+    color: #999999 !important;
+    opacity: 1 !important;
     transition: color 0.2s ease;
   }
 
-  &:focus::placeholder {
-    color: var(--heyform-answer-opacity-30-color);
+  &:not(:focus)::placeholder,
+  &:not(:focus)::-webkit-input-placeholder,
+  &:not(:focus)::-moz-placeholder,
+  &:not(:focus):-ms-input-placeholder {
+    color: #999999 !important;
+    opacity: 1 !important;
+  }
+
+  &:focus::placeholder,
+  &:focus::-webkit-input-placeholder,
+  &:focus::-moz-placeholder,
+  &:focus:-ms-input-placeholder {
+    color: #999999 !important;
+    opacity: 1 !important;
+  }
+}
+
+// CRITICAL: Override Tailwind Forms plugin - must be at the end with highest specificity
+input.input.heyform-input::placeholder,
+input.input.heyform-input::-webkit-input-placeholder,
+input.input.heyform-input::-moz-placeholder,
+input.input.heyform-input:-ms-input-placeholder,
+input.input.heyform-input:not(:focus)::placeholder,
+input.input.heyform-input:not(:focus)::-webkit-input-placeholder,
+input.input.heyform-input:not(:focus)::-moz-placeholder,
+input.input.heyform-input:not(:focus):-ms-input-placeholder {
+  color: #999999 !important;
+  opacity: 1 !important;
+}
+
+// Ensure input class doesn't add backgrounds
+.input.heyform-input,
+input.input.heyform-input,
+input.input {
+  background-color: transparent !important;
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 2px solid var(--heyform-answer-opacity-60-color) !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-width: 0 !important;
+  border-style: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+}
+
+// Specific override for FullName inputs
+.heyform-full-name {
+  input,
+  input.input,
+  input.heyform-input,
+  .input.heyform-input {
+    background-color: transparent !important;
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 2px solid var(--heyform-answer-opacity-60-color) !important;
+    border-radius: 0 !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-width: 0 !important;
+    border-style: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    
+    &:hover,
+    &:focus {
+      background-color: transparent !important;
+      background: transparent !important;
+      border-top: none !important;
+      border-left: none !important;
+      border-right: none !important;
+      border-width: 0 !important;
+      border-style: none !important;
+    }
+    
+    &::placeholder,
+    &::-webkit-input-placeholder,
+    &::-moz-placeholder,
+    &:-ms-input-placeholder {
+      color: #999999 !important;
+      opacity: 1 !important;
+    }
+    
+    &:not(:focus)::placeholder,
+    &:not(:focus)::-webkit-input-placeholder,
+    &:not(:focus)::-moz-placeholder,
+    &:not(:focus):-ms-input-placeholder {
+      color: #999999 !important;
+      opacity: 1 !important;
+    }
   }
 }
 
@@ -949,11 +1216,16 @@ button.button-icon-only {
 .heyform-textarea {
   @apply relative;
   min-height: 2.5rem;
+  color: var(--heyform-answer-color);
 
   &:empty:before {
     @apply pointer-events-none absolute truncate text-2xl;
     content: attr(data-placeholder);
-    color: var(--heyform-answer-opacity-30-color);
+    color: #999999 !important;
+  }
+
+  &:focus:empty:before {
+    color: #999999 !important;
   }
 }
 
@@ -1066,8 +1338,11 @@ button.button-icon-only {
     @apply w-full text-lg;
     color: var(--heyform-answer-color);
 
-    &::placeholder {
-      color: var(--heyform-answer-opacity-60-color);
+    &::placeholder,
+    &::-webkit-input-placeholder,
+    &::-moz-placeholder,
+    &:-ms-input-placeholder {
+      color: #999999 !important;
     }
   }
 }
@@ -1139,14 +1414,45 @@ button.button-icon-only {
   border: 2px dashed var(--heyform-answer-color);
   background: linear-gradient(135deg, var(--heyform-answer-opacity-5-color) 0%, var(--heyform-answer-opacity-8-color) 100%);
   backdrop-filter: blur(8px);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(99, 102, 241, 0.1);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+
+  &:active::before {
+    width: 400px;
+    height: 400px;
+  }
 
   &:hover {
-    background: linear-gradient(135deg, var(--heyform-answer-opacity-10-color) 0%, var(--heyform-answer-opacity-15-color) 100%);
+    background: linear-gradient(135deg, var(--heyform-answer-opacity-8-color) 0%, var(--heyform-answer-opacity-12-color) 100%);
     border-color: var(--heyform-answer-opacity-80-color);
     box-shadow: 
       0 8px 24px rgba(99, 102, 241, 0.15),
-      0 4px 12px rgba(0, 0, 0, 0.08);
+      0 4px 8px rgba(0, 0, 0, 0.08);
     transform: translateY(-2px);
+    color: var(--heyform-answer-opacity-80-color);
+  }
+
+  &.heyform-file-uploader-dragging {
+    background: linear-gradient(135deg, var(--heyform-answer-opacity-10-color) 0%, var(--heyform-answer-opacity-15-color) 100%);
+    border-color: var(--heyform-answer-color);
+    border-style: solid;
+    box-shadow: 
+      0 12px 32px rgba(99, 102, 241, 0.2),
+      0 6px 12px rgba(0, 0, 0, 0.1);
+    transform: scale(1.02);
   }
 }
 
@@ -1194,16 +1500,45 @@ button.button-icon-only {
   background: linear-gradient(135deg, var(--heyform-answer-opacity-5-color) 0%, var(--heyform-answer-opacity-8-color) 100%);
   backdrop-filter: blur(8px);
   transition: all 0.3s ease-out;
+  position: relative;
+  overflow: hidden;
 
   &,
   canvas {
     @apply h-40 w-full rounded-xl;
   }
 
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(99, 102, 241, 0.1);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+    z-index: 0;
+  }
+
+  &:active::before {
+    width: 400px;
+    height: 400px;
+  }
+
   &:hover {
-    background: linear-gradient(135deg, var(--heyform-answer-opacity-10-color) 0%, var(--heyform-answer-opacity-15-color) 100%);
+    background: linear-gradient(135deg, var(--heyform-answer-opacity-8-color) 0%, var(--heyform-answer-opacity-12-color) 100%);
     border-color: var(--heyform-answer-opacity-80-color);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: 
+      0 8px 24px rgba(99, 102, 241, 0.15),
+      0 4px 8px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+  }
+
+  canvas {
+    position: relative;
+    z-index: 1;
   }
 }
 
@@ -1538,7 +1873,17 @@ button.button-icon-only {
 // ----------------------------------------------------------------------------
 // Header
 .heyform-header {
-  @apply absolute left-0 top-0 z-20 w-full px-4 py-2 md:py-4;
+  @apply absolute left-0 top-0 z-20 w-full px-4 py-3 md:py-4;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease-out;
 }
 
 .heyform-header-wrapper {
@@ -1552,16 +1897,41 @@ button.button-icon-only {
 
 .heyform-logo {
   @apply pt-2 pl-2;
+  transition: transform 0.3s ease-out;
+
+  &:hover {
+    transform: scale(1.05);
+  }
 
   img {
     @apply block h-10 w-auto sm:h-8;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
   }
 }
 
 // ----------------------------------------------------------------------------
 // Footer
 .heyform-footer {
-  @apply pointer-events-none absolute bottom-0 left-0 z-20 w-full bg-white/30 p-4 backdrop-blur-sm md:bg-transparent md:backdrop-filter-none;
+  @apply pointer-events-none absolute bottom-0 left-0 z-20 w-full p-4;
+  background: linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(255, 255, 255, 0.5) 50%,
+    transparent 100%
+  );
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.05);
+
+  @media (min-width: 800px) {
+    background: linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.6) 0%,
+      rgba(255, 255, 255, 0.3) 50%,
+      transparent 100%
+    );
+  }
 }
 
 .heyform-footer-wrapper,
@@ -1592,12 +1962,23 @@ button.button-icon-only {
 .heyform-pagination button.button {
   @apply px-2.5 py-2.5 text-sm shadow-none md:py-0.5;
   min-height: 1.875rem;
-  background-color: var(--heyform-button-color);
+  background: linear-gradient(135deg, var(--heyform-button-color) 0%, var(--heyform-button-opacity-80-color) 100%);
   color: var(--heyform-button-text-color);
+  box-shadow: 
+    0 2px 8px rgba(99, 102, 241, 0.2),
+    0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease-out;
 
   &:hover {
-    @apply opacity-80;
-    background-color: var(--heyform-button-color) !important;
+    background: linear-gradient(135deg, var(--heyform-button-color) 0%, var(--heyform-button-color) 100%);
+    transform: translateY(-1px);
+    box-shadow: 
+      0 4px 12px rgba(99, 102, 241, 0.3),
+      0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.98);
   }
 }
 
@@ -1614,28 +1995,87 @@ button.button-icon-only {
 
 .heyform-progress,
 .heyform-countdown {
-  @apply mr-2 rounded;
+  @apply mr-2 rounded-xl;
   line-height: 1.5rem;
+  background: linear-gradient(135deg, var(--heyform-button-color) 0%, var(--heyform-button-opacity-80-color) 100%);
+  box-shadow: 
+    0 2px 8px rgba(99, 102, 241, 0.2),
+    0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease-out;
 }
 
 .heyform-progress {
   @apply flex items-center;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.3),
+      transparent
+    );
+    animation: shimmer 2s infinite;
+  }
 
   span {
     @apply ml-2 hidden md:block;
+    font-weight: 500;
+    transition: opacity 0.3s ease;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
   }
 }
 
 .heyform-circular-progressbar {
   @apply h-6 w-6 md:h-4 md:w-4;
+  filter: drop-shadow(0 2px 4px rgba(99, 102, 241, 0.3));
+  transition: transform 0.3s ease-out;
+
+  &:hover {
+    transform: scale(1.1);
+  }
 }
 
 .heyform-circular-circle {
   stroke: var(--heyform-button-text-opacity-20-color);
+  transition: stroke 0.3s ease;
 }
 
 .heyform-circular-path {
-  stroke: var(--heyform-button-text-color);
+  stroke: url(#progressGradient);
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: drop-shadow(0 0 2px rgba(99, 102, 241, 0.5));
+}
+
+.heyform-progress svg {
+  defs {
+    linearGradient#progressGradient {
+      stop[offset="0%"] {
+        stop-color: var(--heyform-button-text-color);
+        stop-opacity: 1;
+      }
+      stop[offset="100%"] {
+        stop-color: var(--heyform-button-text-color);
+        stop-opacity: 0.8;
+      }
+    }
+  }
 }
 
 .heyform-footer-right {
@@ -1654,14 +2094,41 @@ button.button-icon-only {
 
 .heyform-pagination .button {
   @apply px-3 py-3 md:px-2 md:py-0.5;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease-out;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+
+  &:active::before {
+    width: 300px;
+    height: 300px;
+  }
 
   .button-trailing {
     @apply m-0;
     color: var(--heyform-button-text-color);
+    transition: transform 0.3s ease-out;
 
     svg {
       @apply h-6 w-6;
+      transition: transform 0.3s ease-out;
     }
+  }
+
+  &:hover .button-trailing svg {
+    transform: scale(1.1);
   }
 
   &[disabled] {
@@ -1674,7 +2141,7 @@ button.button-icon-only {
 
   &:focus {
     outline: none !important;
-    box-shadow: none !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
   }
 }
 
@@ -1699,7 +2166,36 @@ button.heyform-pagination-previous {
 }
 
 .heyform-validation-error {
-  @apply inline-block rounded bg-red-600 bg-opacity-10 px-2 py-1 text-sm text-red-600;
+  @apply inline-flex items-center gap-2 rounded-xl bg-red-50 px-3 py-2 text-sm font-medium text-red-700 shadow-sm;
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  animation: slideInError 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(8px);
+
+  &::before {
+    content: '⚠';
+    @apply flex h-4 w-4 items-center justify-center rounded-full bg-red-100 text-xs font-bold;
+    animation: pulseError 2s infinite;
+  }
+}
+
+@keyframes slideInError {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pulseError {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }
 
 .heyform-submit-container {
@@ -1714,6 +2210,25 @@ button.heyform-submit-button {
   box-shadow: 
     0 4px 14px 0 rgba(99, 102, 241, 0.25),
     0 2px 4px 0 rgba(99, 102, 241, 0.15);
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+
+  &:active::before {
+    width: 300px;
+    height: 300px;
+  }
 
   &:hover {
     background: linear-gradient(135deg, var(--heyform-button-color) 0%, var(--heyform-button-color) 100%);
@@ -1733,6 +2248,8 @@ button.heyform-submit-button {
   svg {
     @apply -mr-1 ml-2 h-5 w-5;
     transition: transform 0.3s ease;
+    position: relative;
+    z-index: 1;
   }
 
   &:hover svg {
@@ -1741,6 +2258,8 @@ button.heyform-submit-button {
 
   .spin {
     @apply ml-0 mr-2;
+    position: relative;
+    z-index: 1;
   }
 }
 
@@ -2101,4 +2620,22 @@ button.heyform-submit-button {
       @apply w-full bg-transparent text-center text-base font-bold text-black;
     }
   }
+}
+
+// FINAL OVERRIDE: Maximum specificity to override Tailwind Forms plugin
+// This must be at the very end of the file
+input.input.heyform-input::placeholder,
+input.input.heyform-input::-webkit-input-placeholder,
+input.input.heyform-input::-moz-placeholder,
+input.input.heyform-input:-ms-input-placeholder,
+.heyform-full-name input.input.heyform-input::placeholder,
+.heyform-full-name input.input.heyform-input::-webkit-input-placeholder,
+.heyform-full-name input.input.heyform-input::-moz-placeholder,
+.heyform-full-name input.input.heyform-input:-ms-input-placeholder,
+.heyform-full-name input.heyform-input::placeholder,
+.heyform-full-name input.heyform-input::-webkit-input-placeholder,
+.heyform-full-name input.heyform-input::-moz-placeholder,
+.heyform-full-name input.heyform-input:-ms-input-placeholder {
+  color: #999999 !important;
+  opacity: 1 !important;
 }

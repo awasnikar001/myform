@@ -1,6 +1,79 @@
 
 @import '@heyform-inc/form-renderer/style.css';
 
+// Additional overrides for published form to ensure no blue boxes and grey placeholders
+input,
+input[type='text'],
+input[type='email'],
+input[type='number'],
+input[type='tel'],
+textarea,
+.heyform-input,
+input.heyform-input,
+input.input.heyform-input,
+.input.heyform-input {
+  background-color: transparent !important;
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 2px solid var(--heyform-answer-opacity-60-color) !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-radius: 0 !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+
+  &:hover,
+  &:focus {
+    background-color: transparent !important;
+    background: transparent !important;
+  }
+
+  &::placeholder,
+  &::-webkit-input-placeholder,
+  &::-moz-placeholder,
+  &:-ms-input-placeholder {
+    color: #999999 !important;
+    opacity: 1 !important;
+  }
+  
+  &:not(:focus)::placeholder,
+  &:not(:focus)::-webkit-input-placeholder,
+  &:not(:focus)::-moz-placeholder,
+  &:not(:focus):-ms-input-placeholder {
+    color: #999999 !important;
+    opacity: 1 !important;
+  }
+}
+
+.heyform-full-name {
+  input,
+  input.input,
+  input.heyform-input {
+    background-color: transparent !important;
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 2px solid var(--heyform-answer-opacity-60-color) !important;
+
+    &::placeholder,
+    &::-webkit-input-placeholder,
+    &::-moz-placeholder,
+    &:-ms-input-placeholder {
+      color: #999999 !important;
+      opacity: 1 !important;
+    }
+    
+    &:not(:focus)::placeholder,
+    &:not(:focus)::-webkit-input-placeholder,
+    &:not(:focus)::-moz-placeholder,
+    &:not(:focus):-ms-input-placeholder {
+      color: #999999 !important;
+      opacity: 1 !important;
+    }
+  }
+}
+
 #heyform-render-root {
   height: 100vh;
   width: 100vw;

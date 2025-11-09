@@ -277,7 +277,7 @@
 
     &:before {
       content: attr(placeholder);
-      color: var(--heyform-answer-opacity-30-color);
+      color: #999999 !important;
       @apply pointer-events-none absolute hidden truncate text-2xl;
     }
 
@@ -468,43 +468,94 @@
 
   
   
+  // Override Tailwind Forms plugin and any other input styles
+  input,
+  input[type='text'],
+  input[type='email'],
+  input[type='number'],
+  input[type='tel'],
+  textarea,
   .heyform-input,
-  .heyform-textarea {
+  .heyform-textarea,
+  input.heyform-input,
+  input.input.heyform-input,
+  .input.heyform-input {
     @apply w-full border-none p-0 pb-2 text-2xl shadow-none outline-none transition-all duration-300 ease-out;
-    color: var(--heyform-answer-color);
-    border-radius: 0.5rem;
-    background-color: var(--heyform-answer-opacity-5-color);
-    border: 1.5px solid transparent;
-    backdrop-filter: blur(8px);
+    color: var(--heyform-answer-color) !important;
+    background-color: transparent !important;
+    background: transparent !important;
+    border-bottom: 2px solid var(--heyform-answer-opacity-60-color) !important;
+    border-radius: 0 !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    box-shadow: none !important;
 
     &:hover {
-      background-color: var(--heyform-answer-opacity-8-color);
-      border-color: var(--heyform-answer-opacity-30-color);
+      background-color: transparent !important;
+      background: transparent !important;
+      border-bottom-color: var(--heyform-answer-opacity-80-color) !important;
     }
 
     &:focus {
-      background-color: var(--heyform-answer-opacity-10-color);
-      border-color: var(--heyform-answer-color);
-      box-shadow: 
-        0 0 0 3px var(--heyform-answer-opacity-20-color),
-        0 4px 12px rgba(0, 0, 0, 0.08);
+      background-color: transparent !important;
+      background: transparent !important;
+      border-bottom-color: var(--heyform-answer-color) !important;
+      box-shadow: 0 2px 0 0 var(--heyform-answer-color) !important;
       transform: translateY(-1px);
+      border-top: none !important;
+      border-left: none !important;
+      border-right: none !important;
+      outline: none !important;
+      ring: none !important;
     }
 
-    &::placeholder {
-      color: var(--heyform-answer-opacity-40-color);
+    &::placeholder,
+    &::-webkit-input-placeholder,
+    &::-moz-placeholder,
+    &:-ms-input-placeholder {
+      color: #999999 !important;
       transition: color 0.2s ease;
     }
-
-    &:focus::placeholder {
-      color: var(--heyform-answer-opacity-30-color);
+    
+    &:not(:focus)::placeholder,
+    &:not(:focus)::-webkit-input-placeholder,
+    &:not(:focus)::-moz-placeholder,
+    &:not(:focus):-ms-input-placeholder {
+      color: #999999 !important;
     }
+
+    &:focus::placeholder,
+    &:focus::-webkit-input-placeholder,
+    &:focus::-moz-placeholder,
+    &:focus:-ms-input-placeholder {
+      color: #999999 !important;
+    }
+  }
+
+  // Ensure input class doesn't add backgrounds
+  .input.heyform-input,
+  input.input.heyform-input,
+  input.input {
+    background-color: transparent !important;
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 2px solid var(--heyform-answer-opacity-60-color) !important;
   }
 
   
   
   .heyform-textarea {
     @apply h-10 resize-none overflow-hidden;
+    color: var(--heyform-answer-color);
+
+    &:empty:before {
+      color: #999999 !important;
+    }
+
+    &:focus:empty:before {
+      color: #999999 !important;
+    }
   }
 
   .heyform-textarea-hit {
@@ -545,6 +596,7 @@
 
     .heyform-autoresize-textarea {
       @apply p-0 border-none text-lg resize-none;
+      text-decoration: none !important;
     }
 
     .heyform-radio-content,
@@ -562,6 +614,10 @@
       .heyform-radio-remove {
         @apply visible opacity-100;
       }
+    }
+    
+    .heyform-radio-remove {
+      @apply right-2 top-1/2 -translate-y-1/2;
     }
 
     &.heyform-multiple-choice-horizontal {
@@ -590,21 +646,30 @@
     .input-focused {
       @apply border-none px-0 shadow-none outline-none;
       box-shadow: none;
+      text-decoration: none !important;
     }
 
     .heyform-radio-label-other,
     input {
       @apply w-full text-lg;
       color: var(--heyform-answer-color);
+      text-decoration: none !important;
 
-      &::placeholder {
-        color: var(--heyform-answer-opacity-60-color);
+      &::placeholder,
+      &::-webkit-input-placeholder,
+      &::-moz-placeholder,
+      &:-ms-input-placeholder,
+      &:not(:focus)::placeholder,
+      &:not(:focus)::-webkit-input-placeholder,
+      &:not(:focus)::-moz-placeholder,
+      &:not(:focus):-ms-input-placeholder {
+        color: #999999 !important;
       }
     }
   }
 
   .heyform-radio-remove {
-    @apply invisible absolute -right-3 h-6 w-6 rounded-full border p-0.5 opacity-0 transition;
+    @apply invisible absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 rounded-full border p-0.5 opacity-0 transition;
     background-color: var(--heyform-answer-opacity-60-color);
     border-color: var(--heyform-answer-color);
     color: var(--heyform-background-color);
@@ -888,8 +953,15 @@
       max-width: 9rem;
       color: var(--heyform-answer-color);
 
-      &::placeholder {
-        color: var(--heyform-answer-opacity-60-color);
+      &::placeholder,
+      &::-webkit-input-placeholder,
+      &::-moz-placeholder,
+      &:-ms-input-placeholder,
+      &:not(:focus)::placeholder,
+      &:not(:focus)::-webkit-input-placeholder,
+      &:not(:focus)::-moz-placeholder,
+      &:not(:focus):-ms-input-placeholder {
+        color: #999999 !important;
       }
 
       &,
