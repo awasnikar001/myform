@@ -166,6 +166,23 @@ export const Renderer: FC<RendererProps> = ({ form, query, locale, contactId }) 
           display: none !important;
         }
         
+        /* Remove gradient bar from header */
+        .heyform-header {
+          background: transparent !important;
+          backdrop-filter: none !important;
+          -webkit-backdrop-filter: none !important;
+          border-bottom: none !important;
+        }
+        
+        /* Remove gradient bar from footer */
+        .heyform-footer {
+          background: transparent !important;
+          backdrop-filter: none !important;
+          -webkit-backdrop-filter: none !important;
+          border-top: none !important;
+          box-shadow: none !important;
+        }
+        
         input,
         input[type='text'],
         input[type='email'],

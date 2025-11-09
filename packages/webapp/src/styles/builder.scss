@@ -1450,6 +1450,23 @@ button.connect-stripe {
   .heyform-radio-label {
     @apply break-all;
   }
+  
+  /* Remove gradient bar from header in preview */
+  .heyform-header {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-bottom: none !important;
+  }
+  
+  /* Remove gradient bar from footer in preview */
+  .heyform-footer {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-top: none !important;
+    box-shadow: none !important;
+  }
 }
 
 .heyform-root {
