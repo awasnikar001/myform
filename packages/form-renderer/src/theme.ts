@@ -6,6 +6,7 @@ export const SYSTEM_FONTS =
   '-apple-system, BlinkMacSystemFont, Helvetica, Roboto, Tahoma, Arial, "PingFang SC", "Hiragino Sans GB", "Heiti SC", STXihei, "Microsoft YaHei", SimHei, "WenQuanYi Micro Hei", serif'
 
 export const GOOGLE_FONTS = [
+  'Poppins',
   'Inter',
   'Public Sans',
   'Montserrat',
@@ -44,7 +45,6 @@ export const GOOGLE_FONTS = [
   'Oswald',
   'Open Sans',
   'Courier Prime',
-  'Poppins',
   'Josefin Sans',
   'Fira Sans',
   'Nunito',
@@ -56,8 +56,8 @@ export const GOOGLE_FONTS = [
 export const DEFAULT_THEME: FormTheme = {
   fontFamily: GOOGLE_FONTS[0],
   questionTextColor: '#000',
-  answerTextColor: '#0445AF',
-  buttonBackground: '#0445AF',
+  answerTextColor: '#6366f1',
+  buttonBackground: '#6366f1',
   buttonTextColor: '#fff',
   backgroundColor: '#fff'
 }
@@ -135,8 +135,13 @@ export function getThemeStyle(theme: FormTheme, query?: Record<string, any>): st
     --heyform-answer-color: ${theme.answerTextColor};
     --heyform-answer-opacity-80-color: ${alpha(theme.answerTextColor!, 0.8)};
     --heyform-answer-opacity-60-color: ${alpha(theme.answerTextColor!, 0.6)};
+    --heyform-answer-opacity-40-color: ${alpha(theme.answerTextColor!, 0.4)};
     --heyform-answer-opacity-30-color: ${alpha(theme.answerTextColor!, 0.3)};
+    --heyform-answer-opacity-20-color: ${alpha(theme.answerTextColor!, 0.2)};
+    --heyform-answer-opacity-15-color: ${alpha(theme.answerTextColor!, 0.15)};
     --heyform-answer-opacity-10-color: ${alpha(theme.answerTextColor!, 0.1)};
+    --heyform-answer-opacity-8-color: ${alpha(theme.answerTextColor!, 0.08)};
+    --heyform-answer-opacity-5-color: ${alpha(theme.answerTextColor!, 0.05)};
     --heyform-button-color: ${theme.buttonBackground};
     --heyform-button-opacity-80-color: ${alpha(theme.buttonBackground!, 0.8)};
     --heyform-button-text-color: ${theme.buttonTextColor};

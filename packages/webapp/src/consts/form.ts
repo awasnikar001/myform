@@ -512,10 +512,10 @@ export enum INTEGRATION_STATUS_ENUM {
 
 export const FORM_THEMES = [
   {
-    fontFamily: 'Public Sans',
+    fontFamily: 'Poppins',
     questionTextColor: '#000',
-    answerTextColor: '#0445AF',
-    buttonBackground: '#0445AF',
+    answerTextColor: '#6366f1',
+    buttonBackground: '#6366f1',
     buttonTextColor: '#fff',
     backgroundColor: '#fff',
     backgroundImage: undefined,

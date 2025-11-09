@@ -97,7 +97,7 @@
 
   .heyform-block-group-container {
     @apply mx-auto flex w-full items-center;
-    max-width: 45rem;
+    max-width: 50rem;
     min-height: 3.75rem;
 
     .heyform-block-number {
@@ -181,14 +181,22 @@
   }
 
   .heyform-radio-container {
-    @apply relative flex h-full w-full cursor-pointer rounded p-2 transition;
-
-    background-color: var(--heyform-answer-opacity-10-color);
+    @apply relative flex h-full w-full cursor-pointer rounded-xl p-3 transition-all duration-300 ease-out;
+    background-color: var(--heyform-answer-opacity-5-color);
     color: var(--heyform-answer-color);
-    box-shadow: var(--heyform-answer-opacity-60-color) 0 0 0 1px inset;
+    border: 1.5px solid transparent;
+    box-shadow: 
+      0 1px 3px rgba(0, 0, 0, 0.05),
+      0 1px 2px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(8px);
 
     &:hover {
-      background-color: var(--heyform-answer-opacity-30-color);
+      background-color: var(--heyform-answer-opacity-10-color);
+      border-color: var(--heyform-answer-opacity-30-color);
+      box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.08),
+        0 2px 4px rgba(0, 0, 0, 0.06);
+      transform: translateY(-2px);
     }
   }
 
@@ -253,9 +261,14 @@
   }
 
   .heyform-select-container {
-    @apply flex cursor-pointer items-center pb-2;
+    @apply flex cursor-pointer items-center pb-2 transition-all duration-300 ease-out;
     color: var(--heyform-answer-color);
-    border-bottom: 1px solid var(--heyform-answer-opacity-80-color);
+    border-bottom: 2px solid var(--heyform-answer-opacity-60-color);
+
+    &:hover {
+      border-bottom-color: var(--heyform-answer-opacity-80-color);
+      transform: translateY(-1px);
+    }
   }
 
   .heyform-select-value {
@@ -312,7 +325,7 @@
 
   .heyform-block {
     @apply relative mx-auto w-full;
-    max-width: 45rem;
+    max-width: 50rem;
     padding-top: 7.5rem;
     padding-bottom: 11.5rem;
   }
@@ -333,9 +346,10 @@
   }
 
   .heyform-block-title {
-    @apply mb-1 text-2xl;
+    @apply mb-1 text-2xl font-semibold leading-tight tracking-tight;
     min-height: 2rem;
     color: var(--heyform-question-color);
+    letter-spacing: -0.02em;
   }
 
   .heyform-statement {
@@ -345,9 +359,10 @@
   }
 
   .heyform-block-description {
-    @apply text-lg;
+    @apply text-lg leading-relaxed;
     min-height: 1.75rem;
     color: var(--heyform-description-color);
+    line-height: 1.7;
   }
 
   .heyform-block-title,
@@ -376,13 +391,33 @@
   }
 
   .heyform-submit-button {
-    @apply inline-flex cursor-pointer items-center justify-between rounded-md px-5 py-1.5 text-lg font-medium shadow-none outline-none;
+    @apply inline-flex cursor-pointer items-center justify-between rounded-xl px-6 py-2.5 text-lg font-semibold outline-none transition-all duration-300 ease-out;
     min-width: 7.5rem;
-    background-color: var(--heyform-button-color);
+    background: linear-gradient(135deg, var(--heyform-button-color) 0%, var(--heyform-button-opacity-80-color) 100%);
     color: var(--heyform-button-text-color);
+    box-shadow: 
+      0 4px 14px 0 rgba(99, 102, 241, 0.25),
+      0 2px 4px 0 rgba(99, 102, 241, 0.15);
+
+    &:hover {
+      background: linear-gradient(135deg, var(--heyform-button-color) 0%, var(--heyform-button-color) 100%);
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 
+        0 8px 24px 0 rgba(99, 102, 241, 0.35),
+        0 4px 8px 0 rgba(99, 102, 241, 0.2);
+    }
+
+    &:active {
+      transform: translateY(0) scale(0.98);
+    }
 
     svg {
       @apply -mr-1 ml-2 h-5 w-5;
+      transition: transform 0.3s ease;
+    }
+
+    &:hover svg {
+      transform: translateX(2px);
     }
   }
 
@@ -435,16 +470,33 @@
   
   .heyform-input,
   .heyform-textarea {
-    @apply w-full border-none bg-transparent p-0 pb-2 text-2xl shadow-none outline-none transition;
+    @apply w-full border-none p-0 pb-2 text-2xl shadow-none outline-none transition-all duration-300 ease-out;
     color: var(--heyform-answer-color);
-    border-bottom: 1px solid var(--heyform-answer-opacity-80-color);
+    border-radius: 0.5rem;
+    background-color: var(--heyform-answer-opacity-5-color);
+    border: 1.5px solid transparent;
+    backdrop-filter: blur(8px);
+
+    &:hover {
+      background-color: var(--heyform-answer-opacity-8-color);
+      border-color: var(--heyform-answer-opacity-30-color);
+    }
 
     &:focus {
-      border-color: var(--heyform-answer-opacity-80-color);
-      box-shadow: 0 1px 0 0 var(--heyform-answer-opacity-80-color);
+      background-color: var(--heyform-answer-opacity-10-color);
+      border-color: var(--heyform-answer-color);
+      box-shadow: 
+        0 0 0 3px var(--heyform-answer-opacity-20-color),
+        0 4px 12px rgba(0, 0, 0, 0.08);
+      transform: translateY(-1px);
     }
 
     &::placeholder {
+      color: var(--heyform-answer-opacity-40-color);
+      transition: color 0.2s ease;
+    }
+
+    &:focus::placeholder {
       color: var(--heyform-answer-opacity-30-color);
     }
   }
@@ -634,13 +686,19 @@
   
   
   .heyform-file-uploader {
-    @apply flex h-72 cursor-pointer items-center justify-center rounded transition;
-    color: var(--heyform-answer-color);
-    border: 1px dashed var(--heyform-answer-color);
-    background-color: var(--heyform-answer-opacity-10-color);
+    @apply flex h-72 cursor-pointer items-center justify-center rounded-xl transition-all duration-300 ease-out;
+    color: var(--heyform-answer-opacity-60-color);
+    border: 2px dashed var(--heyform-answer-color);
+    background: linear-gradient(135deg, var(--heyform-answer-opacity-5-color) 0%, var(--heyform-answer-opacity-8-color) 100%);
+    backdrop-filter: blur(8px);
 
     &:hover {
-      background-color: var(--heyform-answer-opacity-30-color);
+      background: linear-gradient(135deg, var(--heyform-answer-opacity-10-color) 0%, var(--heyform-answer-opacity-15-color) 100%);
+      border-color: var(--heyform-answer-opacity-80-color);
+      box-shadow: 
+        0 8px 24px rgba(99, 102, 241, 0.15),
+        0 4px 12px rgba(0, 0, 0, 0.08);
+      transform: translateY(-2px);
     }
   }
 
@@ -661,9 +719,17 @@
   
   
   .heyform-signature-wrapper {
-    @apply h-40 rounded;
-    border: 1px dashed var(--heyform-answer-color);
-    background-color: var(--heyform-answer-opacity-10-color);
+    @apply h-40 rounded-xl;
+    border: 2px dashed var(--heyform-answer-color);
+    background: linear-gradient(135deg, var(--heyform-answer-opacity-5-color) 0%, var(--heyform-answer-opacity-8-color) 100%);
+    backdrop-filter: blur(8px);
+    transition: all 0.3s ease-out;
+
+    &:hover {
+      background: linear-gradient(135deg, var(--heyform-answer-opacity-10-color) 0%, var(--heyform-answer-opacity-15-color) 100%);
+      border-color: var(--heyform-answer-opacity-80-color);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
   }
 
   .heyform-signature-bottom {

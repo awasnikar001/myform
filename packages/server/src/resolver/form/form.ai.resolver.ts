@@ -1149,10 +1149,10 @@ Generate a comprehensive, professional form that:
       // Default professional theme (theme index 0)
       return {
         theme: {
-          fontFamily: 'Public Sans',
+          fontFamily: 'Poppins',
           questionTextColor: '#000',
-          answerTextColor: '#0445AF',
-          buttonBackground: '#0445AF',
+          answerTextColor: '#6366f1',
+          buttonBackground: '#6366f1',
           buttonTextColor: '#fff',
           backgroundColor: '#fff',
           backgroundImage: undefined,
@@ -1174,10 +1174,10 @@ Generate a comprehensive, professional form that:
     ) {
       return {
         theme: {
-          fontFamily: 'Public Sans',
+          fontFamily: 'Poppins',
           questionTextColor: '#000',
-          answerTextColor: '#0445AF',
-          buttonBackground: '#0445AF',
+          answerTextColor: '#6366f1',
+          buttonBackground: '#6366f1',
           buttonTextColor: '#fff',
           backgroundColor: '#fff',
           backgroundImage: undefined,
@@ -1292,13 +1292,13 @@ Generate a comprehensive, professional form that:
       }
     }
 
-    // Default: Professional blue theme (most versatile)
+    // Default: Professional indigo theme (most versatile)
     return {
       theme: {
-        fontFamily: 'Public Sans',
+        fontFamily: 'Poppins',
         questionTextColor: '#000',
-        answerTextColor: '#0445AF',
-        buttonBackground: '#0445AF',
+        answerTextColor: '#6366f1',
+        buttonBackground: '#6366f1',
         buttonTextColor: '#fff',
         backgroundColor: '#fff',
         backgroundImage: undefined,

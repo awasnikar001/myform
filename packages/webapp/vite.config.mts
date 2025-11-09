@@ -14,7 +14,9 @@ export default ({ mode }: ConfigEnv) => {
   const cookieDomain = env.VITE_COOKIE_DOMAIN || 'localhost'
   
   const plugins = [
-    react(),
+    react({
+      fastRefresh: true
+    }),
     svgr(),
     webfontDownload(['https://rsms.me/inter/inter.css'])
   ]
