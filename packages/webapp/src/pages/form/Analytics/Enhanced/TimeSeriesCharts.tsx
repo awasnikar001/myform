@@ -181,48 +181,61 @@ export const TimeSeriesCharts: FC<TimeSeriesChartsProps> = ({ formId, startDate,
   }
 
   return (
-    <div className="mt-6">
-      <h3 className="mb-4 text-base font-semibold">Views & Submissions Over Time</h3>
-      <ResponsiveContainer width="100%" height={300}>
-        <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 5 }}>
-          <defs>
-            <linearGradient id="viewsGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={viewsGradient[0]} stopOpacity={0.4} />
-              <stop offset="50%" stopColor={viewsGradient[1]} stopOpacity={0.3} />
-              <stop offset="100%" stopColor={viewsGradient[2]} stopOpacity={0.1} />
-            </linearGradient>
-            <linearGradient id="submissionsGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={submissionsGradient[0]} stopOpacity={0.4} />
-              <stop offset="50%" stopColor={submissionsGradient[1]} stopOpacity={0.3} />
-              <stop offset="100%" stopColor={submissionsGradient[2]} stopOpacity={0.1} />
-            </linearGradient>
-          </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="transparent" vertical={false} />
-          <XAxis dataKey="date" hide={true} />
-          <YAxis hide={true} />
-          <Tooltip content={<CustomTooltip />} />
-          <Area
-            type="monotone"
-            dataKey="views"
-            name="Views"
-            stroke={viewsColor}
-            strokeWidth={2.5}
-            fill="url(#viewsGradient)"
-            animationDuration={750}
-            animationBegin={0}
-          />
-          <Area
-            type="monotone"
-            dataKey="submissions"
-            name="Submissions"
-            stroke={submissionsColor}
-            strokeWidth={2.5}
-            fill="url(#submissionsGradient)"
-            animationDuration={750}
-            animationBegin={100}
-          />
-        </AreaChart>
-      </ResponsiveContainer>
+    <div>
+      <h3 className="mb-6 text-base font-semibold">Views & Submissions Over Time</h3>
+      <div
+        className="rounded-xl border p-6"
+        style={{
+          backgroundColor: 'rgba(24, 24, 27, 0.3)',
+          borderColor: 'rgba(255, 255, 255, 0.05)'
+        }}
+      >
+        <ResponsiveContainer width="100%" height={300}>
+          <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 5 }}>
+            <defs>
+              <linearGradient id="viewsGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={viewsGradient[0]} stopOpacity={0.4} />
+                <stop offset="50%" stopColor={viewsGradient[1]} stopOpacity={0.3} />
+                <stop offset="100%" stopColor={viewsGradient[2]} stopOpacity={0.1} />
+              </linearGradient>
+              <linearGradient id="submissionsGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={submissionsGradient[0]} stopOpacity={0.4} />
+                <stop offset="50%" stopColor={submissionsGradient[1]} stopOpacity={0.3} />
+                <stop offset="100%" stopColor={submissionsGradient[2]} stopOpacity={0.1} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
+            <XAxis
+              dataKey="date"
+              stroke={axisColor}
+              style={{ fontSize: '12px' }}
+              tick={{ fill: axisColor }}
+            />
+            <YAxis stroke={axisColor} style={{ fontSize: '12px' }} tick={{ fill: axisColor }} />
+            <Tooltip content={<CustomTooltip />} />
+            <Area
+              type="monotone"
+              dataKey="views"
+              name="Views"
+              stroke={viewsColor}
+              strokeWidth={2.5}
+              fill="url(#viewsGradient)"
+              animationDuration={750}
+              animationBegin={0}
+            />
+            <Area
+              type="monotone"
+              dataKey="submissions"
+              name="Submissions"
+              stroke={submissionsColor}
+              strokeWidth={2.5}
+              fill="url(#submissionsGradient)"
+              animationDuration={750}
+              animationBegin={100}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   )
 }

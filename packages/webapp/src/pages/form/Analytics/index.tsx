@@ -51,7 +51,7 @@ export default function FormAnalytics() {
   }, [range, viewMode, customStartDate, customEndDate])
 
   return (
-    <>
+    <div className="space-y-8">
       <FormAnalyticsOverview
         range={range}
         setRange={setRange}
@@ -74,6 +74,6 @@ export default function FormAnalytics() {
       <ActivityHeatmap formId={formId} startDate={startDate} endDate={endDate} />
 
       <FormAnalyticsReport />
-    </>
+    </div>
   )
 }

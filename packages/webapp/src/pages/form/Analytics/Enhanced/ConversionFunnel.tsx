@@ -125,8 +125,8 @@ export const ConversionFunnel: FC<ConversionFunnelProps> = ({
   }
 
   return (
-    <div className="mt-6">
-      <h3 className="mb-6 text-base font-semibold">{t('form.analytics.conversionFunnel')}</h3>
+    <div>
+      <h3 className="mb-6 text-base font-semibold">Conversion Funnel</h3>
 
       <div className="relative flex flex-col items-center">
         {/* Views Box - Larger, Horizontal */}
@@ -167,7 +167,7 @@ export const ConversionFunnel: FC<ConversionFunnelProps> = ({
         </div>
 
         {/* Statistics Cards */}
-        <div className="mt-8 grid w-full grid-cols-3 gap-4">
+        <div className="mt-10 grid w-full max-w-4xl grid-cols-3 gap-4">
           {/* Total Views Card */}
           <div
             className="rounded-lg border p-6 shadow-lg"

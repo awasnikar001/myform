@@ -105,8 +105,8 @@ export const ActivityHeatmap: FC<ActivityHeatmapProps> = ({ formId, startDate, e
   }
 
   return (
-    <div className="mt-6">
-      <h3 className="mb-4 text-base font-semibold">Submission Activity Heatmap</h3>
+    <div>
+      <h3 className="mb-6 text-base font-semibold">Submission Activity Heatmap</h3>
 
       <div
         className="rounded-xl border p-6"
