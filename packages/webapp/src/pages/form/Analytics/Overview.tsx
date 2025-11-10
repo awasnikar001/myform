@@ -1,6 +1,7 @@
 import { IconTrendingDown, IconTrendingUp } from '@tabler/icons-react'
 import { useRequest } from 'ahooks'
-import { FC, useState } from 'react'
+import dayjs from 'dayjs'
+import { FC } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { FormService } from '@/services'
@@ -8,6 +9,8 @@ import { useParam } from '@/utils'
 import { helper, toDuration, toFixed } from '@heyform-inc/utils'
 
 import { Select, Skeleton } from '@/components'
+
+import { CustomDateRange } from './Enhanced/CustomDateRange'
 
 interface TrendIndicatorProps {
   change: number | null
@@ -60,34 +63,91 @@ const TrendIndicator: FC<TrendIndicatorProps> = ({ change, label }) => {
   )
 }
 
-export default function FormAnalyticsOverview() {
+export default function FormAnalyticsOverview({
+  range,
+  setRange,
+  viewMode,
+  setViewMode,
+  customStartDate,
+  setCustomStartDate,
+  customEndDate,
+  setCustomEndDate
+}: {
+  range: string
+  setRange: (range: string) => void
+  viewMode: 'fixed' | 'custom'
+  setViewMode: (mode: 'fixed' | 'custom') => void
+  customStartDate?: number
+  setCustomStartDate: (date: number | undefined) => void
+  customEndDate?: number
+  setCustomEndDate: (date: number | undefined) => void
+}) {
   const { t } = useTranslation()
 
   const { formId } = useParam()
-  const [range, setRange] = useState('7d')
 
   const { loading, data } = useRequest(
     async () => {
+      if (viewMode === 'custom' && customStartDate && customEndDate) {
+        return FormService.analytic(formId, range, customStartDate, customEndDate)
+      }
       return FormService.analytic(formId, range)
     },
     {
-      refreshDeps: [formId, range]
+      refreshDeps: [formId, range, viewMode, customStartDate, customEndDate]
     }
   )
+
+  const handleCustomDateChange = (startDate: number, endDate: number) => {
+    setCustomStartDate(startDate)
+    setCustomEndDate(endDate)
+  }
 
   return (
     <>
       <div className="mt-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <h2 className="text-base/6 font-semibold">{t('dashboard.overview')}</h2>
-        <Select
-          className="w-full sm:w-40"
-          value={range}
-          options={ANALYTIC_RANGES}
-          placeholder={t('form.analytics.7d')}
-          disabled={loading}
-          multiLanguage
-          onChange={setRange}
-        />
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+          <div className="flex gap-2">
+            <button
+              onClick={() => setViewMode('fixed')}
+              className={`rounded px-3 py-1 text-sm ${
+                viewMode === 'fixed'
+                  ? 'bg-primary text-foreground'
+                  : 'bg-background text-secondary hover:bg-accent'
+              }`}
+            >
+              Fixed Range
+            </button>
+            <button
+              onClick={() => setViewMode('custom')}
+              className={`rounded px-3 py-1 text-sm ${
+                viewMode === 'custom'
+                  ? 'bg-primary text-foreground'
+                  : 'bg-background text-secondary hover:bg-accent'
+              }`}
+            >
+              Custom Range
+            </button>
+          </div>
+          {viewMode === 'fixed' ? (
+            <Select
+              className="w-full sm:w-40"
+              value={range}
+              options={ANALYTIC_RANGES}
+              placeholder={t('form.analytics.7d')}
+              disabled={loading}
+              multiLanguage
+              onChange={setRange}
+            />
+          ) : (
+            <CustomDateRange
+              startDate={customStartDate}
+              endDate={customEndDate}
+              onChange={handleCustomDateChange}
+            />
+          )}
+        </div>
       </div>
 
       <div className="mt-4 grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
