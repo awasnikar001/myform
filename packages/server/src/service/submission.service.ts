@@ -417,6 +417,7 @@ export class SubmissionService {
       {
         $match: {
           formId: formId,
+          status: SubmissionStatusEnum.PUBLIC,
           startAt: { $gte: startAt },
           endAt: { $lte: endAt }
         }
@@ -431,5 +432,59 @@ export class SubmissionService {
         }
       }
     ])
+  }
+
+  async getSubmissionsByDate(
+    formId: string,
+    startAt: number,
+    endAt: number
+  ): Promise<Array<{ date: string; count: number }>> {
+    // Debug: Log submission query parameters
+    console.log(`[TimeSeries] Querying submissions for formId ${formId}:`, {
+      startAt,
+      endAt,
+      startAtDate: new Date(startAt * 1000).toISOString(),
+      endAtDate: new Date(endAt * 1000).toISOString()
+    })
+
+    const result = await this.submissionModel.aggregate([
+      {
+        $match: {
+          formId,
+          status: SubmissionStatusEnum.PUBLIC,
+          endAt: {
+            $gte: startAt,
+            $lte: endAt
+          }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: {
+              format: '%Y-%m-%d',
+              date: {
+                $toDate: { $multiply: ['$endAt', 1000] }
+              },
+              timezone: 'UTC'
+            }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $project: {
+          date: '$_id',
+          count: 1,
+          _id: 0
+        }
+      },
+      {
+        $sort: { date: 1 }
+      }
+    ])
+
+    console.log(`[TimeSeries] Submission query result count:`, result.length)
+    return result
   }
 }
