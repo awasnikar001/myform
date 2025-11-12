@@ -162,6 +162,10 @@ export interface Property {
   redirectUrl?: string
   redirectOnCompletion?: boolean
   redirectDelay?: number
+
+  // Selection range (for multiple choice)
+  min?: number
+  max?: number
 }
 
 export interface Validation {

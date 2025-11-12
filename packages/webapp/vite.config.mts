@@ -28,6 +28,9 @@ export default ({ mode }: ConfigEnv) => {
   return {
     assetsInclude: ['**/*.svg'],
     plugins,
+    optimizeDeps: {
+      force: true // Force re-optimization of dependencies
+    },
     css: {
       preprocessorOptions: {
         scss: {

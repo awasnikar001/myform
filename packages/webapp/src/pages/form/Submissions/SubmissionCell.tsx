@@ -296,12 +296,41 @@ const PaymentItem: FC<SubmissionCellProps> = ({ answer, field }) => {
   )
 }
 
-const SignatureItem: FC<SubmissionCellProps> = ({ answer, field }) => {
-  if (answer.kind !== field.kind || !helper.isURL(answer.value)) {
+const SignatureItem: FC<SubmissionCellProps> = ({ answer, field, isTableCell }) => {
+  if (answer.kind !== field.kind || !answer.value) {
     return null
   }
 
-  return <Image src={answer.value} width={80} height={40} />
+  // Handle both URL strings and base64 data URLs
+  const isDataURL = helper.isString(answer.value) && answer.value.startsWith('data:')
+  // Check for both validator.isURL and simple http/https pattern (for localhost URLs)
+  const isValidURL =
+    helper.isURL(answer.value) ||
+    (helper.isString(answer.value) && /^https?:\/\//i.test(answer.value))
+
+  if (!isDataURL && !isValidURL) {
+    return null
+  }
+
+  // Clean display - larger size for detail modal, smaller for table cells
+  const width = isTableCell ? 80 : 300
+  const height = isTableCell ? 40 : 150
+
+  // Use regular img tag for data URLs, Image component for regular URLs
+  if (isDataURL) {
+    return (
+      <img
+        src={answer.value}
+        width={width}
+        height={height}
+        alt="Signature"
+        className="object-contain"
+        style={{ maxWidth: '100%', height: 'auto' }}
+      />
+    )
+  }
+
+  return <Image src={answer.value} width={width} height={height} />
 }
 
 const TextItem: FC<SubmissionCellProps> = ({ answer, field, isTableCell }) => {

@@ -1,0 +1,959 @@
+---
+description: Error handling patterns, conventions, and best practices for error management in the HeyForm monorepo
+globs: packages/server/src/**/*.ts, packages/webapp/src/**/*.tsx, packages/webapp/src/**/*.ts, packages/answer-utils/src/**/*.ts
+alwaysApply: false
+---
+# Error Handling Patterns
+
+This document outlines the conventions and patterns for error handling in the HeyForm monorepo, covering backend exceptions, frontend error handling, validation errors, logging, and best practices.
+
+## Backend Error Handling (NestJS)
+
+### Exception Types
+
+**Pattern**: Use NestJS HTTP exceptions for API errors
+
+```typescript
+// ✅ Good: Standard NestJS exceptions
+import {
+  BadRequestException,
+  ForbiddenException,
+  NotFoundException,
+  InternalServerErrorException
+} from '@nestjs/common'
+
+// ✅ Good: BadRequestException for validation/client errors
+if (!form) {
+  throw new BadRequestException('The form does not exist')
+}
+
+if (form.suspended) {
+  throw new BadRequestException('The form is suspended')
+}
+
+// ✅ Good: NotFoundException for missing resources
+if (!workspace) {
+  throw new NotFoundException('The workspace does not exist')
+}
+
+// ✅ Good: ForbiddenException for permission errors
+if (remaining < 1) {
+  throw new ForbiddenException('Limit exceeded. Please try again later.')
+}
+```
+
+**Exception Conventions**:
+- `BadRequestException` - Client errors (400), validation errors, invalid input
+- `NotFoundException` - Resource not found (404)
+- `ForbiddenException` - Permission denied (403), rate limits
+- `InternalServerErrorException` - Server errors (500), unexpected errors
+- Use descriptive error messages
+- Messages should be user-friendly
+
+### Exception Messages
+
+**Pattern**: Clear, descriptive error messages
+
+```typescript
+// ✅ Good: Descriptive error messages
+throw new BadRequestException('The form does not exist')
+throw new BadRequestException('The form is suspended')
+throw new BadRequestException('The form does not active')
+throw new BadRequestException('The password does not match')
+throw new BadRequestException('Invalid verification code')
+throw new BadRequestException('Verification code expired')
+
+// ✅ Good: Error messages with context
+throw new BadRequestException(
+  'The submission quota exceeds, new submissions are no longer accepted'
+)
+
+// ✅ Good: Error objects with code
+throw new BadRequestException({
+  code: 'FORM_NOT_FOUND',
+  message: 'The form does not exist'
+})
+```
+
+**Message Conventions**:
+- Use clear, user-friendly messages
+- Start with "The" or "Invalid" for consistency
+- Use present tense: "does not exist" not "did not exist"
+- Include context when helpful
+- Use sentence case (capitalize first letter)
+
+### Try-Catch Patterns
+
+**Pattern**: Structured error handling with logging
+
+```typescript
+// ✅ Good: Try-catch with logging and re-throw
+try {
+  const decrypted = this.endpointService.decryptToken(input.openToken)
+  startAt = decrypted.timestamp
+} catch (error) {
+  this.logger.errorWithContext('Form submission failed: open token decryption error', error, {
+    ...logContext,
+    teamId: form.teamId
+  })
+  throw new BadRequestException('Invalid open token')
+}
+
+// ✅ Good: Try-catch with error type check
+try {
+  const { password } = this.endpointService.decryptToken(input.passwordToken)
+  if (password !== form.settings.password) {
+    throw new BadRequestException('The password does not match')
+  }
+} catch (error) {
+  if (error instanceof BadRequestException) {
+    throw error
+  }
+  this.logger.errorWithContext('Form submission failed: token decryption error', error, {
+    ...logContext,
+    teamId: form.teamId
+  })
+  throw new BadRequestException('Invalid password token')
+}
+
+// ✅ Good: Try-catch with error message extraction
+try {
+  answers = fieldValuesToAnswers(fields, input.answers, input.partialSubmission)
+} catch (err: any) {
+  // Handle ValidateError (has response property) or regular Error
+  const errorMessage = err?.response || err?.message || 'Validation failed'
+  this.logger.errorWithContext('Form submission failed: validation error', err, {
+    ...logContext,
+    teamId: form.teamId,
+    fieldId: err?.response?.id,
+    fieldKind: err?.response?.kind
+  })
+  throw new BadRequestException(errorMessage)
+}
+```
+
+**Try-Catch Conventions**:
+- Always log errors before re-throwing
+- Use `errorWithContext` for structured logging
+- Check error type before re-throwing
+- Extract error messages from nested errors
+- Provide context in error logs
+- Convert to appropriate exception type
+
+### Error Propagation
+
+**Pattern**: Re-throw errors when appropriate
+
+```typescript
+// ✅ Good: Re-throw after logging
+try {
+  await this.endpointService.antiBotCheck(form.settings?.captchaKind, input)
+} catch (error) {
+  this.logger.warnWithContext('Form submission failed: bot check failed', {
+    ...logContext,
+    teamId: form.teamId,
+    captchaKind: form.settings?.captchaKind
+  })
+  throw error  // Re-throw original error
+}
+
+// ✅ Good: Continue on non-critical errors
+try {
+  const isSpam = await this.endpointService.verifySpam({
+    answers,
+    ip: client.ip
+  })
+  if (isSpam) {
+    category = SubmissionCategoryEnum.SPAM
+  }
+} catch (error) {
+  this.logger.errorWithContext('Spam check failed', error, {
+    ...logContext,
+    teamId: form.teamId
+  })
+  // Continue with submission even if spam check fails
+}
+```
+
+**Propagation Conventions**:
+- Re-throw errors that should stop execution
+- Log before re-throwing
+- Continue on non-critical errors (with logging)
+- Don't swallow errors silently
+- Document why errors are caught and not re-thrown
+
+## Exception Filter
+
+### Global Exception Filter
+
+**Pattern**: Catch-all exception filter for error handling
+
+```typescript
+// ✅ Good: Global exception filter
+@Catch()
+export class AllExceptionsFilter implements ExceptionFilter {
+  private readonly logger = new Logger(AllExceptionsFilter.name)
+
+  catch(exception: Error, host: ArgumentsHost): void {
+    // Extract request context
+    const logContext: Record<string, any> = {}
+    logContext.method = request?.method
+    logContext.url = request?.url || request?.body?.operationName
+    logContext.ip = request?.ip
+    logContext.userId = request?.user?.id
+
+    // Check if GraphQL request
+    if (helper.isValid(ctx?.res)) {
+      // GraphQL context - log but re-throw
+      if (!(exception instanceof HttpException)) {
+        this.logger.errorWithContext('Unhandled exception in GraphQL context', exception, logContext)
+        throw exception
+      } else {
+        const status = exception.getStatus()
+        if (status >= 500) {
+          this.logger.errorWithContext('Server error in GraphQL', exception, {
+            ...logContext,
+            statusCode: status
+          })
+        } else if (status >= 400) {
+          this.logger.warnWithContext(`Client error in GraphQL: ${exception.message}`, {
+            ...logContext,
+            statusCode: status
+          })
+        }
+        throw exception
+      }
+    } else {
+      // HTTP context - handle normally
+      if (!(exception instanceof HttpException)) {
+        httpException = new InternalServerErrorException(exception.message)
+        this.logger.errorWithContext('Unhandled exception in HTTP context', exception, logContext)
+      }
+      res.status(httpException.getStatus()).json(httpException.getResponse())
+    }
+  }
+}
+```
+
+**Filter Conventions**:
+- Use `@Catch()` to catch all exceptions
+- Extract request context for logging
+- Handle GraphQL and HTTP contexts differently
+- Log errors with context
+- Re-throw GraphQL errors (handled by formatError)
+- Return JSON responses for HTTP errors
+- Convert unhandled exceptions to InternalServerErrorException
+
+## GraphQL Error Formatting
+
+### Error Formatting
+
+**Pattern**: Custom GraphQL error formatter
+
+```typescript
+// ✅ Good: GraphQL error formatter
+formatError: e => {
+  // Handle BadRequestException
+  if (e.extensions?.exception instanceof BadRequestException) {
+    return {
+      code: e.extensions.code || 'BAD_REQUEST',
+      message: e.message
+    }
+  }
+
+  const response = e.extensions?.exception?.response
+  let code = e.extensions?.code
+  let message = e.message as string
+
+  if (helper.isValid(response)) {
+    if (helper.isValid(response.code)) {
+      code = response.code
+    } else if (helper.isValid(response.error)) {
+      code = response.error.replace(/\s+/g, '_').toUpperCase()
+    }
+
+    if (helper.isValid(response.message)) {
+      message = helper.isArray(response.message) ? response.message[0] : response.message
+    }
+  }
+
+  return {
+    code,
+    message: e.message,
+    ...(e.extensions?.exception || {}),
+    ...{ message }
+  }
+}
+```
+
+**Formatting Conventions**:
+- Extract error code from exception
+- Use error message from response if available
+- Handle array messages (take first element)
+- Normalize error codes (uppercase, underscores)
+- Preserve exception extensions
+- Return consistent error structure
+
+## Logging Patterns
+
+### Logger Usage
+
+**Pattern**: Structured logging with context
+
+```typescript
+// ✅ Good: Logger initialization
+private readonly logger = new Logger('CompleteSubmission')
+
+// ✅ Good: Log with context
+this.logger.logWithContext('Form submission started', logContext)
+
+// ✅ Good: Warning with context
+this.logger.warnWithContext('Form submission failed: form not found', logContext)
+
+// ✅ Good: Error with context
+this.logger.errorWithContext('Form submission failed: validation error', err, {
+  ...logContext,
+  teamId: form.teamId,
+  fieldId: err?.response?.id,
+  fieldKind: err?.response?.kind
+})
+```
+
+**Logging Conventions**:
+- Create logger instance: `new Logger('ServiceName')`
+- Use descriptive log messages
+- Include context objects for debugging
+- Use appropriate log levels:
+  - `logWithContext` - Info/debug messages
+  - `warnWithContext` - Warnings, non-critical errors
+  - `errorWithContext` - Errors, exceptions
+- Include relevant context (userId, formId, teamId, etc.)
+
+### Log Context
+
+**Pattern**: Structured context objects
+
+```typescript
+// ✅ Good: Context object structure
+const logContext = {
+  formId: input.formId,
+  ip: client.ip,
+  userAgent: client.userAgent?.browser?.name
+}
+
+// ✅ Good: Extended context
+this.logger.errorWithContext('Form submission failed: validation error', err, {
+  ...logContext,
+  teamId: form.teamId,
+  fieldId: err?.response?.id,
+  fieldKind: err?.response?.kind
+})
+
+// ✅ Good: Request context extraction
+const logContext: Record<string, any> = {}
+logContext.method = request?.method
+logContext.url = request?.url || request?.body?.operationName
+logContext.ip = request?.ip || request?.connection?.remoteAddress
+logContext.userAgent = request?.headers?.['user-agent']
+if (request?.user) {
+  logContext.userId = request.user.id
+}
+```
+
+**Context Conventions**:
+- Include request identifiers (formId, userId, teamId)
+- Include request metadata (ip, userAgent, method, url)
+- Include error-specific context (fieldId, fieldKind)
+- Use spread operator to extend context
+- Keep context objects flat (no nested objects)
+
+### Log Levels
+
+**Pattern**: Appropriate log level selection
+
+```typescript
+// ✅ Good: Info for normal operations
+this.logger.logWithContext('Form submission started', logContext)
+this.logger.info('GitHub API rate limit exceeded, returning cached data')
+
+// ✅ Good: Warning for recoverable issues
+this.logger.warnWithContext('Form submission failed: form not found', logContext)
+this.logger.warn('OPENAI_API_KEY is not set, using fallback fields')
+
+// ✅ Good: Error for exceptions
+this.logger.errorWithContext('Form submission failed: validation error', err, logContext)
+this.logger.error('Failed to fetch latest release', error.stack)
+```
+
+**Log Level Conventions**:
+- `log/info` - Normal operations, flow tracking
+- `warn` - Recoverable issues, missing config, rate limits
+- `error` - Exceptions, failures, unexpected errors
+- Include stack traces for errors
+- Use context methods (`*WithContext`) when possible
+
+## Frontend Error Handling
+
+### Apollo Client Error Handling
+
+**Pattern**: Error link for global error handling
+
+```typescript
+// ✅ Good: Apollo error link
+const errorLink = onError(({ response }) => {
+  if (helper.isValid(response?.errors)) {
+    const error: any = response!.errors![0]
+
+    if (helper.isValid(error) && error.status === 401) {
+      clearAuthState()
+      window.location.href = '/logout'
+      return
+    }
+  }
+})
+```
+
+**Apollo Error Conventions**:
+- Use `onError` link for global error handling
+- Handle authentication errors (401) globally
+- Clear auth state on 401 errors
+- Redirect to logout on auth failures
+- Check for `response?.errors` array
+
+### Service Error Handling
+
+**Pattern**: Error handling in service methods
+
+```typescript
+// ✅ Good: Service method with error handling
+static async forms(projectId: string, status = FormStatusEnum.NORMAL) {
+  return apollo.query({
+    query: FORMS_GQL,
+    variables: {
+      input: {
+        projectId,
+        status
+      }
+    },
+    fetchPolicy: 'network-only'
+  })
+}
+
+// ✅ Good: Error handling in hooks
+const { loading, error, runAsync } = useRequest(fetch!, {
+  manual: true,
+  refreshDeps: [fetch, ...refreshDeps]
+})
+
+// ✅ Good: Error display
+{showFetchError && error && !loading && (
+  <div className="text-error !mt-1 text-sm/6" data-slot="form-error">
+    {error.message}
+  </div>
+)}
+```
+
+**Service Error Conventions**:
+- Let Apollo Client handle errors
+- Use `useRequest` hook for error state
+- Display errors in UI when `showFetchError` is true
+- Show error message from `error.message`
+- Hide errors when loading
+
+### Form Error Handling
+
+**Pattern**: Form validation and error display
+
+```typescript
+// ✅ Good: Form error display
+const FormItem: FC<FormItemProps> = ({ name, rules, children, ...restProps }) => {
+  return (
+    <Field name={name} rules={rules} {...restProps}>
+      {(control, meta, form) => {
+        const hasError = meta.errors.length > 0
+
+        return (
+          <div data-slot="item" data-error={hasError ? '' : undefined}>
+            {hasError && (
+              <div className="text-error text-sm/6" data-slot="error">
+                {meta.errors[0]}
+              </div>
+            )}
+            {children}
+          </div>
+        )
+      }}
+    </Field>
+  )
+}
+```
+
+**Form Error Conventions**:
+- Use `meta.errors` from rc-field-form
+- Display first error: `meta.errors[0]`
+- Use `data-error` attribute for styling
+- Use `text-error` class for error text
+- Show errors below form fields
+
+### Component Error Handling
+
+**Pattern**: Error handling in components
+
+```typescript
+// ✅ Good: Try-catch in component handlers
+const handleConfirm = useCallback(async () => {
+  onConfirm?.()
+
+  if (fetch) {
+    setTrue()
+
+    try {
+      await fetch()
+      onFinish?.()
+    } catch (err: Any) {
+      setError(err)
+    }
+
+    setFalse()
+  } else {
+    onFinish?.()
+  }
+}, [fetch, onConfirm, onFinish, setError, setFalse, setTrue])
+
+// ✅ Good: Error state management
+const [loading, error, { setTrue, setFalse, setError }] = useFormState()
+
+// ✅ Good: Error display
+{showFetchError && error && !loading && (
+  <div className="text-error text-sm/6" data-slot="form-error">
+    {error.message}
+  </div>
+)}
+```
+
+**Component Error Conventions**:
+- Use try-catch for async operations
+- Set error state with `setError`
+- Display errors conditionally
+- Hide errors when loading
+- Use `error.message` for display
+
+## Validation Errors
+
+### ValidateError Class
+
+**Pattern**: Custom validation error class
+
+```typescript
+// ✅ Good: ValidateError class
+export interface ValidateErrorResponse {
+  id: string
+  kind: string
+  title?: string
+  message: string
+  value?: any
+}
+
+export class ValidateError extends Error {
+  response: ValidateErrorResponse
+
+  constructor(response: ValidateErrorResponse) {
+    super()
+    this.message = response.message
+    this.response = response
+  }
+}
+```
+
+**ValidateError Conventions**:
+- Extend `Error` class
+- Include `response` property with error details
+- Include field `id`, `kind`, `title` for context
+- Use descriptive error messages
+- Store original value if needed
+
+### Validation Error Messages
+
+**Pattern**: Field-specific error messages
+
+```typescript
+// ✅ Good: Required field error
+throw new ValidateError({
+  id: rule.id,
+  kind: rule.kind,
+  title: rule.title,
+  message: 'This field is required'
+})
+
+// ✅ Good: Format-specific error
+throw new ValidateError({
+  id: rule.id,
+  kind: rule.kind,
+  title: rule.title,
+  message: 'Please enter a valid email address'
+})
+
+// ✅ Good: Range error
+throw new ValidateError({
+  id: rule.id,
+  kind: rule.kind,
+  title: rule.title,
+  message: `The text length must be between ${rule.min} to ${rule.max}`
+})
+```
+
+**Validation Message Conventions**:
+- Use user-friendly messages
+- Start with "Please" for actions
+- Include field context when helpful
+- Use template strings for dynamic values
+- Be specific about what's wrong
+
+### Validation Error Handling
+
+**Pattern**: Catch and handle validation errors
+
+```typescript
+// ✅ Good: Catch validation errors
+try {
+  answers = fieldValuesToAnswers(fields, input.answers, input.partialSubmission)
+} catch (err: any) {
+  // Handle ValidateError (has response property) or regular Error
+  const errorMessage = err?.response || err?.message || 'Validation failed'
+  this.logger.errorWithContext('Form submission failed: validation error', err, {
+    ...logContext,
+    teamId: form.teamId,
+    fieldId: err?.response?.id,
+    fieldKind: err?.response?.kind
+  })
+  throw new BadRequestException(errorMessage)
+}
+
+// ✅ Good: Frontend validation error handling
+try {
+  validateFields(state.fields, values)
+} catch (err: any) {
+  console.error(err, err?.response)
+  dispatch({
+    type: 'scrollToField',
+    payload: {
+      fieldId: err.response?.id,
+      errorFieldId: err?.response?.id
+    }
+  })
+  return
+}
+```
+
+**Validation Handling Conventions**:
+- Check for `err?.response` (ValidateError)
+- Extract error message from response or message
+- Log validation errors with field context
+- Convert to BadRequestException on backend
+- Scroll to error field on frontend
+- Use field ID for error targeting
+
+## Error Display
+
+### Error UI Patterns
+
+**Pattern**: Consistent error display
+
+```typescript
+// ✅ Good: Form error display
+{showFetchError && error && !loading && (
+  <div className="text-error !mt-1 text-sm/6" data-slot="form-error">
+    {error.message}
+  </div>
+)}
+
+// ✅ Good: Field error display
+{hasError && (
+  <div className="text-error text-sm/6" data-slot="error">
+    {meta.errors[0]}
+  </div>
+)}
+
+// ✅ Good: Error in modal
+{showFetchError && error && !loading && (
+  <div className="text-error text-sm/6" data-slot="form-error">
+    {error.message}
+  </div>
+)}
+```
+
+**Error Display Conventions**:
+- Use `text-error` class for error text
+- Use `data-slot` attributes for styling hooks
+- Show errors only when not loading
+- Display `error.message` or `meta.errors[0]`
+- Use consistent spacing (`!mt-1` or `mt-2`)
+
+## Async Error Handling
+
+### Promise Error Handling
+
+**Pattern**: Handle promise rejections
+
+```typescript
+// ✅ Good: Async function error handling
+async function handleFinish(values: any) {
+  if (onFinish) {
+    onFinish(values)
+  } else {
+    try {
+      await runAsync(values)
+    } catch (error) {
+      // Error handled by useRequest hook
+    }
+  }
+}
+
+// ✅ Good: Promise catch
+.catch(reject)
+
+// ✅ Good: Error handling in queue
+try {
+  await this.endpointService.antiBotCheck(form.settings?.captchaKind, input)
+} catch (error) {
+  this.logger.warnWithContext('Form submission failed: bot check failed', {
+    ...logContext,
+    teamId: form.teamId
+  })
+  throw error
+}
+```
+
+**Async Error Conventions**:
+- Use try-catch for async/await
+- Use `.catch()` for promise chains
+- Log errors before re-throwing
+- Let hooks handle errors when appropriate
+- Don't swallow errors silently
+
+## Error Recovery
+
+### Graceful Degradation
+
+**Pattern**: Continue on non-critical errors
+
+```typescript
+// ✅ Good: Continue on non-critical error
+try {
+  const isSpam = await this.endpointService.verifySpam({
+    answers,
+    ip: client.ip
+  })
+  if (isSpam) {
+    category = SubmissionCategoryEnum.SPAM
+  }
+} catch (error) {
+  this.logger.errorWithContext('Spam check failed', error, {
+    ...logContext,
+    teamId: form.teamId
+  })
+  // Continue with submission even if spam check fails
+}
+
+// ✅ Good: Fallback on error
+try {
+  const result = await fetchData()
+  return result
+} catch (error) {
+  this.logger.warn('Failed to fetch data, using fallback')
+  return fallbackData
+}
+```
+
+**Recovery Conventions**:
+- Continue on non-critical errors
+- Log errors before continuing
+- Use fallback values when appropriate
+- Document why errors are non-critical
+- Don't silently ignore errors
+
+## Error Context
+
+### Context Extraction
+
+**Pattern**: Extract context for error logging
+
+```typescript
+// ✅ Good: Request context extraction
+const logContext: Record<string, any> = {}
+try {
+  logContext.method = request?.method
+  logContext.url = request?.url || request?.body?.operationName
+  logContext.ip = request?.ip || request?.connection?.remoteAddress
+  logContext.userAgent = request?.headers?.['user-agent']
+
+  if (request?.user) {
+    logContext.userId = request.user.id
+  }
+
+  if (request?.body?.operationName) {
+    logContext.operation = request.body.operationName
+    logContext.variables = request.body.variables
+      ? Object.keys(request.body.variables).join(', ')
+      : undefined
+  }
+} catch (error) {
+  // If context extraction fails, just log the exception
+  this.logger.error('Failed to extract request context', error)
+}
+```
+
+**Context Conventions**:
+- Extract request metadata safely
+- Use optional chaining (`?.`)
+- Include user information when available
+- Include operation details for GraphQL
+- Handle context extraction errors gracefully
+
+## Error Type Checking
+
+### Instanceof Checks
+
+**Pattern**: Check error types before handling
+
+```typescript
+// ✅ Good: Check exception type
+if (error instanceof BadRequestException) {
+  throw error
+}
+
+// ✅ Good: Check error type
+if (!(exception instanceof HttpException)) {
+  httpException = new InternalServerErrorException(exception.message)
+  this.logger.errorWithContext('Unhandled exception', exception, logContext)
+}
+
+// ✅ Good: Check error properties
+if (error instanceof Error) {
+  this.logger.error(error.message, error.stack)
+} else {
+  this.logger.error(String(error))
+}
+```
+
+**Type Check Conventions**:
+- Use `instanceof` for exception types
+- Check error properties before accessing
+- Handle different error types appropriately
+- Convert unknown errors to known types
+
+## Best Practices
+
+### Error Handling Principles
+
+1. **Always Log Errors**: Log errors before re-throwing or handling
+2. **Provide Context**: Include relevant context in error logs
+3. **User-Friendly Messages**: Use clear, actionable error messages
+4. **Don't Swallow Errors**: Don't catch errors without handling
+5. **Type Safety**: Check error types before handling
+6. **Graceful Degradation**: Continue on non-critical errors
+7. **Error Recovery**: Provide fallbacks when possible
+
+### Error Message Guidelines
+
+1. **Be Specific**: "The form does not exist" not "Error"
+2. **Be Actionable**: Tell user what went wrong and how to fix
+3. **Be Consistent**: Use consistent message format
+4. **Be User-Friendly**: Avoid technical jargon
+5. **Include Context**: Include relevant IDs or names when helpful
+
+### Logging Guidelines
+
+1. **Structured Logging**: Use context objects for structured logs
+2. **Appropriate Levels**: Use correct log level (info/warn/error)
+3. **Include Stack Traces**: Include stack traces for errors
+4. **Don't Log Sensitive Data**: Avoid logging passwords, tokens, etc.
+5. **Log Before Re-throw**: Log errors before re-throwing
+
+### Error Handling Checklist
+
+- [ ] Error is logged with context
+- [ ] Error message is user-friendly
+- [ ] Error type is appropriate (BadRequest/NotFound/etc.)
+- [ ] Error is handled or re-thrown appropriately
+- [ ] Non-critical errors allow continuation
+- [ ] Frontend displays errors to users
+- [ ] Error context includes relevant IDs
+- [ ] Stack traces included for debugging
+
+## Common Patterns
+
+### Backend Error Pattern
+
+```typescript
+// ✅ Good: Complete backend error handling pattern
+try {
+  const result = await this.service.doSomething(input)
+  return result
+} catch (error) {
+  if (error instanceof BadRequestException) {
+    throw error
+  }
+  
+  this.logger.errorWithContext('Operation failed', error, {
+    ...logContext,
+    inputId: input.id
+  })
+  
+  throw new BadRequestException('Operation failed')
+}
+```
+
+### Frontend Error Pattern
+
+```typescript
+// ✅ Good: Complete frontend error handling pattern
+const { loading, error, runAsync } = useRequest(fetch!, {
+  manual: true
+})
+
+async function handleSubmit() {
+  try {
+    await runAsync(values)
+    onSuccess?.()
+  } catch (err) {
+    // Error handled by useRequest hook
+    console.error('Submit failed:', err)
+  }
+}
+
+return (
+  <>
+    {error && !loading && (
+      <div className="text-error text-sm/6">
+        {error.message}
+      </div>
+    )}
+  </>
+)
+```
+
+### Validation Error Pattern
+
+```typescript
+// ✅ Good: Validation error handling
+try {
+  validateFields(fields, values)
+} catch (err: any) {
+  if (err instanceof ValidateError) {
+    // Handle field-specific error
+    scrollToField(err.response.id)
+    showFieldError(err.response.id, err.response.message)
+  } else {
+    // Handle general error
+    showError(err.message)
+  }
+}
+```
+
+## References
+
+- [NestJS Exception Filters](https://docs.nestjs.com/exception-filters)
+- [NestJS HTTP Exceptions](https://docs.nestjs.com/exception-filters#http-exceptions)
+- [Apollo Client Error Handling](https://www.apollographql.com/docs/react/data/error-handling/)
+- [GraphQL Error Formatting](https://www.apollographql.com/docs/apollo-server/data/errors/)

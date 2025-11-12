@@ -25,6 +25,7 @@ import {
   DUPLICATE_FORM_GQL,
   FORMS_GQL,
   FORM_ANALYTIC_GQL,
+  FORM_ANALYTIC_TIME_SERIES_GQL,
   FORM_DETAIL_GQL,
   FORM_INTEGRATIONS_GQL,
   FORM_REPORT_GQL,
@@ -162,16 +163,39 @@ export class FormService {
     })
   }
 
-  static async analytic(formId: string, range: string) {
+  static async analytic(formId: string, range: string, startDate?: number, endDate?: number) {
+    const input: any = { formId }
+
+    if (startDate && endDate) {
+      // Use custom date range - still provide range for GraphQL schema validation
+      input.range = range // Keep range for schema validation
+      input.startDate = startDate
+      input.endDate = endDate
+    } else {
+      // Use fixed range
+      input.range = range
+    }
+
     return apollo.query({
       query: FORM_ANALYTIC_GQL,
       variables: {
-        input: {
-          formId,
-          range
-        }
+        input
       },
       fetchPolicy: 'cache-first'
+    })
+  }
+
+  static async analyticTimeSeries(formId: string, startDate: number, endDate: number) {
+    return apollo.query({
+      query: FORM_ANALYTIC_TIME_SERIES_GQL,
+      variables: {
+        input: {
+          formId,
+          startDate,
+          endDate
+        }
+      },
+      fetchPolicy: 'network-only' // Always fetch fresh data to avoid stale cache
     })
   }
 

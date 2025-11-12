@@ -464,6 +464,18 @@ export const FORM_ANALYTIC_GQL = gql`
   }
 `
 
+export const FORM_ANALYTIC_TIME_SERIES_GQL = gql`
+  query formAnalyticTimeSeries($input: FormAnalyticTimeSeriesInput!) {
+    formAnalyticTimeSeries(input: $input) {
+      data {
+        date
+        views
+        submissions
+      }
+    }
+  }
+`
+
 export const FORM_REPORT_GQL = gql`
   query formReport($input: FormDetailInput!) {
     formReport(input: $input) {
@@ -571,6 +583,15 @@ export const FORM_DETAIL_GQL = gql`
         metaOGImageUrl
       }
       drafts {
+        id
+        title
+        description
+        kind
+        validations
+        properties
+        layout
+      }
+      fields {
         id
         title
         description
@@ -1426,6 +1447,7 @@ export const PUBLIC_FORM_GQL = gql`
         ipLimitTime
         enableProgress
         enableQuestionList
+        enableNavigationArrows
         locale
         languages
         enableClosedMessage

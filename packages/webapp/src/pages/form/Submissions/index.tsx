@@ -111,7 +111,22 @@ export default function FormSubmissions() {
       title: t('form.builder.question.submitDate')
     }
 
-    const questionFields = flattenFields(form?.drafts || []).filter(row =>
+    // Use published fields (what submissions are based on) or fallback to drafts
+    // Prioritize published fields if they exist and have items
+    let fieldsToUse: FormField[] = []
+
+    if (form) {
+      // Check if published fields exist and have items
+      if (form.fields && Array.isArray(form.fields) && form.fields.length > 0) {
+        fieldsToUse = form.fields
+      }
+      // Otherwise use drafts if available
+      else if (form.drafts && Array.isArray(form.drafts) && form.drafts.length > 0) {
+        fieldsToUse = form.drafts
+      }
+    }
+
+    const questionFields = flattenFields(fieldsToUse).filter(row =>
       QUESTION_FIELD_KINDS.includes(row.kind)
     )
 
@@ -128,7 +143,7 @@ export default function FormSubmissions() {
     }))
 
     return [submitDateField, ...questionFields, ...variables, ...hiddenFields] as FormField[]
-  }, [form?.drafts, form?.hiddenFields, form?.variables, t])
+  }, [form, t])
 
   async function fetch({ current, pageSize }: TableFetchParams) {
     const { total, submissions } = await SubmissionService.submissions({

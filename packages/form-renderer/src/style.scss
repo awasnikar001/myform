@@ -443,7 +443,7 @@ button.button-icon-only {
 }
 
 .heyform-radio-hotkey {
-  @apply flex h-6 w-6 items-center justify-center rounded-lg bg-white text-xs font-bold transition-all duration-300 ease-out;
+  @apply flex h-6 w-6 items-center justify-center rounded-sm bg-white text-xs font-bold;
   background-color: var(--heyform-background-color);
   box-shadow: var(--heyform-answer-opacity-60-color) 0 0 0 1px inset;
 }
@@ -701,6 +701,13 @@ button.button-icon-only {
       @apply pointer-events-none opacity-0;
     }
   }
+  
+  // Disable touch/swipe gestures when navigation arrows are enabled
+  &.heyform-navigation-arrows-enabled {
+    touch-action: pan-y !important; // Allow vertical scrolling within content, but prevent horizontal swipe
+    overscroll-behavior-y: contain !important;
+    -webkit-overflow-scrolling: auto !important;
+  }
 
   @media (max-width: 800px) {
     overflow-y: auto;
@@ -738,6 +745,12 @@ button.button-icon-only {
 .heyform-block-scroll,
 .heyform-scroll-wrapper {
   @apply h-full w-full;
+  
+  // Disable touch/swipe gestures when navigation arrows are enabled
+  .heyform-navigation-arrows-enabled & {
+    touch-action: pan-y !important;
+    overscroll-behavior-y: contain !important;
+  }
 }
 
 .heyform-scroll-wrapper {
@@ -748,6 +761,13 @@ button.button-icon-only {
     opacity 300ms cubic-bezier(0.4, 0, 0.2, 1) 0s;
   will-change: transform, opacity;
   z-index: 6;
+  
+  // Disable touch/swipe gestures when navigation arrows are enabled
+  .heyform-navigation-arrows-enabled & {
+    touch-action: pan-y !important;
+    overscroll-behavior-y: contain !important;
+    -webkit-overflow-scrolling: auto !important;
+  }
 
   @media (max-width: 800px) {
     overflow-y: auto;
@@ -793,7 +813,7 @@ button.button-icon-only {
 
 .heyform-block-main {
   @apply mx-auto w-full;
-  max-width: 50rem;
+  max-width: 45rem;
   position: relative;
 
   &::before {
@@ -810,15 +830,13 @@ button.button-icon-only {
 }
 
 .heyform-block-title {
-  @apply mb-2 text-xl font-semibold leading-tight tracking-tight md:text-2xl;
+  @apply mb-2 text-xl font-medium md:text-2xl;
   color: var(--heyform-question-color);
-  letter-spacing: -0.02em;
 }
 
 .heyform-block-description {
-  @apply text-lg leading-relaxed;
+  @apply text-lg;
   color: var(--heyform-description-color);
-  line-height: 1.7;
 }
 
 .heyform-block-title,
@@ -830,10 +848,8 @@ button.button-icon-only {
 }
 
 .heyform-block-number {
-  @apply mb-1 text-base font-medium tracking-wide;
+  @apply mb-1 text-base;
   color: var(--heyform-label-color);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
 }
 
 .heyform-skip-button {
@@ -930,7 +946,7 @@ button.button-icon-only {
 // Group
 .heyform-block-group-container {
   @apply mx-auto flex w-full items-center;
-  max-width: 50rem;
+  max-width: 45rem;
   min-height: 3.75rem;
 
   .heyform-block-number {
@@ -946,9 +962,7 @@ button.button-icon-only {
 // Welcome
 .heyform-empty-state {
   .heyform-block-title {
-    @apply mb-5 text-3xl font-bold leading-tight tracking-tight lg:text-4xl;
-    letter-spacing: -0.03em;
-    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    @apply mb-5 text-3xl font-medium lg:text-4xl;
   }
 
   .heyform-block-description {
@@ -2069,8 +2083,24 @@ input.input {
 }
 
 .heyform-branding {
-  @apply rounded;
+  @apply rounded px-3 py-2 text-sm font-medium;
+  background: linear-gradient(135deg, var(--heyform-button-color) 0%, var(--heyform-button-opacity-80-color) 100%) !important;
+  color: var(--heyform-button-text-color) !important;
   line-height: 1.5rem;
+  transition: all 0.3s ease-out;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  
+  &:hover {
+    background: linear-gradient(135deg, var(--heyform-button-color) 0%, var(--heyform-button-color) 100%) !important;
+    transform: translateY(-2px) scale(1.02);
+  }
+  
+  svg {
+    @apply h-4 w-4;
+  }
 }
 
 .heyform-pagination .button {
@@ -2078,6 +2108,9 @@ input.input {
   position: relative;
   overflow: hidden;
   transition: all 0.3s ease-out;
+  background: linear-gradient(135deg, var(--heyform-button-color) 0%, var(--heyform-button-opacity-80-color) 100%) !important;
+  color: var(--heyform-button-text-color) !important;
+  border: none !important;
 
   &::before {
     content: '';
@@ -2097,9 +2130,14 @@ input.input {
     height: 300px;
   }
 
+  &:hover {
+    background: linear-gradient(135deg, var(--heyform-button-color) 0%, var(--heyform-button-color) 100%) !important;
+    transform: translateY(-2px) scale(1.02);
+  }
+
   .button-trailing {
     @apply m-0;
-    color: var(--heyform-button-text-color);
+    color: var(--heyform-button-text-color) !important;
     transition: transform 0.3s ease-out;
 
     svg {
@@ -2113,7 +2151,7 @@ input.input {
   }
 
   &[disabled] {
-    @apply cursor-default opacity-100;
+    @apply cursor-default opacity-60;
 
     .button-trailing {
       @apply opacity-60;

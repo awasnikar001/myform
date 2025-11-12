@@ -62,14 +62,26 @@ export const Block: FC<BlockProps> = ({
     )
   }
 
+  // Disable wheel scroll completely when navigation arrows are enabled
   const handleWheelScroll = useWheelScroll(
-    isScrollable,
+    isScrollable && !state.enableNavigationArrows, // Disable wheel scroll when navigation arrows are enabled
     isScrolledToTop,
     isScrolledToBottom,
     type => {
       dispatch({ type })
     }
   )
+
+  // Prevent wheel event from propagating when navigation arrows are enabled
+  function handleWheelEvent(event: WheelEvent<HTMLDivElement>) {
+    // Completely disable wheel scroll navigation when navigation arrows are enabled
+    if (state.enableNavigationArrows) {
+      // Allow normal scrolling within scrollable elements, but prevent question navigation
+      return
+    }
+    // Only call handleWheelScroll if navigation arrows are disabled
+    handleWheelScroll(event)
+  }
 
   useEffect(() => {
     if (state.scrollTo) {
@@ -98,8 +110,10 @@ export const Block: FC<BlockProps> = ({
 
       {/* Block container */}
       <div
-        className={clsx('heyform-block-container', className)}
-        onWheel={handleWheelScroll}
+        className={clsx('heyform-block-container', className, {
+          'heyform-navigation-arrows-enabled': state.enableNavigationArrows
+        })}
+        onWheel={handleWheelEvent}
         {...restProps}
       >
         {field.parent && (

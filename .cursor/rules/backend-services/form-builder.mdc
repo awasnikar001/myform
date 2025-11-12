@@ -1,0 +1,1548 @@
+---
+description: Form builder domain logic, state management, field operations, and conditional logic conventions
+globs:
+  - packages/webapp/src/pages/form/Builder/**/*
+  - packages/answer-utils/src/**/*
+  - packages/form-renderer/src/**/*
+alwaysApply: true
+---
+
+# Form Builder Domain Logic Conventions
+
+This document outlines the conventions and patterns for form builder domain logic, state management, field operations, conditional logic, and related functionality in the HeyForm monorepo.
+
+## State Management (`packages/webapp/src/pages/form/Builder/store/`)
+
+### State Structure
+
+**Pattern**: React Context + useReducer with typed actions
+
+```typescript
+// ✅ Good: State interface definition
+export interface IState {
+  formId: string
+  locale: string
+  fields: FormFieldType[]
+  version: number
+  questions: Partial<FormFieldType>[]
+  references: Partial<FormFieldType>[]
+  currentId?: string
+  parentId?: string
+  currentField?: FormFieldType
+  parentField?: FormFieldType
+  logics?: Logic[]
+  variables?: Variable[]
+  selectedVariable?: Variable
+  hiddenFields: HiddenField[]
+  selectedHiddenField?: HiddenField
+  activeTabName?: string
+  activeDesignTabName?: string
+  isSyncing?: boolean
+}
+```
+
+### Conventions
+
+1. **State Initialization**:
+   - Initialize state from form data using `initFields()`
+   - Set initial version to `0`
+   - Extract drafts, logics, variables, hiddenFields from form
+   - Use `useReducer` with `storeReducer`
+
+2. **Action Types**:
+   - Use string literal types: `'setFields'`, `'addField'`, `'updateField'`
+   - Actions are discriminated unions: `IAction = SetFieldsAction | AddFieldAction | ...`
+   - Each action has `type` and `payload` properties
+
+3. **Version Tracking**:
+   - Increment version on field mutations: `SYNC_ACTIONS` array defines which actions increment version
+   - Version increments trigger sync queue
+   - Version is used for optimistic updates and conflict resolution
+
+4. **State Updates**:
+   - Use `deepEqual` to prevent unnecessary re-renders
+   - Return original state if no changes detected
+   - Always clone state before mutations
+
+### Sync Actions
+
+```typescript
+// ✅ Good: Actions that trigger sync
+const SYNC_ACTIONS = [
+  'setFields',
+  'addField',
+  'updateField',
+  'updateNestFields',
+  'duplicateField',
+  'deleteField'
+]
+
+// Version increments on these actions
+if (SYNC_ACTIONS.includes(action.type)) {
+  result.version += 1
+}
+```
+
+**Sync Action Conventions**:
+- Field mutations trigger version increment
+- Logic/variable/hiddenField changes don't increment version (sync immediately)
+- Version increment triggers debounced sync queue
+
+## Field Operations
+
+### Field Creation
+
+**Pattern**: Factory function with kind-specific defaults
+
+```typescript
+// ✅ Good: Field creation from kind
+export function getFieldFromKind(kind: FieldKindEnum | string): FormFieldType {
+  const field: FormFieldType = {
+    id: nanoid(12),
+    kind: kind as FieldKindEnum,
+    title: '',
+    description: '',
+    validations: {},
+    properties: {}
+  }
+
+  switch (kind) {
+    case FieldKindEnum.MULTIPLE_CHOICE:
+    case FieldKindEnum.PICTURE_CHOICE:
+      field.properties!.allowMultiple = false
+      field.properties!.verticalAlignment = true
+      field.properties!.choices = [
+        { id: nanoid(12), label: '' }
+      ]
+      break
+
+    case FieldKindEnum.RATING:
+      field.properties!.total = 5
+      field.properties!.shape = 'star'
+      break
+
+    case FieldKindEnum.GROUP:
+      field.isCollapsed = false
+      field.properties!.fields = [getFieldFromKind(FieldKindEnum.SHORT_TEXT)]
+      break
+  }
+
+  return field
+}
+```
+
+**Field Creation Conventions**:
+- Always use `nanoid(12)` for field IDs
+- Initialize with empty title, description
+- Set kind-specific defaults in switch statement
+- Use recursive creation for nested fields (GROUP)
+
+### Field Addition
+
+**Pattern**: Insertion logic based on field kind and context
+
+```typescript
+// ✅ Good: Add field with positioning logic
+export function addField(
+  state: IState,
+  { field, parentId: rawParentId }: AddFieldAction['payload']
+): IState {
+  const fields = clone(state.fields)
+  let parentId = rawParentId || state.parentId
+
+  if (parentId) {
+    const index = fields.findIndex(f => f.id === parentId)
+
+    switch (field.kind) {
+      case FieldKindEnum.WELCOME:
+        fields.splice(-1, 0, field)  // Before last (thank you)
+        break
+
+      case FieldKindEnum.THANK_YOU:
+        fields.splice(fields.length - 1, 0, field)  // Before last thank you
+        break
+
+      case FieldKindEnum.GROUP:
+        fields.splice(index + 1, 0, field)  // After parent
+        break
+
+      default:
+        addFieldToGroup(field, fields[index], state.currentId)  // Inside group
+    }
+  } else {
+    // Root level insertion logic
+    let index = fields.findIndex(f => f.kind === FieldKindEnum.THANK_YOU)
+    let selected: FormFieldType | undefined
+
+    if (helper.isValid(state.currentId)) {
+      index = fields.findIndex(f => f.id === state.currentId)
+      selected = fields[index]
+
+      if (field.kind === FieldKindEnum.THANK_YOU) {
+        index = selected?.kind === FieldKindEnum.THANK_YOU ? index + 1 : fields.length
+      } else {
+        index = selected?.kind === FieldKindEnum.WELCOME ? 0 : index + 1
+      }
+    }
+
+    if (selected?.kind === FieldKindEnum.GROUP && field.kind !== FieldKindEnum.GROUP) {
+      addFieldToGroup(field, selected)
+      parentId = selected.id
+    } else {
+      fields.splice(index, 0, field)
+    }
+  }
+
+  const newState = setFields(state, { fields })
+  return selectField(newState, { id: field.id, parentId })
+}
+```
+
+**Field Addition Conventions**:
+- WELCOME fields insert before last field (before thank you)
+- THANK_YOU fields insert before last thank you
+- GROUP fields insert after parent
+- Regular fields insert inside group if parent is GROUP
+- Always select newly added field after insertion
+- Use `splice()` for array insertion
+
+### Field Updates
+
+**Pattern**: Deep merge with mention handling
+
+```typescript
+// ✅ Good: Update field with mention propagation
+export function updateField(
+  state: IState,
+  { id, updates }: UpdateFieldAction['payload']
+): IState {
+  let fields = clone(state.fields)
+  const parentId = state.parentId
+  let currentField: FormFieldType | undefined
+
+  // Find and update field (handles nested fields)
+  if (parentId) {
+    const parentField = fields.find(f => f.id === parentId)
+    if (parentField) {
+      const index = fieldIndex(parentField.properties?.fields, id)
+      if (index > -1) {
+        currentField = {
+          ...parentField.properties!.fields![index],
+          ...updates
+        }
+        parentField.properties!.fields![index] = currentField
+      }
+    }
+  } else {
+    const index = fieldIndex(fields, id)
+    if (index > -1) {
+      currentField = clone({ ...fields[index], ...updates })
+      fields[index] = currentField
+    }
+  }
+
+  // Update mentions when title changes
+  if (currentField && !helper.isNil(updates.title) && 
+      QUESTION_FIELD_KINDS.includes(currentField.kind)) {
+    const idx = state.questions.findIndex(q => q.id === id)
+    if (idx > -1) {
+      let title = htmlUtils.plain(updates.title as string)
+      if (helper.isEmpty(title)) {
+        title = 'Untitled question'
+      }
+
+      state.questions[idx] = { ...state.questions[idx], title }
+
+      // Update mentions in all fields
+      const regex = new RegExp(`<span[^>]+data-mention="${id}"([^>]+)?>[^<]+<\\/span>`, 'gi')
+      const mention = `<span class="mention" contenteditable="false" data-mention="${id}">@${title}</span>`
+
+      fields = fields.map(f => {
+        if (f.title) {
+          f.title = (f.title as string).replace(regex, mention)
+        }
+        if (helper.isValidArray(f.properties?.fields)) {
+          f.properties!.fields!.forEach(c => {
+            if (c.title) {
+              c.title = (c.title as string).replace(regex, mention)
+            }
+          })
+        }
+        return f
+      })
+    }
+  }
+
+  const newState = setFields(state, { fields })
+  return selectField(newState, { id, parentId })
+}
+```
+
+**Field Update Conventions**:
+- Handle both root-level and nested field updates
+- Clone before mutation
+- Update mentions when question title changes
+- Use regex to find and replace mention spans
+- Update questions array for question numbering
+- Always reselect field after update
+
+### Field Deletion
+
+**Pattern**: Smart selection of next field after deletion
+
+```typescript
+// ✅ Good: Delete field with smart selection
+export function deleteField(
+  state: IState,
+  { id, parentId }: DeleteFieldAction['payload']
+): IState {
+  let currentId = state.currentId
+  const fields = clone(state.fields)
+
+  if (parentId) {
+    const parentField = fields.find(f => f.id === parentId)
+    if (parentField) {
+      const index = fieldIndex(parentField.properties?.fields, id)
+      if (index > -1) {
+        // Select previous nested field or parent
+        currentId = index > 0 
+          ? parentField.properties!.fields![index - 1].id 
+          : parentId
+        parentId = index > 0 ? parentId : undefined
+        parentField.properties!.fields!.splice(index, 1)
+      }
+    }
+  } else {
+    const index = fields.findIndex(f => f.id === id)
+    if (index > -1) {
+      // Select previous or next field
+      currentId = fields[index > 0 ? index - 1 : index + 1]?.id
+      fields.splice(index, 1)
+    }
+  }
+
+  const newState = setFields(state, { fields })
+  return selectField(newState, { id: currentId, parentId })
+}
+```
+
+**Field Deletion Conventions**:
+- Select previous field if available, otherwise next field
+- For nested fields, select previous nested field or parent
+- Prevent deletion if only one question remains
+- Clean up references after deletion
+
+### Field Duplication
+
+**Pattern**: Deep clone with ID regeneration
+
+```typescript
+// ✅ Good: Duplicate field with nested field handling
+export function duplicateField(
+  state: IState,
+  { id, parentId }: DuplicateFieldAction['payload']
+): IState {
+  let field: FormFieldType | undefined
+
+  if (parentId) {
+    const parentField = state.fields.find(f => f.id === parentId)
+    field = parentField?.properties?.fields?.find(c => c.id === id)
+  } else {
+    field = state.fields.find(f => f.id === id)
+  }
+
+  if (!field) {
+    return state
+  }
+
+  field = clone(field)
+
+  // Regenerate IDs for nested fields in GROUP
+  if (field.kind === FieldKindEnum.GROUP) {
+    field.properties = {
+      ...field.properties,
+      fields: (field.properties?.fields || []).map(f => ({
+        ...f,
+        id: nanoid(12)
+      }))
+    }
+  }
+
+  return addField(state, {
+    parentId,
+    field: {
+      ...field,
+      id: nanoid(12)  // New ID for duplicated field
+    }
+  })
+}
+```
+
+**Duplication Conventions**:
+- Deep clone field before duplication
+- Regenerate ID for duplicated field
+- Regenerate IDs for all nested fields in GROUP
+- Use `addField` to insert duplicated field
+
+### Field Serialization
+
+**Pattern**: Convert fields to API format with question indexing
+
+```typescript
+// ✅ Good: Serialize fields for API
+export function serializeFields(rawFields: FormFieldType[]) {
+  let questions: Partial<FormFieldType>[] = []
+  let index = 1
+
+  const fields = rawFields.map(f => {
+    // Serialize HTML arrays to strings
+    if (helper.isArray(f.title)) {
+      f.title = htmlUtils.serialize(f.title)
+    }
+    if (helper.isArray(f.description)) {
+      f.description = htmlUtils.serialize(f.description)
+    }
+
+    // Set default collapsed state for GROUP
+    if (f.kind === FieldKindEnum.GROUP && helper.isNil(f.isCollapsed)) {
+      f.isCollapsed = false
+    }
+
+    // Index question fields
+    if (QUESTION_FIELD_KINDS.includes(f.kind)) {
+      f.index = index++
+
+      if (f.kind === FieldKindEnum.GROUP) {
+        const children = f.properties?.fields || []
+        const { questions: nestedQuestions, fields: nestedFields } = serializeFields(children)
+
+        f.properties = {
+          ...f.properties,
+          fields: nestedFields
+        }
+
+        questions = [...questions, ...nestedQuestions]
+      } else {
+        questions.push({
+          id: f.id,
+          kind: f.kind,
+          title: htmlUtils.plain(f.title!)
+        })
+      }
+    }
+
+    return f
+  })
+
+  return { questions, fields }
+}
+```
+
+**Serialization Conventions**:
+- Convert HTML arrays to serialized strings
+- Index question fields sequentially
+- Handle nested GROUP fields recursively
+- Extract questions for mention system
+- Use `htmlUtils.serialize()` for HTML arrays
+- Use `htmlUtils.plain()` for question titles
+
+### Field Filtering
+
+**Pattern**: Parse HTML and sanitize fields
+
+```typescript
+// ✅ Good: Filter and sanitize fields
+export function getFilteredFields(fields?: FormFieldType[]) {
+  const result = { fields: [] as FormFieldType[] }
+
+  if (helper.isValidArray(fields)) {
+    for (const row of fields!) {
+      const field: FormFieldType = {
+        id: row.id,
+        kind: row.kind,
+        title: htmlUtils.parse(row.title! as string),
+        description: htmlUtils.parse(row.description! as string),
+        validations: row.validations,
+        properties: row.properties,
+        layout: row.layout
+      }
+
+      if (row.kind === FieldKindEnum.GROUP) {
+        field.properties = {
+          ...field.properties,
+          fields: getFilteredFields(row.properties?.fields).fields
+        }
+      }
+
+      result.fields.push(sanitizeField(field))
+    }
+  }
+
+  return result
+}
+```
+
+**Filtering Conventions**:
+- Parse HTML strings back to arrays
+- Recursively handle GROUP fields
+- Sanitize validations and properties
+- Remove placeholder properties
+
+## Field Properties & Kind Conversion
+
+### Property Migration
+
+**Pattern**: Migrate properties when field kind changes
+
+```typescript
+// ✅ Good: Get properties for new field kind
+export function getPropertiesFromKind(
+  properties: Property,
+  newKind: FieldKindEnum
+) {
+  const props = properties ? clone(properties) : {}
+
+  switch (newKind) {
+    case FieldKindEnum.MULTIPLE_CHOICE:
+    case FieldKindEnum.PICTURE_CHOICE:
+      if (!helper.isArray(props.choices)) {
+        props.badge = ChoiceBadgeEnum.LETTER
+        props.choices = [{ id: nanoid(12), label: '' }]
+      }
+      break
+
+    case FieldKindEnum.RATING:
+      if (!props.total) props.total = 5
+      if (!props.shape) props.shape = 'star'
+      break
+
+    case FieldKindEnum.INPUT_TABLE:
+      if (!helper.isArray(props.tableColumns)) {
+        props.tableColumns = [
+          { id: nanoid(12), label: '' },
+          { id: nanoid(12), label: '' }
+        ]
+      }
+      break
+  }
+
+  return props
+}
+```
+
+**Property Migration Conventions**:
+- Clone existing properties before modification
+- Set defaults only if properties don't exist
+- Use kind-specific defaults
+- Preserve existing valid properties
+
+## Conditional Logic
+
+### Logic Structure
+
+**Pattern**: Field-based logic with multiple payloads
+
+```typescript
+// ✅ Good: Logic structure
+interface Logic {
+  fieldId: string  // Field that triggers logic
+  payloads: LogicPayload[]  // Multiple conditions/actions
+}
+
+interface LogicPayload {
+  id: string
+  condition: LogicCondition  // When condition
+  action: LogicAction  // What action
+}
+
+interface LogicCondition {
+  comparison: ComparisonEnum  // IS, IS_NOT, EQUAL, etc.
+  expected?: any  // Expected value
+  ref?: string  // Field reference
+}
+
+interface LogicAction {
+  kind: ActionEnum  // NAVIGATE, CALCULATE, SHOW, HIDE
+  fieldId?: string  // Target field (for NAVIGATE)
+  variable?: string  // Variable name (for CALCULATE)
+  operator?: CalculateEnum  // ADD, SUBTRACT, etc.
+  value?: any  // Action value
+}
+```
+
+### Logic Validation
+
+**Pattern**: Filter invalid logics based on field existence
+
+```typescript
+// ✅ Good: Get valid logics
+export function getValidLogics(
+  fields: FormFieldType[],
+  logics?: Logic[]
+): Logic[] {
+  const fieldIds = flattenFieldsWithGroups(fields).map(f => f.id)
+  return logics?.filter(l => fieldIds.includes(l.fieldId)) || []
+}
+```
+
+**Logic Validation Conventions**:
+- Filter logics where fieldId doesn't exist
+- Use `flattenFieldsWithGroups()` to get all field IDs
+- Return empty array if no valid logics
+- Call after field deletion/update
+
+### Logic Condition Types
+
+**Pattern**: Field-kind-specific condition types
+
+```typescript
+// ✅ Good: Condition component based on field kind
+export default function Condition({ field, value, onChange }: ConditionProps) {
+  const Element = useMemo(() => {
+    switch (field.kind) {
+      case FieldKindEnum.SHORT_TEXT:
+      case FieldKindEnum.LONG_TEXT:
+      case FieldKindEnum.EMAIL:
+      case FieldKindEnum.PHONE_NUMBER:
+      case FieldKindEnum.URL:
+        return <TextCondition ... />
+
+      case FieldKindEnum.YES_NO:
+        return <SingleChoiceCondition ... />
+
+      case FieldKindEnum.MULTIPLE_CHOICE:
+      case FieldKindEnum.PICTURE_CHOICE:
+        return <MultipleChoiceCondition ... />
+
+      case FieldKindEnum.DATE:
+        return <DateCondition ... />
+
+      case FieldKindEnum.NUMBER:
+      case FieldKindEnum.RATING:
+      case FieldKindEnum.OPINION_SCALE:
+        return <NumberCondition ... />
+
+      default:
+        return <DefaultCondition ... />
+    }
+  }, [field.kind])
+
+  return <div className="rule-condition">{Element}</div>
+}
+```
+
+**Condition Conventions**:
+- Different condition types per field kind
+- Text fields: IS, IS_NOT, CONTAINS, etc.
+- Choice fields: IS, IS_NOT, IS_ONE_OF
+- Number fields: EQUAL, GREATER_THAN, LESS_THAN
+- Date fields: IS, IS_BEFORE, IS_AFTER
+
+### Logic Actions
+
+**Pattern**: Action types with field-specific options
+
+```typescript
+// ✅ Good: Action component
+export default function Action({
+  fields,
+  currentField,
+  variables = [],
+  value,
+  onChange
+}: ActionProps) {
+  // NAVIGATE action: jump to field
+  // CALCULATE action: update variable
+  // SHOW/HIDE action: show/hide field
+}
+```
+
+**Action Conventions**:
+- NAVIGATE: Jump to another field (forward only)
+- CALCULATE: Update variable based on field value
+- SHOW/HIDE: Show or hide fields conditionally
+- Actions execute when condition is met
+
+### Logic Application
+
+**Pattern**: Apply logic during form rendering
+
+```typescript
+// ✅ Good: Apply logic to fields (from answer-utils)
+export function applyLogicToFields(
+  fields?: IFormField[],
+  logics?: Logic[],
+  parameters?: Variable[],
+  values?: Record<string, AnswerValue>
+): PickAndCalcFieldsResult {
+  // Filter fields based on logic conditions
+  // Calculate variables
+  // Navigate to target fields
+  // Return filtered fields with calculated variables
+}
+```
+
+**Logic Application Conventions**:
+- Logic runs during form rendering
+- Conditions evaluated against current form values
+- Navigation only works forward (prevents loops)
+- Calculate actions update variables
+- Show/hide actions filter field visibility
+
+## Variables
+
+### Variable Management
+
+**Pattern**: CRUD operations with immediate sync
+
+```typescript
+// ✅ Good: Variable operations
+export function setVariables(state: IState, variables: Variable[] = []): IState {
+  FormService.updateVariables(state.formId, variables)  // Immediate sync
+  return { ...state, variables }
+}
+
+export function addVariable(state: IState, variable: Variable): IState {
+  return setVariables(state, [...(state.variables || []), variable])
+}
+
+export function updateVariable(
+  state: IState,
+  { id, updates }: UpdateVariableAction['payload']
+): IState {
+  const variables = state.variables || []
+  const index = variables.findIndex(v => v.id === id)
+  if (index < 0) return state
+
+  return setVariables(
+    state,
+    variables.map((v, i) => (i === index ? { ...v, ...updates } : v))
+  )
+}
+
+export function deleteVariable(state: IState, { id }: DeleteVariableAction['payload']): IState {
+  return setVariables(
+    state,
+    state.variables?.filter(v => v.id !== id)
+  )
+}
+```
+
+**Variable Conventions**:
+- Variables sync immediately (not queued)
+- Use `FormService.updateVariables()` for API call
+- Variables can be string or number type
+- Used in logic calculations and mentions
+
+## Hidden Fields
+
+### Hidden Field Management
+
+**Pattern**: Similar to variables, immediate sync
+
+```typescript
+// ✅ Good: Hidden field operations
+function setHiddenFields(state: IState, hiddenFields: HiddenField[] = []): IState {
+  FormService.updateHiddenFields(state.formId, hiddenFields)  // Immediate sync
+  return { ...state, hiddenFields }
+}
+
+export function createHiddenField(state: IState, hiddenField: HiddenField): IState {
+  return setHiddenFields(state, [...(state.hiddenFields || []), hiddenField])
+}
+
+export function editHiddenField(state: IState, hiddenField: HiddenField): IState {
+  const hiddenFields = state.hiddenFields || []
+  const index = hiddenFields.findIndex(h => h.id === hiddenField.id)
+  if (index < 0) return state
+
+  return setHiddenFields(
+    state,
+    hiddenFields.map((h, i) => (i === index ? hiddenField : h))
+  )
+}
+```
+
+**Hidden Field Conventions**:
+- Hidden fields sync immediately
+- Used to pass data without showing fields
+- Can be referenced in logic and mentions
+- Simple structure: `{ id, name }`
+
+## Publishing & Syncing
+
+### Draft System
+
+**Pattern**: Drafts stored separately from published fields
+
+```typescript
+// ✅ Good: Publishing with drafts
+async function handlePublish() {
+  const { fields } = getFilteredFields(state.fields!)
+  
+  await FormService.publishForm({
+    formId,
+    version: form!.version as number,
+    drafts: fields
+  })
+
+  updateForm({ canPublish: false })
+  router.push(`/workspace/${workspaceId}/project/${projectId}/form/${formId}/share`)
+}
+```
+
+**Draft Conventions**:
+- Drafts stored in `_drafts` field (JSON string)
+- Published fields stored in `fields` array
+- `canPublish` flag indicates if drafts differ from published
+- Publishing copies drafts to fields
+- Version increments on publish
+
+### Sync Queue
+
+**Pattern**: Debounced queue for field updates
+
+```typescript
+// ✅ Good: Sync queue implementation
+export class Queue {
+  private tasks: Task[] = []
+  private version: number = 0
+  private lastSyncedVersion: number = 0
+
+  public add() {
+    this.version += 1
+    const task = { timestamp: Date.now(), version: this.version, status: Status.IDLE }
+    
+    if (this.tasks[0]?.status === Status.IDLE) {
+      this.tasks[0] = task
+    } else {
+      this.tasks.unshift(task)
+    }
+
+    // Immediate sync if timeout exceeded
+    if (Date.now() - this.lastSyncedAt > this.taskTimeout) {
+      this.consume(task)
+    }
+  }
+
+  private async consume(task: Task) {
+    // Only sync latest version
+    if (task.version < this.lastSyncedVersion) {
+      return
+    }
+
+    this.tasks[index].status = Status.PENDING
+    this.lastSyncedAt = Date.now()
+
+    try {
+      await this.syncFunction?.()
+      if (task.version >= this.lastSyncedVersion) {
+        this.lastSyncedVersion = task.version
+      }
+      this.remove(task.version)
+      this.callback?.('complete', task)
+    } catch (err) {
+      this.update(task.version, { status: Status.FAILED })
+      this.callback?.('failed', task, err as Error)
+    }
+  }
+}
+```
+
+**Sync Queue Conventions**:
+- Queue debounces field updates (2s default interval)
+- Only latest version syncs (older versions skipped)
+- Immediate sync if timeout exceeded (10s default)
+- Status tracking: IDLE → PENDING → (complete/failed)
+- Callbacks for start/complete/failed events
+
+### Sync Integration
+
+**Pattern**: Queue integration in compose component
+
+```typescript
+// ✅ Good: Queue setup in component
+const queue = useRef(new Queue()).current
+
+const sync = useCallback(async () => {
+  try {
+    const { fields } = getFilteredFields(state.fields!)
+    const result = await FormService.updateFormSchemas({
+      formId,
+      version: form?.version as number,
+      drafts: fields
+    })
+    updateForm(result)
+  } catch (err: any) {
+    toast({ title: t('components.error.title'), message: err.message })
+  }
+}, [formId, state.fields, form?.version])
+
+queue.on(event => {
+  switch (event) {
+    case 'start':
+      dispatch({ type: 'setSyncing', payload: { isSyncing: true } })
+      queue.sync(sync)
+      break
+    case 'complete':
+    case 'failed':
+      dispatch({ type: 'setSyncing', payload: { isSyncing: false } })
+      break
+  }
+})
+
+useEffect(() => {
+  if (state.version > 0) {
+    queue.add()  // Trigger sync on version change
+  }
+}, [state.version])
+```
+
+**Sync Integration Conventions**:
+- Create queue instance with `useRef`
+- Sync function filters and serializes fields
+- Queue callbacks update syncing state
+- Version changes trigger queue.add()
+- Cleanup queue on unmount
+
+## Rich Text Editing
+
+### RichText Component
+
+**Pattern**: ContentEditable with mention and toolbar support
+
+```typescript
+// ✅ Good: RichText component
+export const RichText: FC<RichTextProps> = ({
+  innerRef,
+  value,
+  placeholder,
+  onChange,
+  ...restProps
+}) => {
+  const [keyword, setKeyword] = useState<string>()
+  const [isMentionOpen, setIsMentionOpen] = useState(false)
+  const [isToolbarOpen, setIsToolbarOpen] = useState(false)
+
+  const handleUpdateCallback = useMemo(
+    () => debounce(() => {
+      onChange?.(innerRef.current!.innerHTML)
+    }, 300),
+    []
+  )
+
+  function handleMentionSelect(type: string, option: Partial<FormFieldType> | Variable) {
+    const template = type === 'mention'
+      ? `<span class="mention" data-mention="${option.id}" contenteditable="false">@${(option as FormFieldType).title}</span>\xA0`
+      : `<span class="variable" data-variable="${option.id}" contenteditable="false">@${(option as Variable).name}</span>\xA0`
+
+    replaceTriggerText(innerRef.current!, triggerSelection!, template)
+    handleUpdateCallback()
+    hideMentionMenu()
+  }
+
+  function handleKeyUp() {
+    if (inputKey === MENTION_TRIGGER) {
+      const selection = getTriggerSelection()
+      setPortalStyle(getStyleFromRect(selection!.rect!))
+      setIsMentionOpen(true)
+      setTriggerSelection(selection)
+    }
+  }
+
+  return (
+    <>
+      <div
+        ref={innerRef}
+        className="rich-text"
+        contentEditable={true}
+        onKeyUp={handleKeyUpCallback}
+        onInput={handleInputCallback}
+        onPaste={handlePasteCallback}
+        onMouseUp={handleMouseUpCallback}
+      />
+      <MentionMenu visible={isMentionOpen} keyword={keyword} onComplete={handleMentionSelectCallback} />
+      <FloatingToolbar visible={isToolbarOpen} range={toolbarRange} />
+    </>
+  )
+}
+```
+
+**RichText Conventions**:
+- Use `contentEditable` div (not textarea)
+- Debounce onChange (300ms)
+- Mention trigger: `@` character
+- Mention spans: `data-mention` or `data-variable` attributes
+- Floating toolbar for text selection
+- Handle composition events for IME
+- Custom paste handling
+
+### Mention System
+
+**Pattern**: HTML spans with data attributes
+
+```typescript
+// ✅ Good: Mention span format
+// Field mention
+<span class="mention" data-mention="${fieldId}" contenteditable="false">@${title}</span>
+
+// Variable mention
+<span class="variable" data-variable="${variableId}" contenteditable="false">@${name}</span>
+
+// Hidden field mention
+<span class="hiddenfield" data-hiddenfield="${name}" contenteditable="false">@${name}</span>
+```
+
+**Mention Conventions**:
+- Use `contenteditable="false"` to prevent editing
+- Store ID in data attribute
+- Display name after @ symbol
+- Update mentions when field title changes
+- Regex replace for mention updates
+
+## Field Rendering
+
+### Block Component Pattern
+
+**Pattern**: Base Block component with field-specific blocks
+
+```typescript
+// ✅ Good: Block component structure
+export const Block: FC<BlockProps> = ({
+  field,
+  locale,
+  parentField,
+  children,
+  ...restProps
+}) => {
+  const { dispatch } = useStoreContext()
+  const titleRef = useRef<HTMLDivElement>()
+  const descriptionRef = useRef<HTMLDivElement>()
+
+  const isLabelShow = QUESTION_FIELD_KINDS.includes(field.kind)
+  const isCoverShow = helper.isValid(field.layout?.mediaUrl)
+
+  function handleTitleChange(title: string) {
+    dispatch({
+      type: 'updateField',
+      payload: { id: field.id, updates: { title } }
+    })
+  }
+
+  return (
+    <>
+      <div className="heyform-theme-background" />
+      {field.layout?.align !== FieldLayoutAlignEnum.INLINE && (
+        <Layout layout={field.layout} />
+      )}
+      {parentField && (
+        <div className="heyform-block-group">
+          <label>{t('Question {{number}}', { number: questionNumber(parentField.index) })}</label>
+          <div>{parentField.title}</div>
+        </div>
+      )}
+      <div className="heyform-block-container">
+        <div className="heyform-block">
+          {isLabelShow && (
+            <label className="heyform-block-number">
+              {t('Question {{number}}', { number: questionNumber(field.index, parentField?.index) })}
+              {field.validations?.required && <span className="text-error">*</span>}
+            </label>
+          )}
+          <RichText
+            className="heyform-block-title"
+            innerRef={titleRef}
+            placeholder={t('form.builder.compose.question')}
+            onChange={handleTitleChangeCallback}
+          />
+          <RichText
+            className="heyform-block-description"
+            innerRef={descriptionRef}
+            placeholder={t('form.builder.compose.description')}
+            onChange={handleDescriptionChangeCallback}
+          />
+          {children}
+        </div>
+      </div>
+    </>
+  )
+}
+```
+
+**Block Conventions**:
+- Block wraps field-specific components
+- Shows question number for question fields
+- RichText for title and description
+- Layout component for media/background
+- Parent field context for nested fields
+- Required indicator for required fields
+
+### Field-Specific Blocks
+
+**Pattern**: Switch statement for field rendering
+
+```typescript
+// ✅ Good: Field rendering switch
+const Fields: FC = () => {
+  const { state } = useStoreContext()
+  const field = state.currentField
+
+  if (!field) return null
+
+  switch (field.kind) {
+    case FieldKindEnum.ADDRESS:
+      return <Address field={field} locale={state.locale} parentField={state.parentField} />
+    case FieldKindEnum.EMAIL:
+      return <Email field={field} locale={state.locale} parentField={state.parentField} />
+    case FieldKindEnum.MULTIPLE_CHOICE:
+      return <MultipleChoice field={field} locale={state.locale} parentField={state.parentField} />
+    // ... more field types
+    default:
+      return null
+  }
+}
+```
+
+**Field Block Conventions**:
+- One component per field kind
+- Components in `Compose/Blocks/` directory
+- Pass field, locale, and parentField props
+- Use Block component as wrapper
+- Handle field-specific interactions
+
+## Question List & Navigation
+
+### Question List Structure
+
+**Pattern**: Sortable list with welcome/fields/thankYous sections
+
+```typescript
+// ✅ Good: Question list organization
+const data = useMemo(() => {
+  let welcome: FormFieldType | null = null
+  let thankYouIndex = 1
+  const thankYous: FormFieldType[] = []
+  const fields: FormFieldType[] = []
+
+  for (const field of state.fields) {
+    if (field.kind === FieldKindEnum.WELCOME) {
+      welcome = field
+    } else if (field.kind === FieldKindEnum.THANK_YOU) {
+      thankYous.push({ ...field, index: thankYouIndex++ })
+    } else {
+      fields.push(field)
+    }
+  }
+
+  return { welcome, fields, thankYous }
+}, [state.fields])
+```
+
+**Question List Conventions**:
+- Separate welcome, fields, and thankYous
+- Welcome appears first
+- ThankYous appear in separate panel
+- Use ReactSortable for drag-and-drop
+- Group nested fields under parent
+
+### Drag and Drop
+
+**Pattern**: ReactSortable with groups
+
+```typescript
+// ✅ Good: Sortable configuration
+<ReactSortable
+  className="space-y-1"
+  ghostClass="question-ghost"
+  chosenClass="question-chosen"
+  dragClass="question-dragging"
+  handle=".question-handle"
+  list={data.fields}
+  setList={handleSortFields}
+  onStart={handleSortStart}
+  group={{
+    name: 'root',
+    put: ['nested'],  // Can drop into nested groups
+    pull: true
+  }}
+  delay={10}
+  animation={240}
+>
+  {data.fields.map(field => (
+    <Question key={field.id} field={field} currentId={state.currentId} />
+  ))}
+</ReactSortable>
+```
+
+**Drag and Drop Conventions**:
+- Use ReactSortable for sorting
+- Separate groups: 'root' and 'nested'
+- Root can accept nested items
+- Nested can be pulled to root
+- Handle class for drag handle
+- Visual feedback classes
+
+## Field Selection
+
+### Selection Logic
+
+**Pattern**: Track current and parent field
+
+```typescript
+// ✅ Good: Field selection
+export function selectField(
+  state: IState,
+  { id: currentId, parentId }: SelectFieldAction['payload']
+): IState {
+  let currentField: FormFieldType | undefined
+  let parentField: FormFieldType | undefined
+
+  if (parentId) {
+    parentField = state.fields.find(field => field.id === parentId)
+    if (parentField) {
+      const index = fieldIndex(parentField.properties?.fields, currentId)
+      if (index > -1) {
+        currentField = parentField.properties!.fields![index]
+      } else {
+        currentField = parentField
+        parentField = undefined
+      }
+    }
+  } else {
+    currentField = state.fields.find(f => f.id === currentId)
+  }
+
+  const index = state.questions.findIndex(q => q.id === currentId)
+  const references = index < 1 ? state.questions : state.questions.slice(0, index)
+
+  return {
+    ...state,
+    currentId,
+    parentId,
+    currentField,
+    parentField,
+    references
+  }
+}
+```
+
+**Selection Conventions**:
+- Track both currentField and parentField
+- References are questions before current
+- Used for mention system
+- Update on field add/update/delete
+
+## Logic Flow Visualization
+
+### Flow Graph Generation
+
+**Pattern**: Convert fields and logics to nodes/edges
+
+```typescript
+// ✅ Good: Logic flow visualization
+export function fieldLogicToNodesEdges(
+  rawFields: FormFieldType[],
+  logics?: Logic[]
+): { nodes: Node[]; edges: Edge[] } {
+  const nodes: Node[] = []
+  const edges: Edge[] = []
+  const fields = flattenFieldsWithGroups(rawFields)
+
+  // Create nodes for each field
+  fields.forEach((field, index) => {
+    nodes.push({
+      id: field.id,
+      type: 'customNode',
+      data: { field, isFirstField: index === 0, isLastField: index === fields.length - 1 },
+      position: { x: 0, y: 0 },
+      connectable: true,
+      selectable: !UNSELECTABLE_FIELD_KINDS.includes(field.kind)
+    })
+
+    // Create sequential edges
+    if (index < fields.length - 1) {
+      edges.push({
+        id: `${field.id}-${fields[index + 1].id}`,
+        source: field.id,
+        target: fields[index + 1].id,
+        style: { stroke: '#1f2937' },
+        markerEnd: 'edge-marker-arrow'
+      })
+    }
+  })
+
+  // Create logic edges
+  logics?.forEach(logic => {
+    logic.payloads.forEach(payload => {
+      if (payload.action.kind === ActionEnum.NAVIGATE) {
+        edges.push({
+          type: 'customEdge',
+          id: payload.id,
+          source: logic.fieldId,
+          target: payload.action.fieldId,
+          style: { stroke: '#1f2937' },
+          markerEnd: 'edge-marker-arrow'
+        })
+      }
+    })
+  })
+
+  return getLayoutedElements(nodes, edges)
+}
+```
+
+**Flow Visualization Conventions**:
+- Use dagre for automatic layout
+- Sequential edges between fields
+- Logic edges for NAVIGATE actions
+- Custom node type for field display
+- Unselectable fields: WELCOME, THANK_YOU, STATEMENT
+
+## Field Kind Defaults
+
+### Default Properties by Kind
+
+**Pattern**: Kind-specific property initialization
+
+```typescript
+// ✅ Good: Field kind defaults
+switch (kind) {
+  case FieldKindEnum.MULTIPLE_CHOICE:
+  case FieldKindEnum.PICTURE_CHOICE:
+    field.properties!.allowMultiple = false
+    field.properties!.verticalAlignment = true
+    field.properties!.choices = [{ id: nanoid(12), label: '' }]
+    break
+
+  case FieldKindEnum.RATING:
+    field.properties!.total = 5
+    field.properties!.shape = 'star'
+    break
+
+  case FieldKindEnum.OPINION_SCALE:
+    field.properties!.total = 10
+    break
+
+  case FieldKindEnum.YES_NO:
+    field.properties!.choices = [
+      { id: nanoid(12), label: 'Yes' },
+      { id: nanoid(12), label: 'No' }
+    ]
+    break
+
+  case FieldKindEnum.DATE:
+  case FieldKindEnum.DATE_RANGE:
+    field.properties!.format = 'MM/DD/YYYY'
+    field.properties!.allowTime = false
+    break
+
+  case FieldKindEnum.PHONE_NUMBER:
+    field.properties!.defaultCountryCode = 'US'
+    break
+
+  case FieldKindEnum.INPUT_TABLE:
+    field.properties!.tableColumns = [
+      { id: nanoid(12), label: '' },
+      { id: nanoid(12), label: '' }
+    ]
+    break
+
+  case FieldKindEnum.PAYMENT:
+    field.properties!.currency = 'USD'
+    field.properties!.price = { type: 'number', value: 0 }
+    break
+
+  case FieldKindEnum.GROUP:
+    field.isCollapsed = false
+    field.properties!.fields = [getFieldFromKind(FieldKindEnum.SHORT_TEXT)]
+    break
+}
+```
+
+**Default Conventions**:
+- Set sensible defaults per field kind
+- Use nanoid(12) for choice/column IDs
+- Initialize with minimal required structure
+- GROUP fields start with one nested field
+
+## Field Validation
+
+### Validation Structure
+
+**Pattern**: Field-level validation rules
+
+```typescript
+// ✅ Good: Validation structure
+interface Validation {
+  required?: boolean
+  min?: number
+  max?: number
+  matchExpected?: boolean
+}
+
+function sanitizeValidations(validations?: Validation): Validation | undefined {
+  if (!validations) return undefined
+
+  const { required, min, max, matchExpected } = validations
+  const cleaned: Validation = {}
+
+  if (typeof required !== 'undefined') cleaned.required = required
+  if (typeof min !== 'undefined') cleaned.min = min
+  if (typeof max !== 'undefined') cleaned.max = max
+  if (typeof matchExpected !== 'undefined') cleaned.matchExpected = matchExpected
+
+  return Object.keys(cleaned).length > 0 ? cleaned : undefined
+}
+```
+
+**Validation Conventions**:
+- Only include defined validation properties
+- Remove undefined/null values
+- Return undefined if no validations
+- Validate on form submission (not in builder)
+
+## Field Layout
+
+### Layout Structure
+
+**Pattern**: Media and alignment configuration
+
+```typescript
+// ✅ Good: Layout structure
+interface Layout {
+  mediaType?: 'image' | 'video'
+  mediaUrl?: string
+  backgroundColor?: string
+  brightness?: number  // -100 to 100
+  align?: FieldLayoutAlignEnum  // INLINE, SPLIT_LEFT, SPLIT_RIGHT, etc.
+}
+```
+
+**Layout Conventions**:
+- Media types: image or video
+- Brightness: -100 (dark) to 100 (bright)
+- Alignment affects media positioning
+- INLINE: media above/below content
+- SPLIT: media side-by-side with content
+
+## Best Practices
+
+1. **State Management**:
+   - Always clone state before mutations
+   - Use deepEqual to prevent unnecessary updates
+   - Increment version on field mutations
+   - Track parentId for nested fields
+
+2. **Field Operations**:
+   - Use nanoid(12) for all field IDs
+   - Handle both root and nested fields
+   - Update mentions when titles change
+   - Serialize HTML arrays before API calls
+
+3. **Logic**:
+   - Validate logics after field changes
+   - Filter invalid logics (deleted fields)
+   - Use field-kind-specific conditions
+   - Navigation only works forward
+
+4. **Syncing**:
+   - Queue field updates (debounced)
+   - Sync variables/hiddenFields immediately
+   - Track syncing state for UI feedback
+   - Handle sync errors gracefully
+
+5. **Rich Text**:
+   - Debounce onChange callbacks
+   - Handle IME composition events
+   - Use data attributes for mentions
+   - Update mentions when titles change
+
+6. **Performance**:
+   - Use useMemo for expensive computations
+   - Debounce sync operations
+   - Clone only when necessary
+   - Filter fields before serialization
+
+## Common Patterns
+
+### Field Index Helper
+
+```typescript
+// ✅ Good: Field index helper
+function fieldIndex(fields?: FormFieldType[], id?: string): number {
+  if (!helper.isValidArray(fields) || helper.isEmpty(id)) {
+    return -1
+  }
+  return fields!.findIndex(f => f.id === id!)
+}
+```
+
+### Add Field to Group
+
+```typescript
+// ✅ Good: Add field to nested group
+function addFieldToGroup(
+  field: FormFieldType,
+  groupLike?: FormFieldType,
+  currentId?: string
+) {
+  if (groupLike) {
+    const nestedFields = groupLike.properties?.fields || []
+    const index = fieldIndex(groupLike.properties?.fields, currentId)
+    nestedFields.splice(index + 1, 0, field)
+    groupLike.properties = {
+      ...groupLike.properties,
+      fields: nestedFields
+    }
+  }
+}
+```
+
+### Question Numbering
+
+```typescript
+// ✅ Good: Question numbering
+// Root level: Q1, Q2, Q3...
+// Nested: Q1.1, Q1.2, Q2.1...
+questionNumber(field.index, parentField?.index)
+```
+
+## File Organization
+
+```
+Builder/
+├── store/
+│   ├── context.ts        # State, actions, reducer
+│   ├── actions.ts        # Action implementations
+│   ├── hook.ts           # useStoreContext hook
+│   └── index.ts
+├── utils/
+│   ├── field.ts          # Field operations
+│   ├── logic.ts          # Logic utilities
+│   ├── queue.ts          # Sync queue
+│   └── theme.ts          # Theme utilities
+├── Compose/
+│   ├── Blocks/           # Field-specific blocks
+│   └── index.tsx         # Main compose component
+├── LeftSidebar/          # Question list
+├── RightSidebar/         # Field settings
+├── LogicModal/           # Logic editor
+├── RichText/             # Rich text editor
+└── NavBar.tsx            # Publish/sync controls
+```
+
+## Import Conventions
+
+- `@heyform-inc/shared-types-enums` - Field types, enums
+- `@heyform-inc/answer-utils` - Logic validation, HTML utils
+- `@heyform-inc/utils` - Helper functions (nanoid, clone, helper)
+- `@/services` - FormService for API calls
+- `@/components` - UI components
+- `@/store` - Global stores (form, app, workspace)
+
+## References
+
+- [React useReducer Documentation](https://react.dev/reference/react/useReducer)
+- [React Context Documentation](https://react.dev/reference/react/createContext)
+- [ReactSortable Documentation](https://github.com/SortableJS/react-sortablejs)
+- [React Flow Documentation](https://reactflow.dev/)

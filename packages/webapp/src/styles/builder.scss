@@ -97,7 +97,7 @@
 
   .heyform-block-group-container {
     @apply mx-auto flex w-full items-center;
-    max-width: 50rem;
+    max-width: 45rem;
     min-height: 3.75rem;
 
     .heyform-block-number {
@@ -325,7 +325,7 @@
 
   .heyform-block {
     @apply relative mx-auto w-full;
-    max-width: 50rem;
+    max-width: 45rem;
     padding-top: 7.5rem;
     padding-bottom: 11.5rem;
   }
@@ -346,10 +346,9 @@
   }
 
   .heyform-block-title {
-    @apply mb-1 text-2xl font-semibold leading-tight tracking-tight;
+    @apply mb-1 text-2xl;
     min-height: 2rem;
     color: var(--heyform-question-color);
-    letter-spacing: -0.02em;
   }
 
   .heyform-statement {
@@ -359,10 +358,9 @@
   }
 
   .heyform-block-description {
-    @apply text-lg leading-relaxed;
+    @apply text-lg;
     min-height: 1.75rem;
     color: var(--heyform-description-color);
-    line-height: 1.7;
   }
 
   .heyform-block-title,
@@ -391,34 +389,10 @@
   }
 
   .heyform-submit-button {
-    @apply inline-flex cursor-pointer items-center justify-between rounded-xl px-6 py-2.5 text-lg font-semibold outline-none transition-all duration-300 ease-out;
+    @apply inline-flex cursor-pointer items-center justify-between rounded-md px-5 py-1.5 text-lg font-medium shadow-none outline-none;
     min-width: 7.5rem;
-    background: linear-gradient(135deg, var(--heyform-button-color) 0%, var(--heyform-button-opacity-80-color) 100%);
+    background-color: var(--heyform-button-color);
     color: var(--heyform-button-text-color);
-    box-shadow: 
-      0 4px 14px 0 rgba(99, 102, 241, 0.25),
-      0 2px 4px 0 rgba(99, 102, 241, 0.15);
-
-    &:hover {
-      background: linear-gradient(135deg, var(--heyform-button-color) 0%, var(--heyform-button-color) 100%);
-      transform: translateY(-2px) scale(1.02);
-      box-shadow: 
-        0 8px 24px 0 rgba(99, 102, 241, 0.35),
-        0 4px 8px 0 rgba(99, 102, 241, 0.2);
-    }
-
-    &:active {
-      transform: translateY(0) scale(0.98);
-    }
-
-    svg {
-      @apply -mr-1 ml-2 h-5 w-5;
-      transition: transform 0.3s ease;
-    }
-
-    &:hover svg {
-      transform: translateX(2px);
-    }
   }
 
   
@@ -1466,6 +1440,27 @@ button.connect-stripe {
     -webkit-backdrop-filter: none !important;
     border-top: none !important;
     box-shadow: none !important;
+  }
+  
+  /* Ensure footer buttons are visible and styled */
+  .heyform-footer-right {
+    pointer-events: auto !important;
+    display: flex !important;
+    visibility: visible !important;
+  }
+  
+  .heyform-pagination {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  .heyform-pagination .button,
+  .heyform-branding {
+    background: linear-gradient(135deg, var(--heyform-button-color) 0%, var(--heyform-button-opacity-80-color) 100%) !important;
+    color: var(--heyform-button-text-color) !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 }
 

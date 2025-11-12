@@ -306,7 +306,7 @@ export const Renderer: FC<RendererProps> = ({ form, query, locale, contactId }) 
         alwaysShowNextButton={true}
         customUrlRedirects={(form.settings as Any)?.customUrlRedirects}
         enableQuestionList={form.settings?.enableQuestionList}
-        enableNavigationArrows={form.settings?.enableNavigationArrows}
+        enableNavigationArrows={!!form.settings?.enableNavigationArrows}
         onSubmit={handleSubmit}
       />
 

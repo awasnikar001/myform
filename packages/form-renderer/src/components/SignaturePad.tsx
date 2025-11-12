@@ -1,5 +1,5 @@
 import type { FC } from 'react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Signature_pad from 'signature_pad'
 
 import { useTranslation } from '../utils'
@@ -17,6 +17,7 @@ interface SignaturePadProps extends Omit<IComponentProps, 'onChange'> {
 export const SignaturePad: FC<SignaturePadProps> = ({ value, penColor, onChange }) => {
   const { t } = useTranslation()
   const [canvasRef, setCanvasRef] = useState<HTMLCanvasElement | null>(null)
+  const lastValueRef = useRef<string | undefined>()
   const signaturePad = useMemo(() => {
     if (canvasRef) {
       return new Signature_pad(canvasRef, { penColor })
@@ -25,10 +26,14 @@ export const SignaturePad: FC<SignaturePadProps> = ({ value, penColor, onChange 
 
   function handleClear() {
     signaturePad?.clear()
+    onChange?.('') // Clear the form value when user clicks clear
+    lastValueRef.current = ''
   }
 
   function handleEndStroke() {
-    onChange?.(signaturePad!.toDataURL('image/png'))
+    const dataURL = signaturePad!.toDataURL('image/png')
+    onChange?.(dataURL)
+    lastValueRef.current = dataURL
   }
 
   useEffect(() => {
@@ -43,12 +48,23 @@ export const SignaturePad: FC<SignaturePadProps> = ({ value, penColor, onChange 
   }, [canvasRef])
 
   useEffect(() => {
-    if (signaturePad) {
-      // see https://github.com/szimek/signature_pad/issues/147#issuecomment-191761079
-      signaturePad.clear()
+    if (signaturePad && canvasRef) {
+      // Only reload if value has actually changed
+      if (lastValueRef.current !== value) {
+        // Clear first
+        signaturePad.clear()
 
-      if (helper.isValid(value)) {
-        signaturePad.fromDataURL(value!)
+        // Load signature from value if it exists
+        if (helper.isValid(value) && value) {
+          try {
+            // Use fromDataURL to load the signature image
+            signaturePad.fromDataURL(value)
+          } catch (err) {
+            console.error('Failed to load signature:', err)
+          }
+        }
+
+        lastValueRef.current = value
       }
 
       signaturePad.addEventListener('endStroke', handleEndStroke)
@@ -58,7 +74,7 @@ export const SignaturePad: FC<SignaturePadProps> = ({ value, penColor, onChange 
       signaturePad?.removeEventListener('endStroke', handleEndStroke)
       signaturePad?.off()
     }
-  }, [signaturePad])
+  }, [signaturePad, value, canvasRef])
 
   return (
     <div className="heyform-signature-pad">

@@ -1,0 +1,468 @@
+---
+description: Complete tech stack, dependency versions, and best practices for HeyForm monorepo
+globs: **/*
+alwaysApply: true
+---
+
+# HeyForm Tech Stack & Dependencies
+
+This document outlines the complete technology stack, dependency versions, and best practices for the HeyForm monorepo.
+
+## Runtime & Package Management
+
+### Node.js & Package Manager
+- **Node.js**: `>=16` (root), `^18.0.0 || >=20.0.0` (webapp), `>=12.0.0` (shared-types-enums)
+- **pnpm**: `8.15.9` (exact version enforced via `packageManager` field)
+- **Workspace**: pnpm workspaces with packages defined in `pnpm-workspace.yaml`
+
+**Best Practices**:
+- Always use `pnpm` commands, never `npm` or `yarn`
+- Run `pnpm install` from root after any dependency changes
+- Use workspace filters: `pnpm --filter <package>` for package-specific commands
+- Respect the `packageManager` field - don't override pnpm version
+
+## Frontend Stack (`packages/webapp`)
+
+### Core Framework
+- **React**: `^19.0.0` (latest major version)
+- **React DOM**: `^19.0.0`
+- **TypeScript**: `^5.7.2`
+
+**Best Practices**:
+- React 19 introduces new features like Actions, useFormStatus, useOptimistic
+- Use React Server Components patterns where applicable
+- Leverage React 19's improved concurrent rendering
+- TypeScript strict mode enabled - maintain type safety
+
+### Build Tooling
+- **Vite**: `^5.4.10` (build tool and dev server)
+- **@vitejs/plugin-react-swc**: `^3.7.1` (SWC for faster compilation)
+- **PostCSS**: `^8.4.47`
+- **Autoprefixer**: `^10.4.20`
+- **Sass**: `^1.80.4`
+
+**Best Practices**:
+- Vite 5 provides excellent HMR and fast builds
+- Use SWC plugin for faster React compilation
+- SCSS files are processed through PostCSS with TailwindCSS
+- Keep Vite config in `vite.config.mts` - TypeScript config file
+
+### Styling
+- **TailwindCSS**: `^3.4.14`
+- **tailwindcss-animate**: `^1.0.7`
+- **@tailwindcss/forms**: `^0.5.9`
+- **tailwind-merge**: `^2.5.4`
+- **clsx**: `^2.1.1`
+
+**Best Practices**:
+- Use TailwindCSS utility classes for styling
+- Combine `clsx` and `tailwind-merge` for conditional classes
+- Follow TailwindCSS v3 patterns (no JIT mode needed - always enabled)
+- Use `@tailwindcss/forms` for consistent form styling
+
+### State Management
+- **Zustand**: `^4.5.5` (primary state management)
+- **zustand-computed**: `^1.4.1` (computed state)
+- **MobX React Lite**: `^4.1.0` (legacy/alternative state)
+- **Immer**: `^10.1.1` (immutable updates)
+
+**Best Practices**:
+- Prefer Zustand for new state management - simpler API than Redux
+- Use `zustand-computed` for derived state
+- MobX is present but consider migrating to Zustand for consistency
+- Use Immer for complex immutable updates
+
+### Data Fetching & API
+- **@apollo/client**: `^3.11.8` (GraphQL client)
+- **apollo-link-retry**: `^2.2.16`
+- **apollo-link-timeout**: `^4.0.0`
+- **axios**: `^1.7.7` (HTTP client)
+- **@fortaine/fetch-event-source**: `^3.0.6` (SSE support)
+
+**Best Practices**:
+- Apollo Client 3.x uses hooks-based API (`useQuery`, `useMutation`)
+- Configure retry and timeout links for resilience
+- Use Apollo Client cache effectively - avoid unnecessary refetches
+- Axios is overridden to `1.6.8` in root - respect this version
+
+### Routing
+- **react-router-dom**: `^6.27.0`
+- **@heyooo-inc/react-router**: `^0.0.5` (custom router wrapper)
+
+**Best Practices**:
+- React Router v6 uses hooks (`useNavigate`, `useParams`, `useLocation`)
+- Use data loaders and error boundaries for route-level data fetching
+- Prefer declarative routing with `<Routes>` and `<Route>`
+
+### UI Component Libraries
+- **@radix-ui/react-***: Multiple packages (v1.x and v2.x)
+  - `react-dialog`: `^1.1.2`
+  - `react-dropdown-menu`: `^2.1.2`
+  - `react-popover`: `^1.1.2`
+  - `react-select`: `^2.1.2`
+  - `react-tabs`: `^1.1.1`
+  - `react-toast`: `^1.2.2`
+  - `react-tooltip`: `^1.1.4`
+- **@tabler/icons-react**: `^3.20.0` (icon library)
+- **@popperjs/core**: `^2.11.8` (positioning)
+
+**Best Practices**:
+- Radix UI provides accessible, unstyled components
+- Mix of v1 and v2 packages - consider migrating to v2 for consistency
+- Use Tabler icons for consistent iconography
+- Popper.js for advanced positioning needs
+
+### Form Handling
+- **rc-field-form**: `^2.2.1` (form state management)
+- **react-textarea-autosize**: `^8.5.4`
+- **input-otp**: `^1.2.4`
+- **libphonenumber-js**: `^1.12.10`
+- **validator**: `^13.15.15`
+
+**Best Practices**:
+- rc-field-form provides form state and validation
+- Use libphonenumber-js for phone number validation/formatting
+- Validator.js for general validation rules
+- Consider form libraries that work well with React 19
+
+### Internationalization
+- **i18next**: `^24.0.5`
+- **react-i18next**: `^15.1.4`
+- **i18next-browser-languagedetector**: `^8.0.0`
+
+**Best Practices**:
+- i18next v24 is latest - supports new features
+- Use `useTranslation` hook from react-i18next
+- Language detection happens automatically via browser detector
+- Translation files in `locales/` directory (JSON format)
+
+### Utilities & Helpers
+- **dayjs**: `^1.11.12` (date manipulation)
+- **lodash**: `^4.17.21` (utility functions)
+- **fast-equals**: `^5.2.2` (deep equality)
+- **big.js**: `^6.2.2` (arbitrary precision arithmetic)
+- **js-cookie**: `^3.0.5` (cookie management)
+- **store2**: `^2.14.3` (localStorage wrapper)
+
+**Best Practices**:
+- Prefer dayjs over moment.js (smaller bundle)
+- Use lodash sparingly - tree-shake unused functions
+- big.js for financial calculations (avoid floating point errors)
+- store2 provides unified localStorage/sessionStorage API
+
+### Visualization & Charts
+- **recharts**: `^3.3.0` (React charting library)
+- **react-flow-renderer**: `^10.3.17` (flow diagrams)
+- **dagre**: `^0.8.5` (graph layout)
+
+**Best Practices**:
+- Recharts for data visualization (analytics, reports)
+- react-flow-renderer for form builder flow visualization
+- Consider Recharts v3 API patterns
+
+### Other Frontend Libraries
+- **react-markdown**: `^10.1.0` (markdown rendering)
+- **react-colorful**: `^5.6.1` (color picker)
+- **react-copy-to-clipboard**: `^5.1.0`
+- **react-error-boundary**: `^6.0.0`
+- **react-resizable-panels**: `^2.1.5`
+- **react-sortablejs**: `^6.1.4`
+- **react-transition-state**: `^2.3.1`
+- **signature_pad**: `^5.0.7`
+- **qrcode.react**: `^3.1.0`
+- **cmdk**: `^1.0.0` (command menu)
+
+## Backend Stack (`packages/server`)
+
+### Core Framework
+- **NestJS**: `7.4.4` (Node.js framework)
+- **@nestjs/core**: `7.4.4`
+- **@nestjs/common**: `7.4.4`
+- **TypeScript**: `4.9.5` (older version - consider upgrading)
+
+**Best Practices**:
+- NestJS 7.x uses decorators and dependency injection
+- Follow NestJS module pattern (controllers, services, resolvers)
+- TypeScript 4.9.5 is older - consider upgrading to match frontend (5.x)
+- Use NestJS guards, interceptors, and pipes for cross-cutting concerns
+
+### GraphQL
+- **@nestjs/graphql**: `7.6.0`
+- **graphql**: `15.3.0`
+- **apollo-server-express**: `^2.26.2`
+- **graphql-tools**: `6.2.1`
+- **graphql-middleware**: `4.0.2`
+- **graphql-type-json**: `0.3.2`
+
+**Best Practices**:
+- GraphQL 15.x is latest stable
+- Use code-first approach with NestJS GraphQL decorators
+- Schema definitions in `common/graphql/*.graphql.ts`
+- Resolvers in `resolver/` directory organized by domain
+- Apollo Server Express for GraphQL endpoint
+
+### Database & ORM
+- **Mongoose**: `^6.13.0` (MongoDB ODM)
+- **@nestjs/mongoose**: `^9.2.0`
+- **ioredis**: `4.17.3` (Redis client)
+- **@svtslv/nestjs-ioredis**: `1.0.2`
+
+**Best Practices**:
+- Mongoose 6.x for MongoDB operations
+- Models defined in `model/` directory
+- Use Redis for caching and session storage
+- ioredis is promise-based (prefer over node-redis)
+
+### Queue & Background Jobs
+- **Bull**: `3.22.0` (Redis-based queue)
+- **@nestjs/bull**: `^0.6.3`
+- **@nestjs/schedule**: `0.4.0` (cron jobs)
+
+**Best Practices**:
+- Bull queues for async job processing (emails, integrations, reports)
+- Queue processors in `queue/` directory
+- Scheduled tasks in `schedule/` directory
+- Use Bull dashboard for monitoring (if configured)
+
+### HTTP & Express
+- **express**: `4.19.2` (overridden in root)
+- **@nestjs/platform-express**: `7.4.4`
+- **body-parser**: `1.20.2`
+- **cookie-parser**: `1.4.5`
+- **helmet**: `4.1.1` (security headers)
+- **express-rate-limit**: `5.1.3`
+- **@nestjs/throttler**: `1.2.1`
+
+**Best Practices**:
+- Express 4.19.2 is overridden - don't upgrade without testing
+- Use Helmet for security headers
+- Rate limiting via express-rate-limit and NestJS throttler
+- Cookie parser for session management
+
+### Authentication & Security
+- **jsonwebtoken**: `8.5.1` (JWT)
+- **bcrypt**: `5.1.1` (password hashing)
+- **google-auth-library**: `6.0.6` (Google OAuth)
+- **googleapis**: `59.0.0` (Google APIs)
+- **akismet-api**: `6.0.0` (spam detection)
+
+**Best Practices**:
+- JWT for stateless authentication
+- bcrypt for password hashing (cost factor 10+)
+- Google OAuth for social login
+- Akismet for spam detection on submissions
+
+### File Processing & Storage
+- **multer**: `1.4.5-lts.1` (file upload - overridden)
+- **multer-s3**: `3.0.1` (S3 uploads)
+- **@aws-sdk/client-s3**: `3.572.0` (AWS S3)
+- **sharp**: `0.32.6` (image processing)
+- **pdfkit**: `^0.17.2` (PDF generation)
+
+**Best Practices**:
+- Multer 1.4.5-lts.1 is overridden - maintain this version
+- Use S3 for file storage (via multer-s3)
+- Sharp for image resizing/optimization
+- PDFKit for generating PDF reports
+
+### Email
+- **nodemailer**: `6.9.9` (email sending)
+- **hbs**: `4.2.0` (Handlebars templates)
+
+**Best Practices**:
+- Nodemailer for SMTP email sending
+- Handlebars templates in `resources/email-templates/`
+- Configure SMTP in `config/smtp/`
+
+### Payment Processing
+- **stripe**: `8.140.0` (Stripe SDK)
+
+**Best Practices**:
+- Stripe v8 for payment processing
+- Use Stripe webhooks for payment events
+- Payment intents for secure payment handling
+
+### Validation & Transformation
+- **class-validator**: `0.14.0` (DTO validation)
+- **class-transformer**: `0.3.1` (DTO transformation)
+
+**Best Practices**:
+- Use class-validator decorators on DTOs
+- class-transformer for request/response transformation
+- Validation pipes in NestJS for automatic validation
+
+### Utilities & Helpers
+- **rxjs**: `^7.8.1` (reactive programming - overridden)
+- **dotenv**: `8.2.0` (environment variables)
+- **json2csv**: `5.0.6` (CSV export)
+- **dayjs**: `^1.11.3` (overridden in root)
+- **lodash**: `4.17.21` (overridden in root)
+- **got**: `11.8.5` (HTTP client - overridden)
+- **openai**: `4.38.2` (OpenAI API)
+
+**Best Practices**:
+- RxJS 7.x for reactive patterns (Observables)
+- dotenv for environment configuration
+- json2csv for exporting submission data
+- OpenAI SDK for AI features
+
+## Shared Packages
+
+### Form Renderer (`packages/form-renderer`)
+- **React**: `^18.2.0 || ^19.0.0` (peer dependency)
+- **TypeScript**: `5.5.3`
+- **Vite**: `^5.3.3`
+- **tsup**: `^8.0.2` (build tool)
+- **TailwindCSS**: `^3.4.14`
+
+**Best Practices**:
+- Library package - supports both React 18 and 19
+- Uses tsup for building (faster than webpack/rollup for libraries)
+- Exports both ESM and CJS formats
+
+### Embed (`packages/embed`)
+- **Rollup**: `^4.16.4` (bundler)
+- **TypeScript**: `5.4.5`
+
+**Best Practices**:
+- Rollup for creating embeddable JavaScript bundle
+- Tree-shaking for smaller bundle size
+- Multiple embed modes (modal, popup, full-page, standard)
+
+### Answer Utils (`packages/answer-utils`)
+- **TypeScript**: `5.5.3`
+- **Vitest**: `^1.6.0` (testing)
+- **tsup**: `^8.0.2`
+
+**Best Practices**:
+- Utility functions for form answer processing
+- Vitest for fast unit testing
+- Pure functions - easy to test
+
+### Utils (`packages/utils`)
+- **TypeScript**: `5.5.3`
+- **Vitest**: `^1.6.0`
+- **tsup**: `^8.0.2`
+
+**Best Practices**:
+- Shared utility functions across packages
+- Well-tested with Vitest
+- Common operations (date, bytes, clone, etc.)
+
+### Shared Types (`packages/shared-types-enums`)
+- **TypeScript**: `4.9.5` (older version)
+
+**Best Practices**:
+- Centralized type definitions
+- Used across all packages
+- Consider upgrading TypeScript to match other packages
+
+## Build & Development Tools
+
+### Root Level
+- **prettier**: `^3.6.2` (code formatting)
+- **@trivago/prettier-plugin-sort-imports**: `4.3.0`
+- **prettier-plugin-tailwindcss**: `^0.6.14`
+- **oxlint**: `^1.6.0` (linter)
+- **lint-staged**: `^15.5.1`
+- **simple-git-hooks**: `^2.13.0`
+
+**Best Practices**:
+- Prettier 3.x with import sorting and TailwindCSS plugin
+- oxlint for fast linting (Rust-based)
+- Pre-commit hooks run lint-staged
+- Format on save recommended
+
+### Testing
+- **Vitest**: `^1.6.0` (answer-utils, utils)
+- **Jest**: `^26.6.3` (shared-types-enums)
+- **@vitest/coverage-v8**: `^1.6.0`
+
+**Best Practices**:
+- Prefer Vitest for new tests (faster, Vite-native)
+- Jest still used in shared-types-enums (consider migrating)
+- Coverage via v8 provider
+
+## Critical Dependency Overrides
+
+The root `package.json` has important overrides that must be respected:
+
+```json
+{
+  "apollo-upload-client": "17.0.0",
+  "fs-capacitor": "6.2.0",
+  "multer": "1.4.5-lts.1",
+  "express": "4.19.2",
+  "dayjs": "^1.11.3",
+  "i18next": "^21.9.1",
+  "axios": "1.6.8",
+  "lodash": "4.17.21",
+  "rxjs": "^7.8.1",
+  // ... and more
+}
+```
+
+**Best Practices**:
+- These overrides exist for compatibility reasons
+- Don't upgrade these packages without thorough testing
+- Check for security vulnerabilities regularly
+- Document why overrides exist
+
+## Version Compatibility Notes
+
+### React 19 Considerations
+- React 19 is latest major version - some libraries may not fully support it yet
+- Test thoroughly when upgrading React-related dependencies
+- Some Radix UI packages may need updates for React 19 compatibility
+
+### TypeScript Version Mismatch
+- Frontend: TypeScript 5.7.2
+- Backend: TypeScript 4.9.5
+- Shared packages: Mix of 4.9.5 and 5.5.3
+- **Recommendation**: Standardize on TypeScript 5.x across all packages
+
+### Node.js Version Requirements
+- Root: `>=16`
+- Webapp: `^18.0.0 || >=20.0.0`
+- **Recommendation**: Use Node.js 18 LTS or 20 LTS for development
+
+## Security Considerations
+
+1. **Regular Updates**: Keep dependencies updated, especially security patches
+2. **Audit**: Run `pnpm audit` regularly
+3. **Overrides**: Review overrides periodically - they may mask vulnerabilities
+4. **Dependency Scanning**: Use tools like Dependabot or Snyk
+5. **Lock File**: Always commit `pnpm-lock.yaml` - ensures reproducible builds
+
+## Performance Considerations
+
+1. **Bundle Size**: Monitor bundle sizes, especially in webapp
+2. **Tree Shaking**: Ensure unused code is eliminated
+3. **Code Splitting**: Use Vite's automatic code splitting
+4. **Lazy Loading**: Lazy load routes and heavy components
+5. **Caching**: Leverage Apollo Client cache and Redis caching
+
+## Migration Recommendations
+
+1. **TypeScript**: Upgrade server and shared-types-enums to TypeScript 5.x
+2. **Radix UI**: Migrate v1 packages to v2 for consistency
+3. **MobX**: Consider migrating to Zustand for consistency
+4. **Jest**: Migrate shared-types-enums to Vitest
+5. **React Router**: Ensure all code uses React Router v6 patterns
+
+## Dependency Management Workflow
+
+1. **Adding Dependencies**: Add to appropriate package's `package.json`
+2. **Installing**: Run `pnpm install` from root
+3. **Testing**: Test affected packages thoroughly
+4. **Committing**: Commit both `package.json` and `pnpm-lock.yaml`
+5. **Documenting**: Update this file if adding major dependencies
+
+## References
+
+- [React 19 Release Notes](https://react.dev/blog/2024/04/25/react-19)
+- [NestJS Documentation](https://docs.nestjs.com/)
+- [Vite Documentation](https://vitejs.dev/)
+- [Apollo Client Documentation](https://www.apollographql.com/docs/react/)
+- [TailwindCSS Documentation](https://tailwindcss.com/docs)
+- [Zustand Documentation](https://docs.pmnd.rs/zustand/)

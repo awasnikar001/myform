@@ -1,6 +1,7 @@
 import {
   CHOICES_FIELD_KINDS,
   FieldKindEnum,
+  FormField,
   QUESTION_FIELD_KINDS
 } from '@heyform-inc/shared-types-enums'
 import { FC, useCallback, useState } from 'react'
@@ -31,7 +32,22 @@ export const ReportList: FC<ReportListProps> = ({ isHideFieldEnabled }) => {
   const fetch = useCallback(async () => {
     const result = await FormService.report(formId)
 
-    const fields = flattenFields(form?.drafts).filter(field =>
+    // Use published fields (what submissions are based on) or fallback to drafts
+    // Prioritize published fields if they exist and have items
+    let fieldsToUse: FormField[] = []
+
+    if (form) {
+      // Check if published fields exist and have items
+      if (form.fields && Array.isArray(form.fields) && form.fields.length > 0) {
+        fieldsToUse = form.fields
+      }
+      // Otherwise use drafts if available
+      else if (form.drafts && Array.isArray(form.drafts) && form.drafts.length > 0) {
+        fieldsToUse = form.drafts
+      }
+    }
+
+    const fields = flattenFields(fieldsToUse).filter(field =>
       QUESTION_FIELD_KINDS.includes(field.kind)
     )
 
@@ -88,7 +104,7 @@ export const ReportList: FC<ReportListProps> = ({ isHideFieldEnabled }) => {
     }
 
     return false
-  }, [form?.drafts, formId])
+  }, [form?.fields, form?.drafts, formId])
 
   return (
     <Async
@@ -100,7 +116,7 @@ export const ReportList: FC<ReportListProps> = ({ isHideFieldEnabled }) => {
           </Repeat>
         </div>
       }
-      refreshDeps={[form?.drafts, formId]}
+      refreshDeps={[form?.fields, form?.drafts, formId]}
     >
       {isHideFieldEnabled && (
         <>

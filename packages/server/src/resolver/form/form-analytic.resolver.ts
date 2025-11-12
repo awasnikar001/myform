@@ -1,7 +1,14 @@
 import { Promise } from 'mongoose'
 
 import { Auth, FormGuard } from '@decorator'
-import { FormAnalyticInput, FormAnalyticResult, FormAnalyticType } from '@graphql'
+import {
+  FormAnalyticInput,
+  FormAnalyticResult,
+  FormAnalyticTimeSeriesInput,
+  FormAnalyticTimeSeriesType,
+  FormAnalyticType,
+  TimeSeriesDataType
+} from '@graphql'
 import { date, helper, parseJson } from '@heyform-inc/utils'
 import { FormAnalyticRangeEnum } from '@model'
 import { Args, Query, Resolver } from '@nestjs/graphql'
@@ -45,16 +52,71 @@ export class FormAnalyticResolver {
   @Query(returns => FormAnalyticType)
   @FormGuard()
   async formAnalytic(@Args('input') input: FormAnalyticInput): Promise<FormAnalyticType> {
+    const now = date().endOf('day')
+    let startAt: Date
+    let prevStartAt: Date
+
+    // Check if custom dates are provided
+    if (input.startDate && input.endDate) {
+      startAt = new Date(input.startDate * 1000)
+      const endAt = new Date(input.endDate * 1000)
+      const rangeDuration = endAt.getTime() - startAt.getTime()
+      prevStartAt = new Date(startAt.getTime() - rangeDuration)
+
+      const key = `form:${input.formId}:analytic:custom:${input.startDate}:${input.endDate}`
+      const cache = await this.redisService.get(key)
+
+      if (helper.isValid(cache)) {
+        return parseJson(cache)
+      }
+
+      const [prev, next] = await Promise.all([
+        this.formAnalyticService.summary({
+          formId: input.formId,
+          startAt: prevStartAt,
+          endAt: startAt
+        }),
+        this.formAnalyticService.summary({
+          formId: input.formId,
+          startAt,
+          endAt,
+          isNext: true
+        })
+      ])
+
+      const prevRate = getRate(prev.avgTotalVisits, prev.avgSubmissionCount)
+      const nextRate = getRate(next.avgTotalVisits, next.avgSubmissionCount)
+
+      const result = {
+        totalVisits: getChanges(prev.avgTotalVisits, next.avgTotalVisits),
+        submissionCount: getChanges(prev.avgSubmissionCount, next.avgSubmissionCount),
+        completeRate: {
+          value: nextRate,
+          change: prevRate ? nextRate - prevRate : undefined
+        },
+        averageTime: getChanges(prev.avgAverageTime, next.avgAverageTime, false)
+      }
+
+      await this.redisService.set({
+        key,
+        value: JSON.stringify(result),
+        duration: '10m'
+      })
+
+      return result
+    }
+
+    // Use fixed range (backward compatibility)
+    if (!input.range) {
+      input.range = FormAnalyticRangeEnum.WEEK
+    }
+
     const key = `form:${input.formId}:analytic:${input.range}`
     const cache = await this.redisService.get(key)
 
     if (helper.isValid(cache)) {
       return parseJson(cache)
     }
-
-    const now = date().endOf('day')
-    let startAt: Date
-    let prevStartAt: Date
 
     switch (input.range) {
       case FormAnalyticRangeEnum.WEEK:
@@ -112,6 +174,60 @@ export class FormAnalyticResolver {
 
     await this.redisService.set({
       key,
+      value: JSON.stringify(result),
+      duration: '10m'
+    })
+
+    return result
+  }
+
+  @Query(returns => FormAnalyticTimeSeriesType)
+  @FormGuard()
+  async formAnalyticTimeSeries(
+    @Args('input') input: FormAnalyticTimeSeriesInput
+  ): Promise<FormAnalyticTimeSeriesType> {
+    const cacheKey = `form:${input.formId}:timeseries:${input.startDate}:${input.endDate}`
+    const cache = await this.redisService.get(cacheKey)
+
+    console.log(
+      `[TimeSeries Resolver] Query for formId ${input.formId}, startDate: ${input.startDate}, endDate: ${input.endDate}`
+    )
+    console.log(`[TimeSeries Resolver] Cache hit:`, helper.isValid(cache))
+
+    if (helper.isValid(cache)) {
+      const cachedResult = parseJson(cache) as FormAnalyticTimeSeriesType
+      console.log(
+        `[TimeSeries Resolver] Returning cached result with ${cachedResult?.data?.length || 0} dates`
+      )
+      return cachedResult
+    }
+
+    const startDate = new Date(input.startDate * 1000)
+    const endDate = new Date(input.endDate * 1000)
+
+    console.log(`[TimeSeries Resolver] Calling getTimeSeriesData with dates:`, {
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString()
+    })
+
+    const timeSeriesData = await this.formAnalyticService.getTimeSeriesData(
+      input.formId,
+      startDate,
+      endDate
+    )
+
+    const result: FormAnalyticTimeSeriesType = {
+      data: timeSeriesData.map(item => ({
+        date: item.date,
+        views: item.views,
+        submissions: item.submissions
+      })) as TimeSeriesDataType[]
+    }
+
+    console.log(`[TimeSeries Resolver] Result has ${result.data.length} dates, caching for 10m`)
+
+    await this.redisService.set({
+      key: cacheKey,
       value: JSON.stringify(result),
       duration: '10m'
     })

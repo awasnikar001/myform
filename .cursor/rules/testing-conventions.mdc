@@ -1,0 +1,964 @@
+---
+description: Testing conventions, patterns, and best practices for unit tests in the HeyForm monorepo
+globs: packages/**/test/**/*.test.ts, packages/**/test/**/*.test.tsx, packages/**/__tests__/**/*
+alwaysApply: false
+---
+# Testing Conventions
+
+This document outlines the conventions and patterns for writing tests in the HeyForm monorepo, covering test structure, frameworks, assertions, fixtures, snapshots, and best practices.
+
+## Testing Frameworks
+
+### Framework Selection
+
+**Pattern**: Use Vitest for new tests, Jest for legacy packages
+
+```typescript
+// ✅ Good: Vitest (preferred for new tests)
+import { expect, test } from 'vitest'
+
+// ⚠️ Legacy: Jest (shared-types-enums only)
+import { expect, test } from 'jest'
+```
+
+**Framework Conventions**:
+- **Vitest**: Used in `packages/utils` and `packages/answer-utils` (preferred)
+- **Jest**: Used in `packages/shared-types-enums` (legacy, consider migrating)
+- Prefer Vitest for new test files (faster, Vite-native)
+- Use consistent framework within each package
+
+### Test Scripts
+
+**Pattern**: Standard npm scripts for testing
+
+```json
+// ✅ Good: Package.json scripts
+{
+  "scripts": {
+    "test": "vitest",
+    "cov": "vitest run --coverage"
+  }
+}
+```
+
+**Script Conventions**:
+- `test` - Run tests in watch mode (Vitest) or once (Jest)
+- `cov` - Run tests with coverage report
+- Use `vitest run` for CI/CD (non-watch mode)
+- Coverage provider: `@vitest/coverage-v8`
+
+## Test File Organization
+
+### File Naming
+
+**Pattern**: Test files co-located with source or in test directory
+
+```
+// ✅ Good: Test directory structure
+packages/utils/
+├── src/
+│   ├── helper.ts
+│   └── clone.ts
+└── test/
+    ├── helper.test.ts
+    └── clone.test.ts
+
+// ✅ Good: Co-located test files
+packages/answer-utils/
+├── src/
+│   └── validate.ts
+└── test/
+    └── validate.test.ts
+```
+
+**Naming Conventions**:
+- Test files: `*.test.ts` or `*.test.tsx`
+- Test directory: `test/` (not `__tests__/` or `tests/`)
+- Match source file name: `helper.ts` → `helper.test.ts`
+- Use kebab-case for file names
+
+### Test Directory Structure
+
+**Pattern**: Organized test directory with fixtures and snapshots
+
+```
+test/
+├── __snapshots__/          # Snapshot files
+│   ├── email.test.ts.snap
+│   └── validate.test.ts.snap
+├── fixtures/               # Test data fixtures
+│   ├── fields.json
+│   └── values.json
+├── helper.test.ts
+├── validate.test.ts
+└── email.test.ts
+```
+
+**Directory Conventions**:
+- `test/` - Main test directory
+- `test/__snapshots__/` - Vitest snapshot files
+- `test/fixtures/` - JSON fixtures and test data
+- Keep snapshots organized by test file
+- Group related fixtures together
+
+## Test Structure
+
+### Basic Test Pattern
+
+**Pattern**: Simple test function with descriptive name
+
+```typescript
+// ✅ Good: Simple test structure
+import { expect, test } from 'vitest'
+import { helper } from '../src'
+
+test("' ' is empty", () => {
+  expect(helper.isEmpty(' ')).toBe(true)
+})
+
+test('[] is empty', () => {
+  expect(helper.isEmpty([])).toBe(true)
+})
+```
+
+**Test Structure Conventions**:
+- Use `test()` function (not `describe()` or `it()`)
+- Descriptive test names in quotes (describe what is being tested)
+- One assertion per test when possible
+- Import from `vitest` (not Jest)
+- Import source code from `../src`
+
+### Test Organization
+
+**Pattern**: Group related tests in same file
+
+```typescript
+// ✅ Good: Related tests grouped together
+test('null is empty', () => {
+  expect(helper.isEmpty(null)).toBe(true)
+})
+
+test('undefined is empty', () => {
+  expect(helper.isEmpty(undefined)).toBe(true)
+})
+
+test('false is not empty', () => {
+  expect(helper.isEmpty(false)).toBe(false)
+})
+```
+
+**Organization Conventions**:
+- Group tests by functionality in same file
+- Order tests logically (positive cases, negative cases, edge cases)
+- Use descriptive test names that explain the scenario
+- Keep tests focused on one aspect
+
+## Assertions
+
+### Basic Assertions
+
+**Pattern**: Use Vitest expect API
+
+```typescript
+// ✅ Good: Basic assertions
+expect(helper.isEmpty(' ')).toBe(true)
+expect(helper.isEmpty([])).toBe(true)
+expect(helper.isEmpty({})).toBe(true)
+
+// ✅ Good: Strict equality
+expect(clone(obj)).toStrictEqual(obj)
+
+// ✅ Good: Error assertions
+expect(() => {
+  validate(rules[0], undefined)
+}).toThrowError()
+
+expect(() => {
+  fieldValuesToAnswers(fields, { EMAIL: '' })
+}).toThrow('Please enter a valid email address')
+```
+
+**Assertion Conventions**:
+- Use `toBe()` for primitive values
+- Use `toStrictEqual()` for objects/arrays
+- Use `toThrowError()` for error testing
+- Use `toThrow(message)` for specific error messages
+- Use arrow functions for error assertions: `expect(() => { ... }).toThrow()`
+
+### Array/Object Assertions
+
+**Pattern**: Test array/object transformations
+
+```typescript
+// ✅ Good: Array assertions
+expect(result.fields.map(f => f.id)).toStrictEqual(
+  fields.filter(f => f.kind !== FieldKindEnum.STATEMENT).map(f => f.id)
+)
+
+// ✅ Good: Object property assertions
+expect(result.variables).toStrictEqual({
+  number_var: 10,
+  string_var: 'Your name is: hello kitty'
+})
+```
+
+**Array/Object Conventions**:
+- Use `toStrictEqual()` for deep equality
+- Extract IDs or keys for comparison when needed
+- Test transformations with `map()` and `filter()`
+- Compare expected vs actual structures
+
+### Error Testing
+
+**Pattern**: Test error conditions
+
+```typescript
+// ✅ Good: Error testing pattern
+test('empty value should throw error', () => {
+  expect(() => {
+    fieldValuesToAnswers([field], {
+      EMAIL: ''
+    })
+  }).toThrow('Please enter a valid email address')
+})
+
+test('invalid value should throw error', () => {
+  expect(() => {
+    fieldValuesToAnswers([field], {
+      EMAIL: 'email.example@com'
+    })
+  }).toThrow('Please enter a valid email address')
+})
+```
+
+**Error Testing Conventions**:
+- Wrap code in arrow function: `expect(() => { ... }).toThrow()`
+- Test both empty and invalid inputs
+- Use specific error messages when possible
+- Test required field validation
+- Test type validation errors
+
+## Test Data & Fixtures
+
+### Inline Test Data
+
+**Pattern**: Define test data at top of test file
+
+```typescript
+// ✅ Good: Test data at top of file
+const fields: FormField[] = [
+  {
+    id: 'id_short_text',
+    title: 'Short Text',
+    kind: FieldKindEnum.SHORT_TEXT
+  },
+  {
+    id: 'id_statement',
+    title: 'Statement',
+    kind: FieldKindEnum.STATEMENT
+  }
+]
+
+const logics: Logic[] = [
+  {
+    fieldId: 'id_short_text',
+    payloads: [
+      {
+        id: 'p1',
+        condition: {
+          comparison: ComparisonEnum.CONTAINS,
+          expected: 'kitty'
+        },
+        action: {
+          kind: ActionEnum.NAVIGATE,
+          fieldId: fields[2].id
+        }
+      }
+    ]
+  }
+]
+
+test('apply to fields with matched values', () => {
+  const result = applyLogicToFields(fields, logics, undefined, {
+    id_short_text: 'hello kitty',
+    id_number: 5
+  })
+  // ...
+})
+```
+
+**Inline Data Conventions**:
+- Define shared test data at top of file
+- Use TypeScript types for test data
+- Reuse test data across multiple tests
+- Keep test data minimal and focused
+
+### JSON Fixtures
+
+**Pattern**: Use JSON files for complex test data
+
+```typescript
+// ✅ Good: Import JSON fixtures
+import fields from './fixtures/fields.json'
+import values from './fixtures/values.json'
+
+test('should convert value to answer', () => {
+  expect(fieldValuesToAnswers(fields as any, values)).toMatchSnapshot()
+})
+```
+
+**Fixture Conventions**:
+- Store complex test data in `test/fixtures/` directory
+- Use JSON format for fixtures
+- Import fixtures: `import fields from './fixtures/fields.json'`
+- Use `as any` when TypeScript types don't match exactly
+- Keep fixtures realistic and representative
+
+### Fixture File Structure
+
+**Pattern**: Organized fixture files
+
+```json
+// ✅ Good: fixtures/fields.json
+[
+  {
+    "validations": {
+      "required": true
+    },
+    "properties": {
+      "choices": []
+    },
+    "id": "Z90w4JfKzc9c",
+    "title": "",
+    "kind": "statement"
+  }
+]
+
+// ✅ Good: fixtures/values.json
+{
+  "1rc8Rgj9et52": "Jimmmy",
+  "bcFvi1syrp66": "+12015551023",
+  "vyLu2NkN70xkS": {
+    "value": ["F7XrAjByBk2w", "cFEkKnnXmBP6"]
+  }
+}
+```
+
+**Fixture File Conventions**:
+- Use descriptive file names: `fields.json`, `values.json`
+- Keep fixtures focused (one concept per file)
+- Use realistic data that represents actual usage
+- Format JSON with proper indentation
+
+## Snapshot Testing
+
+### Snapshot Pattern
+
+**Pattern**: Use snapshots for complex output validation
+
+```typescript
+// ✅ Good: Snapshot testing
+test('correct value should be verified', () => {
+  const answer = fieldValuesToAnswers(
+    [
+      {
+        ...field,
+        validations: { required: true }
+      }
+    ],
+    {
+      EMAIL: 'email@example.com'
+    }
+  )
+
+  expect(answer).toMatchSnapshot()
+})
+```
+
+**Snapshot Conventions**:
+- Use `toMatchSnapshot()` for complex object/array outputs
+- Snapshots stored in `test/__snapshots__/` directory
+- Review snapshot changes carefully
+- Update snapshots when output intentionally changes: `vitest -u`
+- Use for stable, deterministic outputs
+
+### Snapshot File Structure
+
+**Pattern**: Organized snapshot files
+
+```
+test/__snapshots__/
+├── email.test.ts.snap
+├── validate.test.ts.snap
+└── flatten-fields.test.ts.snap
+```
+
+**Snapshot File Conventions**:
+- One snapshot file per test file: `*.test.ts.snap`
+- Snapshot files auto-generated by Vitest
+- Don't manually edit snapshot files
+- Commit snapshots to version control
+- Review snapshot diffs in PRs
+
+## Test Scenarios
+
+### Positive Cases
+
+**Pattern**: Test expected behavior
+
+```typescript
+// ✅ Good: Positive test cases
+test('correct value should be verified', () => {
+  const answer = fieldValuesToAnswers(
+    [{ ...field, validations: { required: true } }],
+    { EMAIL: 'email@example.com' }
+  )
+  expect(answer).toMatchSnapshot()
+})
+
+test('apply to fields with matched values', () => {
+  const result = applyLogicToFields(fields, logics, undefined, {
+    id_short_text: 'hello kitty',
+    id_number: 5
+  })
+  expect(result.fields.map(f => f.id)).toStrictEqual(
+    fields.filter(f => f.kind !== FieldKindEnum.STATEMENT).map(f => f.id)
+  )
+})
+```
+
+**Positive Case Conventions**:
+- Test happy path scenarios
+- Use realistic, valid inputs
+- Verify expected outputs
+- Test multiple valid scenarios
+
+### Negative Cases
+
+**Pattern**: Test error conditions and edge cases
+
+```typescript
+// ✅ Good: Negative test cases
+test('empty value should throw error', () => {
+  expect(() => {
+    fieldValuesToAnswers([field], { EMAIL: '' })
+  }).toThrow('Please enter a valid email address')
+})
+
+test('invalid value should throw error', () => {
+  expect(() => {
+    fieldValuesToAnswers([field], { EMAIL: 'email.example@com' })
+  }).toThrow('Please enter a valid email address')
+})
+
+test('apply to fields with unmatched values', () => {
+  const result = applyLogicToFields(fields, logics, undefined, {
+    id_short_text: 'hello world',
+    id_number: 10
+  })
+  expect(result.fields.map(f => f.id)).toStrictEqual(fields.map(f => f.id))
+})
+```
+
+**Negative Case Conventions**:
+- Test error conditions
+- Test invalid inputs
+- Test edge cases (empty, null, undefined)
+- Test boundary conditions
+
+### Edge Cases
+
+**Pattern**: Test boundary conditions and special cases
+
+```typescript
+// ✅ Good: Edge case testing
+test('apply to fields with empty values', () => {
+  const result = applyLogicToFields(fields, logics)
+  expect(result.fields.map(f => f.id)).toStrictEqual(fields.map(f => f.id))
+})
+
+test('apply to fields without logics', () => {
+  const result = applyLogicToFields(fields, undefined, undefined, {
+    id_short_text: 'hello kitty'
+  })
+  expect(result.fields.map(f => f.id)).toStrictEqual(fields.map(f => f.id))
+})
+
+test('apply to fields with empty fields', () => {
+  const result = applyLogicToFields([], logics, undefined, {
+    id_short_text: 'hello world',
+    id_number: 10
+  })
+  expect(result.fields.map(f => f.id)).toStrictEqual([])
+})
+```
+
+**Edge Case Conventions**:
+- Test empty arrays/objects
+- Test undefined/null inputs
+- Test missing optional parameters
+- Test circular references
+- Test boundary values
+
+## Complex Test Scenarios
+
+### Multiple Conditions
+
+**Pattern**: Test complex logic with multiple conditions
+
+```typescript
+// ✅ Good: Complex scenario testing
+test('apply to fields with variables', () => {
+  const _logics: Logic[] = [
+    {
+      fieldId: 'id_short_text',
+      payloads: [
+        {
+          id: 'p1',
+          condition: {
+            comparison: ComparisonEnum.CONTAINS,
+            expected: 'kitty'
+          },
+          action: {
+            kind: ActionEnum.NAVIGATE,
+            fieldId: fields[2].id
+          }
+        },
+        {
+          id: 'p2',
+          condition: {
+            comparison: ComparisonEnum.ENDS_WITH,
+            expected: 'kitty'
+          },
+          action: {
+            kind: ActionEnum.CALCULATE,
+            variable: 'number_var',
+            operator: CalculateEnum.ADDITION,
+            value: 2
+          }
+        }
+      ]
+    }
+  ]
+  const result = applyLogicToFields(fields, _logics, variables, {
+    id_short_text: 'hello kitty',
+    id_number: 5
+  })
+  expect(result.fields.map(f => f.id)).toStrictEqual(
+    fields.filter(f => f.id !== 'id_statement').map(f => f.id)
+  )
+  expect(result.variables).toStrictEqual({
+    number_var: 10,
+    string_var: 'Your name is: hello kitty'
+  })
+})
+```
+
+**Complex Scenario Conventions**:
+- Build complex test data inline
+- Test multiple conditions together
+- Verify multiple aspects of output
+- Use descriptive variable names (`_logics` for modified data)
+
+### Validation Testing
+
+**Pattern**: Test validation logic comprehensively
+
+```typescript
+// ✅ Good: Comprehensive validation testing
+test('validate navigate payload', () => {
+  const payloads: LogicPayload[] = [
+    {
+      id: 'p1',
+      condition: {
+        comparison: ComparisonEnum.ENDS_WITH,
+        expected: 'hello'
+      },
+      action: {
+        kind: ActionEnum.NAVIGATE,
+        fieldId: 'field_id'
+      }
+    },
+    {
+      id: 'p1',
+      condition: {
+        comparison: ComparisonEnum.ENDS_WITH
+      },
+      action: {
+        kind: ActionEnum.NAVIGATE,
+        fieldId: 'field_id'
+      }
+    }
+  ]
+  const result = payloads.map(validatePayload)
+  expect(result).toStrictEqual([true, false])
+})
+```
+
+**Validation Testing Conventions**:
+- Test valid and invalid inputs
+- Test missing required fields
+- Test invalid field combinations
+- Use arrays to test multiple cases
+- Map results for comparison
+
+## Type Safety
+
+### TypeScript in Tests
+
+**Pattern**: Use TypeScript types in test data
+
+```typescript
+// ✅ Good: Typed test data
+const fields: FormField[] = [
+  {
+    id: 'id_short_text',
+    title: 'Short Text',
+    kind: FieldKindEnum.SHORT_TEXT
+  }
+]
+
+const logics: Logic[] = [
+  {
+    fieldId: 'id_short_text',
+    payloads: [
+      {
+        id: 'p1',
+        condition: {
+          comparison: ComparisonEnum.CONTAINS,
+          expected: 'kitty'
+        },
+        action: {
+          kind: ActionEnum.NAVIGATE,
+          fieldId: fields[2].id
+        }
+      }
+    ]
+  }
+]
+```
+
+**Type Safety Conventions**:
+- Use TypeScript types for test data
+- Import types from shared packages
+- Use `as any` sparingly (only when necessary)
+- Let TypeScript catch type errors
+- Use enum values for type-safe comparisons
+
+### Type Assertions
+
+**Pattern**: Use type assertions when needed
+
+```typescript
+// ✅ Good: Type assertion for fixtures
+import fields from './fixtures/fields.json'
+
+test('should convert value to answer', () => {
+  expect(fieldValuesToAnswers(fields as any, values)).toMatchSnapshot()
+})
+
+// ✅ Good: Type assertion for test data
+const _fields: any[] = [
+  {
+    id: 'id_group',
+    kind: 'group'
+  }
+]
+```
+
+**Type Assertion Conventions**:
+- Use `as any` for JSON fixtures when types don't match
+- Use `as any` for incomplete test data
+- Prefer proper types when possible
+- Document why type assertion is needed
+
+## Test Utilities
+
+### Helper Functions
+
+**Pattern**: Extract common test logic
+
+```typescript
+// ✅ Good: Reusable test data
+const obj = {
+  a: {
+    w: 'hello'
+  },
+  b: [
+    {
+      x: 2,
+      y: true
+    }
+  ]
+}
+
+test('clone nested object', () => {
+  expect(clone(obj)).toStrictEqual(obj)
+})
+
+test('clone nested object independence', () => {
+  const copyObj = clone(obj)
+  copyObj.a.w = 'world'
+  expect(obj.a.w).toBe('hello')
+  expect(copyObj.a.w).toBe('world')
+})
+```
+
+**Helper Conventions**:
+- Define shared test data at top of file
+- Reuse test data across multiple tests
+- Extract complex setup into variables
+- Keep helpers focused and simple
+
+## Environment-Specific Testing
+
+### Environment Variables
+
+**Pattern**: Test environment-specific behavior
+
+```typescript
+// ✅ Good: Environment-specific test
+test('payment', () => {
+  const field = {
+    validations: { required: false },
+    properties: {
+      concurrency: 'USD',
+      price: { type: 'number', value: 1 } as NumberPrice
+    },
+    id: 'PAYMENT',
+    title: 'PAYMENT',
+    kind: FieldKindEnum.PAYMENT
+  }
+  const rules = fieldsToValidateRules([field])
+
+  // Server side
+  expect(() => {
+    validate(rules[0], {})
+  }).toThrowError()
+
+  // Client side
+  // @ts-ignore
+  process.env.VALIDATE_CLIENT_SIDE = true
+
+  expect(() => {
+    validate(rules[0], {})
+  }).toThrowError()
+})
+```
+
+**Environment Testing Conventions**:
+- Test server vs client behavior
+- Set environment variables in tests
+- Use `@ts-ignore` for process.env assignments
+- Document environment-specific behavior
+- Test both environments when applicable
+
+## Jest-Specific Patterns
+
+### Jest Environment
+
+**Pattern**: Specify test environment when needed
+
+```typescript
+/**
+ * @jest-environment jsdom
+ */
+test('window.FormData is form data', () => {
+  expect(helper.isFormData(new window.FormData())).toBe(true)
+})
+```
+
+**Jest Environment Conventions**:
+- Use JSDoc comment for environment
+- Use `jsdom` for DOM-related tests
+- Use `node` for Node.js-specific tests
+- Only needed for Jest (not Vitest)
+
+## Best Practices
+
+### Test Quality
+
+1. **Descriptive Names**: Use clear, descriptive test names
+2. **One Concept**: Test one concept per test
+3. **Independence**: Tests should not depend on each other
+4. **Deterministic**: Tests should produce consistent results
+5. **Fast**: Keep tests fast and focused
+
+### Test Coverage
+
+1. **Coverage Goals**: Aim for high coverage of critical paths
+2. **Coverage Reports**: Use `vitest run --coverage` for reports
+3. **Coverage Provider**: Use `@vitest/coverage-v8`
+4. **Focus Areas**: Prioritize business logic and utilities
+5. **Don't Over-Test**: Avoid testing implementation details
+
+### Test Maintenance
+
+1. **Update Snapshots**: Review and update snapshots when output changes
+2. **Refactor Tests**: Refactor tests when code changes
+3. **Remove Dead Tests**: Remove tests for removed functionality
+4. **Keep Tests Simple**: Avoid complex test setup
+5. **Document Complex Tests**: Add comments for complex scenarios
+
+### Performance
+
+1. **Fast Execution**: Keep tests fast (< 1s per test)
+2. **Parallel Execution**: Vitest runs tests in parallel by default
+3. **Avoid Side Effects**: Don't modify global state
+4. **Mock External Dependencies**: Mock slow external calls
+5. **Use Fixtures**: Use fixtures instead of generating data
+
+## Common Patterns
+
+### Testing Pure Functions
+
+**Pattern**: Test input/output relationships
+
+```typescript
+// ✅ Good: Pure function testing
+test('unix timestamp', () => {
+  expect(date().unix()).toBe(timestamp())
+})
+
+test('date expired', () => {
+  const startAt = date('2020-05-05').unix()
+  const endAt = date('2020-05-15').unix()
+  expect(isDateExpired(startAt, endAt, '5d')).toBe(true)
+})
+```
+
+**Pure Function Conventions**:
+- Test with known inputs
+- Verify expected outputs
+- Test edge cases
+- Test multiple scenarios
+
+### Testing Transformations
+
+**Pattern**: Test data transformations
+
+```typescript
+// ✅ Good: Transformation testing
+test('should flatten fields', () => {
+  expect(flattenFields(fields as any)).toMatchSnapshot()
+})
+
+test('should flatten fields with group', () => {
+  const rawFields: any[] = [
+    {
+      properties: {
+        fields: [
+          {
+            id: 'sub1',
+            kind: 'multiple_choice'
+          }
+        ]
+      },
+      id: 'grp1',
+      kind: 'group'
+    }
+  ]
+  expect(flattenFields(rawFields).map(f => f.id)).toStrictEqual(['sub1'])
+})
+```
+
+**Transformation Conventions**:
+- Test input → output mapping
+- Test nested structures
+- Test edge cases (empty, null)
+- Use snapshots for complex outputs
+
+## File Organization Summary
+
+```
+packages/[package-name]/
+├── src/
+│   └── [source-files].ts
+└── test/
+    ├── __snapshots__/
+    │   └── [test-file].test.ts.snap
+    ├── fixtures/
+    │   ├── fields.json
+    │   └── values.json
+    └── [source-file].test.ts
+```
+
+## Import Patterns
+
+### Standard Imports
+
+```typescript
+// ✅ Good: Import order
+// 1. Testing framework
+import { expect, test } from 'vitest'
+
+// 2. Source code being tested
+import { helper, clone } from '../src'
+
+// 3. Types (if needed)
+import { FieldKindEnum, FormField } from '@heyform-inc/shared-types-enums'
+
+// 4. Fixtures (if needed)
+import fields from './fixtures/fields.json'
+```
+
+**Import Conventions**:
+- Import testing framework first
+- Import source code from `../src`
+- Import types from shared packages
+- Import fixtures from `./fixtures/`
+- Group imports logically
+
+## Running Tests
+
+### Development
+
+```bash
+# Run tests in watch mode
+pnpm test
+
+# Run tests once
+pnpm test --run
+
+# Run specific test file
+pnpm test helper.test.ts
+```
+
+### Coverage
+
+```bash
+# Generate coverage report
+pnpm cov
+
+# Coverage with specific threshold
+vitest run --coverage --coverage.thresholds.lines=80
+```
+
+### CI/CD
+
+```bash
+# Run tests in CI (no watch mode)
+vitest run
+
+# Run with coverage
+vitest run --coverage
+```
+
+## Migration Notes
+
+### Jest to Vitest
+
+When migrating from Jest to Vitest:
+
+1. Replace `jest` imports with `vitest`
+2. Update test scripts in `package.json`
+3. Remove Jest configuration
+4. Update snapshot file paths (if needed)
+5. Test environment comments not needed (Vitest auto-detects)
+
+## References
+
+- [Vitest Documentation](https://vitest.dev/)
+- [Vitest API Reference](https://vitest.dev/api/)
+- [Jest Documentation](https://jestjs.io/) (legacy)
+- [Testing Best Practices](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library)

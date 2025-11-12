@@ -18,6 +18,70 @@
   box-shadow: none !important;
 }
 
+// Disable sliding/swipe when navigation arrows are enabled
+.heyform-root:has(.heyform-footer-right .heyform-pagination-previous) {
+  .heyform-block-container,
+  .heyform-block-scroll,
+  .heyform-scroll-wrapper {
+    touch-action: pan-y !important;
+    overscroll-behavior: none !important;
+    overscroll-behavior-y: contain !important;
+    -webkit-overflow-scrolling: auto !important;
+  }
+  
+  // Prevent wheel scroll navigation completely
+  .heyform-block-container {
+    pointer-events: auto !important;
+  }
+  
+  // Prevent any scroll-based navigation
+  .heyform-body {
+    overscroll-behavior: none !important;
+  }
+}
+
+// Also apply when navigation arrows class is present
+.heyform-navigation-arrows-enabled {
+  touch-action: pan-y !important;
+  overscroll-behavior-y: contain !important;
+  
+  .heyform-block-container,
+  .heyform-block-scroll,
+  .heyform-scroll-wrapper {
+    touch-action: pan-y !important;
+    overscroll-behavior-y: contain !important;
+  }
+}
+
+// Ensure footer buttons are visible and styled
+.heyform-footer {
+  z-index: 20 !important;
+}
+
+.heyform-footer-right {
+  pointer-events: auto !important;
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.heyform-pagination {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+.heyform-pagination .button,
+.heyform-branding {
+  background: linear-gradient(135deg, var(--heyform-button-color) 0%, var(--heyform-button-opacity-80-color) 100%) !important;
+  color: var(--heyform-button-text-color) !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: inline-flex !important;
+  pointer-events: auto !important;
+}
+
 // Additional overrides for published form to ensure no blue boxes and grey placeholders
 input,
 input[type='text'],

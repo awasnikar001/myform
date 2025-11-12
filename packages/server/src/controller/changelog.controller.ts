@@ -9,12 +9,18 @@ export class ChangelogController {
   @Get('/api/changelog/latest')
   @HttpCode(HttpStatus.OK)
   async getLatestRelease() {
-    return this.changelogService.getLatestRelease()
+    const result = await this.changelogService.getLatestRelease()
+
+    // Return null gracefully if rate limited or error occurred
+    return result || null
   }
 
   @Get('/api/changelogs')
   @HttpCode(HttpStatus.OK)
   async changelogs() {
-    return this.changelogService.getAllReleases()
+    const result = await this.changelogService.getAllReleases()
+
+    // Return empty array gracefully if rate limited or error occurred
+    return result || []
   }
 }

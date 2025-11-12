@@ -1,3 +1,6 @@
+---
+alwaysApply: false
+---
 # HeyForm Project Rules
 
 > **AUTO-UPDATE INSTRUCTION**: When making changes that reveal new patterns, dependencies, or conventions, automatically update this file to reflect them. Keep it concise - remove outdated info, add critical new constraints. This file should evolve with the project.

@@ -7,7 +7,7 @@ module.exports = {
   theme: {
     fontFamily: {
       sans: [
-        ['Poppins', ...defaultTheme.fontFamily.sans],
+        ['Inter', ...defaultTheme.fontFamily.sans],
         {
           fontFeatureSettings: '"cv11"'
         }

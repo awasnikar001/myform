@@ -189,6 +189,14 @@ class SharedPropertyInput {
   @Field({ nullable: true })
   @IsOptional()
   redirectDelay?: number
+
+  @Field({ nullable: true })
+  @IsOptional()
+  min?: number
+
+  @Field({ nullable: true })
+  @IsOptional()
+  max?: number
 }
 
 @InputType()
@@ -398,9 +406,20 @@ export class UpdateFormCustomReportInput extends FormDetailInput {
 
 @InputType()
 export class FormAnalyticInput extends FormDetailInput {
-  @Field()
+  @Field({ nullable: true })
   @IsEnum(FormAnalyticRangeEnum)
-  range: FormAnalyticRangeEnum
+  @IsOptional()
+  range?: FormAnalyticRangeEnum
+
+  @Field({ nullable: true })
+  @IsNumber()
+  @IsOptional()
+  startDate?: number
+
+  @Field({ nullable: true })
+  @IsNumber()
+  @IsOptional()
+  endDate?: number
 }
 
 @ObjectType()
@@ -425,6 +444,35 @@ export class FormAnalyticType {
 
   @Field(type => FormAnalyticResult)
   averageTime: FormAnalyticResult
+}
+
+@InputType()
+export class FormAnalyticTimeSeriesInput extends FormDetailInput {
+  @Field()
+  @IsNumber()
+  startDate: number
+
+  @Field()
+  @IsNumber()
+  endDate: number
+}
+
+@ObjectType()
+export class TimeSeriesDataType {
+  @Field()
+  date: string
+
+  @Field()
+  views: number
+
+  @Field()
+  submissions: number
+}
+
+@ObjectType()
+export class FormAnalyticTimeSeriesType {
+  @Field(type => [TimeSeriesDataType])
+  data: TimeSeriesDataType[]
 }
 
 @InputType()
@@ -1113,6 +1161,9 @@ export class FormType {
 
   @Field(type => [FormFieldType], { nullable: true })
   drafts?: FormField[]
+
+  @Field(type => [FormFieldType], { nullable: true })
+  fields?: FormField[]
 
   @Field(type => [HiddenFieldType], { nullable: true })
   hiddenFields?: HiddenField[]

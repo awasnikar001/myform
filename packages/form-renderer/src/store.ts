@@ -182,7 +182,9 @@ const actions: any = {
     ...state,
     isSubmitted,
     isSidebarOpen: false,
-    thankYouFieldId
+    thankYouFieldId,
+    // Clear all form values after successful submission
+    values: {}
   }),
 
   setIsSidebarOpen: (state: IState, { isSidebarOpen }: any) => ({ ...state, isSidebarOpen }),

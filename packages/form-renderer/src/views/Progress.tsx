@@ -50,6 +50,12 @@ const CircularProgressbar: FC<CircularProgressbarProps> = ({
 }) => {
   return (
     <svg className="heyform-circular-progressbar" viewBox={`0 0 ${radius * 2} ${radius * 2}`}>
+      <defs>
+        <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="currentColor" stopOpacity="1" />
+          <stop offset="100%" stopColor="currentColor" stopOpacity="0.8" />
+        </linearGradient>
+      </defs>
       <circle
         className="heyform-circular-circle"
         fill="none"

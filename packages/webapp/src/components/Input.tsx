@@ -429,8 +429,8 @@ const TextArea: FC<TextAreaProps> = ({
       <textarea
         ref={inputRef}
         className={cn(
-          'scrollbar placeholder:text-secondary focus:border-input block w-full appearance-none rounded-lg border bg-transparent px-3.5 py-2.5 text-base/[1.4rem] ring-0 focus:shadow-none focus:outline-none focus:ring-0 sm:px-3 sm:py-2 sm:text-sm/[1.4rem]',
-          hasError ? 'border-error focus:border-error' : 'border-input focus:border-input'
+          'scrollbar focus:ring-primary/20 focus:border-primary block w-full appearance-none rounded-lg border-2 border-gray-300 bg-white px-3.5 py-2.5 text-base/[1.4rem] ring-0 transition-all placeholder:text-gray-400 focus:shadow-sm focus:outline-none focus:ring-2 sm:px-3 sm:py-2 sm:text-sm/[1.4rem] dark:border-gray-400 dark:bg-gray-950 dark:placeholder:text-gray-500',
+          hasError ? 'border-error focus:border-error focus:ring-error/20' : ''
         )}
         data-slot="textarea"
         value={value}

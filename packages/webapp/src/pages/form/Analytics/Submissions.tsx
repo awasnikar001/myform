@@ -7,7 +7,7 @@ import { SubmissionService } from '@/services'
 import { timeFromNow, useParam } from '@/utils'
 import { helper } from '@heyform-inc/utils'
 
-import { Pagination, useToast } from '@/components'
+import { Image, Pagination, useToast } from '@/components'
 
 interface SubmissionItemProps {
   answers: AnyMap[]
@@ -86,7 +86,30 @@ const AnswerValue: FC<{ answer: AnyMap }> = ({ answer }) => {
       return <div>{answer.value?.filename}</div>
 
     case FieldKindEnum.SIGNATURE:
-      return <div>{t('form.builder.question.signature')}</div>
+      // Display the signature image if it's a valid URL or base64 data URL
+      if (answer.value) {
+        const isDataURL = helper.isString(answer.value) && answer.value.startsWith('data:')
+        // Check for both validator.isURL and simple http/https pattern (for localhost URLs)
+        const isValidURL =
+          helper.isURL(answer.value) ||
+          (helper.isString(answer.value) && /^https?:\/\//i.test(answer.value))
+
+        if (isDataURL) {
+          return (
+            <img
+              src={answer.value}
+              width={80}
+              height={40}
+              alt="Signature"
+              className="object-contain"
+            />
+          )
+        }
+        if (isValidURL) {
+          return <Image src={answer.value} width={80} height={40} />
+        }
+      }
+      return null
 
     default:
       return answer.value

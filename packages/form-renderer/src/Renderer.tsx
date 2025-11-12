@@ -138,7 +138,19 @@ export const FormRenderer: FC<FormRendererProps> = ({
       ...initStore(form, locale, autoSave, allowPayment, ssr),
       query
     }),
-    [form, locale, autoSave, allowPayment, query]
+    [
+      form,
+      locale,
+      autoSave,
+      allowPayment,
+      query,
+      enableQuestionList,
+      enableNavigationArrows,
+      reportAbuseURL,
+      customUrlRedirects,
+      alwaysShowNextButton,
+      onSubmit
+    ]
   )
   const [state, dispatch] = useReducer(StoreReducer, memoState)
 
@@ -175,6 +187,46 @@ export const FormRenderer: FC<FormRendererProps> = ({
       }
     }
   }, [])
+
+  // Disable wheel scroll navigation when navigation arrows are enabled
+  useEffect(() => {
+    if (!state.enableNavigationArrows) {
+      return
+    }
+
+    function handleRootWheel(event: WheelEvent) {
+      // Prevent question navigation via wheel scroll
+      const target = event.target as HTMLElement
+
+      // ONLY allow scrolling within actual form input elements
+      // Block navigation handler from receiving events for all other elements
+      const isScrollableFormElement =
+        target.tagName === 'TEXTAREA' ||
+        target.tagName === 'SELECT' ||
+        target.closest('textarea') ||
+        target.closest('select') ||
+        target.closest('[role="listbox"]') ||
+        target.closest('[contenteditable="true"]')
+
+      // If it's not a form input element, stop propagation AND prevent default
+      // This prevents the accumulation of deltaY values that trigger navigation
+      // We prevent default to ensure React's synthetic events don't fire
+      if (!isScrollableFormElement) {
+        event.stopPropagation()
+        event.preventDefault()
+        return false
+      }
+    }
+
+    // Use capture phase to catch events before they reach React handlers
+    // Use passive: false so we can call preventDefault()
+    const rootElement = document.querySelector('.heyform-root') || document
+    rootElement.addEventListener('wheel', handleRootWheel, { passive: false, capture: true })
+
+    return () => {
+      rootElement.removeEventListener('wheel', handleRootWheel, { capture: true })
+    }
+  }, [state.enableNavigationArrows])
 
   return (
     <StoreContext.Provider value={{ state, dispatch }}>

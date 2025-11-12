@@ -110,6 +110,7 @@ export function useWheelScroll(
   }
 
   function handleWheelScroll(event: WheelEvent) {
+    // Early return if scrolling is disabled
     if (!isScrollable || isWheelScrollDisabled) {
       return
     }

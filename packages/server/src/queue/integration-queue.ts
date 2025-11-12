@@ -46,7 +46,7 @@ export class IntegrationQueue extends BaseQueue {
             config
           })
 
-          this.logger.info(`Integration ${appId} executed successfully`, {
+          this.logger.logWithContext(`Integration ${appId} executed successfully`, {
             integrationId,
             formId,
             submissionId,
