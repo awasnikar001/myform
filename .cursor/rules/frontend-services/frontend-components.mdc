@@ -3,19 +3,16 @@ description: Frontend component patterns, conventions, and best practices for Re
 globs: packages/webapp/src/components/**/*.tsx, packages/form-renderer/src/components/**/*.tsx
 alwaysApply: false
 ---
+
 # Frontend Component Patterns
 
-This document outlines the conventions and patterns for React components in the HeyForm monorepo, covering component structure, TypeScript types, styling, hooks, composition, and best practices.
+React 19 component conventions for HeyForm monorepo.
 
 ## Component Structure
 
-### Basic Component Pattern
-
-**Pattern**: Functional components with TypeScript interfaces
-
 ```typescript
-// ✅ Good: Standard component structure
-import { FC, ReactNode } from 'react'
+// Standard pattern
+import { FC } from 'react'
 import { cn } from '@/utils'
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -31,10 +28,7 @@ const ButtonComponent: FC<ButtonProps> = ({
   ...restProps
 }) => {
   return (
-    <button
-      className={cn('base-classes', className)}
-      {...restProps}
-    >
+    <button className={cn('base-classes', className)} {...restProps}>
       {children}
     </button>
   )
@@ -45,161 +39,73 @@ export const Button = ButtonComponent
 
 **Conventions**:
 - Use `FC<PropsType>` for functional components
-- Export props interface with `export interface ComponentNameProps`
-- Use descriptive component names (PascalCase)
-- Destructure props with defaults in function signature
+- Export props interface: `export interface ComponentNameProps`
+- Destructure props with defaults in signature
 - Always spread `...restProps` to pass through HTML attributes
-- Export component as named export
+- Named exports (not default)
 
-### Component File Organization
+## TypeScript Patterns
 
-**Pattern**: One component per file, co-located types
-
-```typescript
-// ✅ Good: Component with types in same file
-// Button.tsx
-export interface ButtonProps { ... }
-const ButtonComponent: FC<ButtonProps> = { ... }
-export const Button = ButtonComponent
-
-// ✅ Good: Multiple related components in same file
-const ButtonComponent: FC<ButtonProps> = { ... }
-const GhostButton: FC<ButtonProps> = { ... }
-const LinkButton: FC<ButtonProps> = { ... }
-
-export const Button = Object.assign(ButtonComponent, {
-  Ghost: GhostButton,
-  Link: LinkButton
-})
-```
-
-**Conventions**:
-- One main component per file
-- Related variants can be in same file
-- Types/interfaces defined above component
-- Export component at bottom of file
-
-## TypeScript Types & Interfaces
-
-### Props Interface Patterns
-
-**Pattern**: Extend HTML element attributes with custom props
+### Props Interfaces
 
 ```typescript
-// ✅ Good: Extend HTML attributes
+// Extend HTML attributes
 export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
   hasError?: boolean
-  leading?: ReactNode
-  trailing?: ReactNode
-  onChange?: (value: any) => void
+  onChange?: (value: any) => void  // Custom signature
 }
 
-// ✅ Good: Extend ComponentProps utility type
-interface BadgeProps extends ComponentProps {
+// Use global types (from vite-env.d.ts)
+interface ModalProps extends DOMProps {  // Only children prop
+  open?: boolean
+}
+
+interface BadgeProps extends ComponentProps {  // All HTML attributes
   color?: 'red' | 'blue' | 'green'
 }
-
-// ✅ Good: Extend DOMProps for components without HTML element
-interface ModalProps extends DOMProps {
-  open?: boolean
-  onOpenChange?: (open: boolean) => void
-}
 ```
 
-**Conventions**:
-- Use `ComponentProps<E>` for standard HTML element props (aliased to `HTMLAttributes<E>`)
-- Use `DOMProps<E>` for components that only need `children` prop
-- Use `Omit<>` to exclude conflicting props (e.g., `onChange`, `children`)
-- Export props interfaces with `export interface`
-- Use union types for string literals: `'sm' | 'md' | 'lg'`
+**Global Types**:
+- `ComponentProps<E>` = `HTMLAttributes<E>` (all HTML attrs)
+- `DOMProps<E>` = Only `children` prop
+- `Any` = TypeScript `any`
+- `AnyMap` = `Record<string, any>`
 
-### Global Type Definitions
-
-**Pattern**: Global types defined in `vite-env.d.ts`
+### Custom Refs
 
 ```typescript
-// ✅ Good: Global types available everywhere
-declare global {
-  type DOMProps<E = HTMLElement> = Pick<DOMAttributes<E>, 'children'>
-  type ComponentProps<E = HTMLElement> = HTMLAttributes<E>
-  type Any = any
-  type AnyMap<K = string, V = Any> = Record<K, V>
-  type Timeout = ReturnType<typeof setTimeout>
-}
-```
-
-**Conventions**:
-- `ComponentProps<E>` - Standard HTML attributes
-- `DOMProps<E>` - Only children prop
-- `Any` - TypeScript `any` type
-- `AnyMap` - Record type alias
-- Use these types consistently across components
-
-### Ref Patterns
-
-**Pattern**: Custom ref interfaces with useImperativeHandle
-
-```typescript
-// ✅ Good: Custom ref interface
+// Expose custom ref interface
 export interface InputRef {
   clear: () => void
   submit: () => void
 }
 
-export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
+export interface InputProps {
   ref?: Ref<InputRef>
-  onChange?: (value: any) => void
 }
 
-const InputComponent: FC<InputProps> = ({ ref, ...restProps }) => {
+const InputComponent: FC<InputProps> = ({ ref, ...props }) => {
   const inputRef = useRef<HTMLInputElement>(null)
 
-  useImperativeHandle<InputRef, InputRef>(
-    ref,
-    () => ({
-      clear() {
-        setValue('')
-      },
-      submit() {
-        onEnter?.(inputRef.current?.value)
-      }
-    }),
-    []
-  )
+  useImperativeHandle<InputRef, InputRef>(ref, () => ({
+    clear: () => setValue(''),
+    submit: () => onEnter?.(inputRef.current?.value)
+  }), [])
 
-  return <input ref={inputRef} {...restProps} />
+  return <input ref={inputRef} {...props} />
 }
 ```
-
-**Ref Conventions**:
-- Export ref interface: `export interface ComponentNameRef`
-- Use `Ref<ComponentRef>` type in props
-- Use `useImperativeHandle` to expose custom methods
-- Keep internal ref separate from exposed ref
-- Include ref in dependency array if needed
 
 ## Component Composition
 
 ### Object.assign Pattern
 
-**Pattern**: Compose multiple component variants using Object.assign
-
 ```typescript
-// ✅ Good: Component composition pattern
+// Compose variants using Object.assign
 const ButtonComponent: FC<ButtonProps> = ({ ... }) => { ... }
 
-const GhostButton: FC<ButtonProps> = ({ className, ...restProps }) => (
-  <ButtonComponent
-    className={cn('border-input bg-foreground', className)}
-    {...restProps}
-  />
-)
-
-const LinkButton: FC<ButtonProps> = ({ className, ...restProps }) => (
-  <ButtonComponent
-    className={cn('border-0 bg-transparent', className)}
-    {...restProps}
-  />
+const GhostButton: FC<ButtonProps> = ({ className, ...props }) => (
+  <ButtonComponent className={cn('border-input', className)} {...props} />
 )
 
 export const Button = Object.assign(ButtonComponent, {
@@ -210,334 +116,101 @@ export const Button = Object.assign(ButtonComponent, {
 // Usage: <Button />, <Button.Ghost />, <Button.Link />
 ```
 
-**Composition Conventions**:
-- Main component as first argument to `Object.assign`
-- Variants as properties in second argument object
-- Variants wrap main component with different styling/props
-- Export composed component as named export
-- Use PascalCase for variant names
+**Pattern**: Main component + variants as properties
 
-### Sub-component Pattern
+## Styling with TailwindCSS
 
-**Pattern**: Nested components for complex structures
+### cn() Utility
 
 ```typescript
-// ✅ Good: Form with sub-components
-const FormComponent: FC<FormProps> = { ... }
+// Import from utils
+import { cn } from '@/utils'  // Combines clsx + tailwind-merge
 
-const FormItem: FC<FormItemProps> = { ... }
+// Basic usage
+className={cn('base-classes', className)}
 
-const SimpleForm: FC<SimpleFormProps> = { ... }
-
-export const Form = Object.assign(FormComponent, {
-  Item: FormItem,
-  Simple: SimpleForm
-})
-
-// Usage: <Form />, <Form.Item />, <Form.Simple />
-```
-
-**Sub-component Conventions**:
-- Use `Object.assign` to attach sub-components
-- Sub-components are separate components, not nested
-- Export all variants together
-- Document usage in component comments
-
-## Styling Patterns
-
-### TailwindCSS with cn Utility
-
-**Pattern**: Use `cn()` utility for conditional classes
-
-```typescript
-// ✅ Good: cn utility for class merging
-import { cn } from '@/utils'
-
-const ButtonComponent: FC<ButtonProps> = ({
-  className,
-  size = 'lg',
-  loading,
-  iconOnly,
-  ...restProps
-}) => {
-  return (
-    <button
-      className={cn(
-        'bg-primary text-primary-light relative h-11 rounded-lg px-3.5',
-        {
-          '[&_[data-slot=button]]:opacity-0': loading,
-          'w-11 px-0': iconOnly
-        },
-        className
-      )}
-      {...restProps}
-    >
-      {children}
-    </button>
-  )
-}
-```
-
-**Styling Conventions**:
-- Always use `cn()` utility (combines `clsx` + `tailwind-merge`)
-- Base classes as first argument (string)
-- Conditional classes as second argument (object)
-- Custom className as last argument
-- Use TailwindCSS utility classes
-- Use `data-*` attributes for styling hooks
-
-### Conditional Classes Pattern
-
-**Pattern**: Object syntax for conditional Tailwind classes
-
-```typescript
-// ✅ Good: Conditional classes with object
+// Conditional classes
 className={cn(
-  'base-classes',
+  'flex items-center',
   {
-    'active-class': isActive,
-    'error-class': hasError,
-    'disabled-class': disabled
+    'opacity-50': disabled,
+    'bg-primary': isActive,
+    '[&_[data-slot=button]]:opacity-0': loading  // Nested selectors
   },
-  className
+  className  // User className always last
 )}
 
-// ✅ Good: Multiple conditions
-className={cn(
-  'flex items-center gap-x-2',
-  {
-    'flex-col': vertical,
-    'justify-between': spaceBetween,
-    'opacity-50': disabled
-  },
-  className
-)}
+// Responsive (mobile-first)
+className="h-11 sm:h-10 data-[size=sm]:h-9"
 ```
 
-**Conditional Class Conventions**:
-- Use object syntax for boolean conditions
-- Keep base classes separate from conditionals
-- Use descriptive class names
-- Group related conditionals together
-
-### Responsive Design
-
-**Pattern**: Mobile-first responsive classes
-
-```typescript
-// ✅ Good: Mobile-first responsive classes
-className="text-base/6 sm:text-sm/6 h-11 sm:h-10 px-3.5 sm:px-3"
-
-// ✅ Good: Responsive with data attributes
-className="h-11 data-[size=md]:h-9 data-[size=sm]:h-9 sm:h-10 data-[size=md]:sm:h-9"
-```
-
-**Responsive Conventions**:
-- Mobile-first approach (base = mobile, `sm:` = desktop)
-- Use `sm:` breakpoint for tablet/desktop
-- Group responsive variants together
-- Use data attributes for component-level variants
+**Rules**:
+- Always use `cn()` for class merging
+- Base classes first, conditions second, custom className last
+- Use `data-*` attributes with Tailwind selectors
 
 ## React Hooks Patterns
 
-### useState Pattern
-
-**Pattern**: Local state with TypeScript types
-
 ```typescript
-// ✅ Good: Typed useState
+// useState with TypeScript
 const [value, setValue] = useState<string>('')
-const [loading, setLoading] = useState(false)
-const [state, setState] = useState<'idle' | 'pending' | 'success' | 'error'>('idle')
+const [state, setState] = useState<'idle' | 'pending' | 'success'>('idle')
 
-// ✅ Good: State from props with sync
-const [value, setValue] = useState(rawValue)
-
-useEffect(() => {
-  if (rawValue !== value) {
-    setValue(rawValue)
-  }
-}, [rawValue])
-```
-
-**useState Conventions**:
-- Provide TypeScript type for complex types
-- Use union types for state machines
-- Sync with props using `useEffect`
-- Use descriptive state variable names
-
-### useCallback Pattern
-
-**Pattern**: Memoize event handlers and callbacks
-
-```typescript
-// ✅ Good: useCallback for event handlers
+// useCallback for event handlers
 const handleChange = useCallback(
   (newValue: string) => {
     onChange?.(newValue)
-    onValuesChange?.(changes, values)
   },
-  [onChange, onValuesChange, changes, values]
+  [onChange]
 )
 
-// ✅ Good: useCallback with dependencies
-const handleConfirm = useCallback(async () => {
-  onConfirm?.()
-  if (fetch) {
-    setTrue()
-    try {
-      await fetch()
-      onFinish?.()
-    } catch (err: Any) {
-      setError(err)
-    }
-    setFalse()
-  }
-}, [fetch, onConfirm, onFinish, setError, setFalse, setTrue])
-```
-
-**useCallback Conventions**:
-- Use for event handlers passed to children
-- Use for callbacks in dependency arrays
-- Include all dependencies in array
-- Use `?.()` for optional callbacks
-- Name handlers with `handle` prefix
-
-### useMemo Pattern
-
-**Pattern**: Memoize expensive computations
-
-```typescript
-// ✅ Good: useMemo for computed values
+// useMemo for expensive computations
 const columns = useMemo(
-  () =>
-    rawColumns.map(c => ({
-      _key: (c.field as AnyMap)[rowKey],
-      ...c
-    })),
-  [rawColumns, rowKey]
+  () => rawColumns.map(c => ({ _key: c.id, ...c })),
+  [rawColumns]
 )
 
-// ✅ Good: useMemo for filtered lists
-const list = useMemo(
-  () =>
-    (data?.list || []).map(r => ({
-      _key: r[rowKey],
-      ...r
-    })),
-  [data?.list, rowKey]
-)
-```
-
-**useMemo Conventions**:
-- Use for expensive array/object transformations
-- Use for filtered/mapped data
-- Include all dependencies
-- Return transformed data structure
-
-### useEffect Pattern
-
-**Pattern**: Side effects with cleanup
-
-```typescript
-// ✅ Good: useEffect with cleanup
+// useEffect with cleanup
 useEffect(() => {
-  return () => {
-    cancel()
-  }
+  return () => cancel()
 }, [])
 
-// ✅ Good: Sync with props
-useEffect(() => {
-  if (rawValue !== value) {
-    setValue(rawValue)
-  }
-}, [rawValue])
-
-// ✅ Good: Side effect with dependencies
-useEffect(() => {
-  onLoadingChange?.(loading)
-}, [loading, onLoadingChange])
-```
-
-**useEffect Conventions**:
-- Return cleanup function for subscriptions
-- Include all dependencies in array
-- Use optional chaining for callbacks
-- Sync state with props when needed
-
-### useRef Pattern
-
-**Pattern**: Refs for DOM access and mutable values
-
-```typescript
-// ✅ Good: useRef for DOM elements
+// useRef for DOM and mutable values
 const inputRef = useRef<HTMLInputElement>(null)
-
-useEffect(() => {
-  if (inputRef.current && autoFocus) {
-    inputRef.current.focus()
-  }
-}, [inputRef])
-
-// ✅ Good: useRef for mutable values
-const lock = useRef(false)
-const timerRef = useRef<Timeout>(undefined)
-
-function handleCompositionStart() {
-  lock.current = true
-}
+const lock = useRef(false)  // Mutable value (no re-render)
 ```
-
-**useRef Conventions**:
-- Type refs with element type: `useRef<HTMLInputElement>(null)`
-- Use for DOM element access
-- Use for mutable values that don't trigger re-renders
-- Access via `.current` property
 
 ## Event Handlers
 
-### onChange Pattern
-
-**Pattern**: Custom onChange with value extraction
+### Custom onChange
 
 ```typescript
-// ✅ Good: Custom onChange handler
+// Extract value from event
 export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
   onChange?: (value: any) => void
 }
 
-const InputComponent: FC<InputProps> = ({ onChange, ...restProps }) => {
+const InputComponent: FC<InputProps> = ({ onChange, type, ...props }) => {
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     let newValue = event.target.value
 
     // Type-specific processing
     if (type === 'number') {
       newValue = Number(newValue)
-      if (helper.isNan(newValue)) {
-        newValue = rawValue
-      }
+      if (helper.isNan(newValue)) return
     }
 
     onChange?.(newValue)
   }
 
-  return <input onChange={handleChange} {...restProps} />
+  return <input onChange={handleChange} {...props} />
 }
 ```
 
-**onChange Conventions**:
-- Extract value from event
-- Process value based on type
-- Call optional callback with processed value
-- Use `?.()` for optional callbacks
-
-### Composition Events
-
-**Pattern**: Handle IME composition events
+### Composition Events (IME)
 
 ```typescript
-// ✅ Good: Composition event handling
+// Handle IME input (Chinese, Japanese, Korean)
 const lock = useRef(false)
 
 function handleCompositionStart() {
@@ -546,12 +219,12 @@ function handleCompositionStart() {
 
 function handleCompositionEnd(event: CompositionEvent<HTMLInputElement>) {
   lock.current = false
-  onChange?.(getValue(event))
+  onChange?.(event.currentTarget.value)
 }
 
 function handleChange(event: ChangeEvent<HTMLInputElement>) {
   if (!lock.current) {
-    onChange?.(getValue(event))
+    onChange?.(event.target.value)
   }
 }
 
@@ -564,148 +237,39 @@ return (
 )
 ```
 
-**Composition Conventions**:
-- Use ref to track composition state
-- Lock onChange during composition
-- Call onChange on composition end
-- Prevents duplicate onChange calls for IME
+**Critical**: Always use composition lock to prevent duplicate onChange calls
 
 ### Keyboard Events
 
-**Pattern**: Handle keyboard interactions
-
 ```typescript
-// ✅ Good: Keyboard event handler
 function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
   if (!lock.current && event.key === 'Enter') {
-    onEnter?.(getValue(event as Any))
-  }
-}
-
-return <input onKeyDown={handleKeyDown} {...restProps} />
-```
-
-**Keyboard Conventions**:
-- Check composition lock before handling
-- Use `event.key` for key detection
-- Call optional callbacks with `?.()`
-- Extract value before calling callback
-
-## Data Fetching & Async Patterns
-
-### Async Component Pattern
-
-**Pattern**: Async data fetching with loading/error states
-
-```typescript
-// ✅ Good: Async component with states
-export interface AsyncProps {
-  loader?: ReactNode
-  cacheFirst?: boolean
-  fetch: () => Promise<boolean>
-  refreshDeps?: any[]
-  emptyRender?: (props: EmptyRenderProps) => ReactNode
-  errorRender?: (err: Error) => ReactNode
-  children: ReactNode
-}
-
-export const Async: FC<AsyncProps> = ({
-  loader,
-  cacheFirst = false,
-  fetch,
-  refreshDeps,
-  emptyRender,
-  errorRender,
-  children
-}) => {
-  const [state, setState] = useState<'idle' | 'pending' | 'success' | 'error'>('idle')
-
-  const { data, error, runAsync: refresh, cancel } = useRequest(
-    async () => await fetch(),
-    {
-      refreshDeps,
-      onBefore() {
-        setState('pending')
-      },
-      onSuccess() {
-        setState('success')
-      },
-      onError() {
-        setState('error')
-      }
-    }
-  )
-
-  useEffect(() => {
-    return () => {
-      cancel()
-    }
-  }, [])
-
-  switch (state) {
-    case 'idle':
-      return cacheFirst ? children : null
-    case 'pending':
-      return cacheFirst ? children : loader
-    case 'success':
-      return !data && emptyRender ? emptyRender({ refresh }) : children
-    case 'error':
-      return errorRender ? errorRender(error as Error) : children
-    default:
-      return null
+    onEnter?.(event.currentTarget.value)
   }
 }
 ```
 
-**Async Conventions**:
-- Use state machine for async states
-- Use `useRequest` hook from `ahooks`
-- Provide loader, empty, and error render props
-- Cancel requests on unmount
-- Support cache-first mode
-
-### Form Fetching Pattern
-
-**Pattern**: Form submission with loading/error states
+## Data Fetching
 
 ```typescript
-// ✅ Good: Form with fetch integration
-const SimpleForm: FC<SimpleFormProps> = ({
-  fetch,
-  showFetchError = true,
-  submitProps: { label, ...restSubmitProps },
-  ...restProps
-}) => {
+// Async component with states
+import { useRequest } from 'ahooks'
+
+const SimpleForm: FC<SimpleFormProps> = ({ fetch, ...props }) => {
   const { loading, error, runAsync } = useRequest(fetch!, {
-    manual: true,
-    refreshDeps: [fetch, ...refreshDeps]
+    manual: true
   })
 
   async function handleFinish(values: any) {
-    if (onFinish) {
-      onFinish(values)
-    } else {
-      await runAsync(values)
-    }
+    await runAsync(values)
   }
 
   return (
-    <Form onFinish={handleFinish} {...restProps}>
+    <Form onFinish={handleFinish} {...props}>
       {children}
-
-      <div data-slot="submit">
-        <Button
-          type="submit"
-          loading={loading}
-          data-slot="submit-button"
-          {...restSubmitProps}
-        >
-          {label}
-        </Button>
-      </div>
-
-      {showFetchError && error && !loading && (
-        <div className="text-error !mt-1 text-sm/6" data-slot="form-error">
+      <Button type="submit" loading={loading}>Submit</Button>
+      {error && !loading && (
+        <div className="text-error text-sm" data-slot="form-error">
           {error.message}
         </div>
       )}
@@ -714,39 +278,24 @@ const SimpleForm: FC<SimpleFormProps> = ({
 }
 ```
 
-**Form Fetching Conventions**:
-- Use `useRequest` with `manual: true`
-- Show loading state on submit button
-- Display error message below form
-- Use `data-slot` attributes for styling hooks
-- Support both `fetch` prop and `onFinish` callback
+**Pattern**: Use `useRequest` from `ahooks` for async operations
 
 ## Loading States
 
-### Loading Prop Pattern
-
-**Pattern**: Loading state with visual feedback
-
 ```typescript
-// ✅ Good: Loading prop with loader
-const ButtonComponent: FC<ButtonProps> = ({
-  loading,
-  disabled,
-  children,
-  ...restProps
-}) => {
+// Loading prop with visual feedback
+const ButtonComponent: FC<ButtonProps> = ({ loading, children, ...props }) => {
   return (
     <button
       className={cn({
         '[&_[data-slot=button]]:opacity-0': loading
       })}
       disabled={loading || disabled}
-      {...restProps}
+      {...props}
     >
       <div data-slot="button">{children}</div>
-
       {loading && (
-        <div className="absolute inset-0 flex items-center justify-center" data-slot="loader">
+        <div className="absolute inset-0 flex items-center justify-center">
           <Loader />
         </div>
       )}
@@ -755,152 +304,80 @@ const ButtonComponent: FC<ButtonProps> = ({
 }
 ```
 
-**Loading Conventions**:
-- Accept `loading` boolean prop
-- Disable component when loading
-- Hide content with opacity when loading
-- Show loader overlay when loading
-- Use `data-slot` for styling hooks
-
 ## Error Handling
 
-### Error Display Pattern
-
-**Pattern**: Error messages with styling
-
 ```typescript
-// ✅ Good: Error display
-{showFetchError && error && !loading && (
-  <div className="text-error !mt-1 text-sm/6" data-slot="form-error">
+// Error display pattern
+{error && !loading && (
+  <div className="text-error text-sm" data-slot="error">
     {error.message}
   </div>
 )}
 
-// ✅ Good: Error state in form item
-const hasError = meta.errors.length > 0
-
-<div
-  className={className}
-  data-slot="item"
-  data-error={hasError ? '' : undefined}
->
-  {hasError && (
-    <div className="text-error text-sm/6" data-slot="error">
-      {meta.errors[0]}
-    </div>
-  )}
+// Error state with data attribute
+<div data-error={hasError ? '' : undefined}>
+  {hasError && <div className="text-error">{meta.errors[0]}</div>}
 </div>
 ```
 
-**Error Conventions**:
-- Use `text-error` class for error text
-- Show errors only when not loading
-- Use `data-error` attribute for styling hooks
-- Display first error message
-- Use `data-slot` for error container
-
 ## Internationalization
 
-### i18n Pattern
-
-**Pattern**: Use react-i18next for translations
-
 ```typescript
-// ✅ Good: Translation hook
 import { useTranslation } from 'react-i18next'
 
-const ButtonComponent: FC<ButtonProps> = ({ ... }) => {
+const Component: FC = () => {
   const { t } = useTranslation()
-
-  return (
-    <button>
-      {copied ? t('components.copied') : t('components.copy')}
-    </button>
-  )
+  return <button>{t('components.copy')}</button>
 }
 ```
 
-**i18n Conventions**:
-- Use `useTranslation` hook
-- Access translations via `t()` function
-- Use dot notation for keys: `'components.copy'`
-- Keep translation keys organized by feature
+**Keys**: Use dot notation (`'components.copy'`, `'form.builder.title'`)
 
 ## Data Attributes & Accessibility
 
 ### data-slot Pattern
 
-**Pattern**: Use data-slot for styling and testing hooks
-
 ```typescript
-// ✅ Good: data-slot attributes
-<div data-slot="item" data-name={name} data-error={hasError ? '' : undefined}>
+// Use data-slot for styling and testing hooks
+<div data-slot="item" data-error={hasError ? '' : undefined}>
   <div data-slot="control">...</div>
-  <div data-slot="info">...</div>
   <div data-slot="content">{children}</div>
 </div>
 
-// ✅ Good: data-slot for conditional styling
+// Styling with data attributes
 <button
   data-size={size}
-  className={cn('base-classes', {
-    'data-[size=md]:h-9': true
-  })}
+  className="h-11 data-[size=sm]:h-9"
 >
 ```
 
-**Data Attribute Conventions**:
-- Use `data-slot` for component structure hooks
-- Use `data-*` for component state (e.g., `data-size`, `data-error`)
-- Use for CSS selectors: `[data-slot="item"]`
-- Use for testing selectors
-- Keep attribute values consistent
+**Uses**:
+- CSS selectors: `[data-slot="item"]`
+- Testing selectors
+- Conditional styling: `data-[size=sm]:h-9`
 
-### Accessibility Patterns
-
-**Pattern**: ARIA attributes and semantic HTML
+### ARIA Attributes
 
 ```typescript
-// ✅ Good: ARIA attributes
 <button
-  type="button"
   role="switch"
   aria-checked={value}
-  data-checked={value}
+  aria-hidden={hidden}
   disabled={loading || disabled}
 >
   <span aria-hidden="true">...</span>
 </button>
-
-// ✅ Good: Visually hidden labels
-<Title>
-  <VisuallyHidden />
-</Title>
-<Description>
-  <VisuallyHidden />
-</Description>
 ```
-
-**Accessibility Conventions**:
-- Use semantic HTML elements
-- Add ARIA attributes when needed
-- Use `VisuallyHidden` for screen reader only content
-- Maintain keyboard navigation
-- Ensure focus states are visible
 
 ## Children Patterns
 
-### Children Prop Types
-
-**Pattern**: Support ReactNode and render functions
-
 ```typescript
-// ✅ Good: ReactNode children
+// ReactNode children
 interface ButtonProps {
   children?: ReactNode
 }
 
-// ✅ Good: Function children (render props)
+// Function children (render props)
 interface RepeatProps {
   children: ReactNode | ((index: number) => ReactNode)
 }
@@ -908,189 +385,57 @@ interface RepeatProps {
 export const Repeat: FC<RepeatProps> = ({ count, children }) =>
   Array.from({ length: count }, (_, index) =>
     helper.isFunction(children) 
-      ? (children as RepeatChildren)(index) 
-      : (children as ReactNode)
+      ? (children as Function)(index) 
+      : children
   )
 
-// ✅ Good: Render props in Form
-<Field name={name}>
-  {(control, meta, form) => {
-    const childNode =
-      typeof children === 'function'
-        ? children(props, meta, form)
-        : cloneElement(children as ReactElement, props)
-    return childNode
-  }}
-</Field>
+// Clone element with props
+const childNode = typeof children === 'function'
+  ? children(props, meta, form)
+  : cloneElement(children as ReactElement, props)
 ```
-
-**Children Conventions**:
-- Use `ReactNode` for standard children
-- Support function children for render props
-- Use `cloneElement` to inject props into children
-- Check type before calling function children
-
-## Component Exports
-
-### Export Patterns
-
-**Pattern**: Named exports with index barrel file
-
-```typescript
-// ✅ Good: Named export
-export const Button = ButtonComponent
-
-// ✅ Good: Composed export
-export const Form = Object.assign(FormComponent, {
-  Item: FormItem,
-  Simple: SimpleForm
-})
-
-// ✅ Good: Multiple exports
-export const Button = ButtonComponent
-export const CopyButton = CopyButtonComponent
-
-// ✅ Good: Barrel export file (index.ts)
-export * from './Button'
-export * from './Input'
-export * from './Modal'
-```
-
-**Export Conventions**:
-- Use named exports (not default exports)
-- Export composed components
-- Use barrel file (`index.ts`) for re-exports
-- Export types/interfaces separately
-- Keep exports consistent
 
 ## Component Variants
 
-### Size Variants
-
-**Pattern**: Size prop with data attributes
-
 ```typescript
-// ✅ Good: Size variants
+// Size variants
 export interface ButtonProps {
   size?: 'sm' | 'md' | 'lg'
 }
 
-const ButtonComponent: FC<ButtonProps> = ({
-  size = 'lg',
-  ...restProps
-}) => {
+const ButtonComponent: FC<ButtonProps> = ({ size = 'lg', ...props }) => {
   return (
     <button
-      className={cn(
-        'h-11 data-[size=md]:h-9 data-[size=sm]:h-9 sm:h-10',
-        className
-      )}
+      className={cn('h-11 data-[size=md]:h-9 data-[size=sm]:h-9')}
       data-size={size}
-      {...restProps}
-    >
-      {children}
-    </button>
+      {...props}
+    />
   )
 }
-```
 
-**Size Conventions**:
-- Use union type for sizes: `'sm' | 'md' | 'lg'`
-- Default to largest size (`'lg'`)
-- Use `data-size` attribute for styling
-- Use Tailwind data attribute selectors
-
-### Type Variants
-
-**Pattern**: Type prop for component variants
-
-```typescript
-// ✅ Good: Type variants
+// Type variants
 export interface ButtonProps {
   type?: 'primary' | 'danger' | 'success'
 }
 
-const ButtonComponent: FC<ButtonProps> = ({
-  type = 'primary',
-  ...restProps
-}) => {
-  return (
-    <button
-      className={cn(
-        {
-          'bg-primary': type === 'primary',
-          'bg-danger': type === 'danger',
-          'bg-success': type === 'success'
-        },
-        className
-      )}
-      {...restProps}
-    >
-      {children}
-    </button>
-  )
-}
+className={cn({
+  'bg-primary': type === 'primary',
+  'bg-danger': type === 'danger'
+})}
 ```
 
-**Type Conventions**:
-- Use union type for types
-- Map types to CSS classes
-- Use conditional classes with `cn()`
-- Provide sensible default
-
-## Best Practices
-
-### Component Design
-
-1. **Single Responsibility**: Each component should have one clear purpose
-2. **Composition**: Prefer composition over complex props
-3. **Reusability**: Make components reusable with sensible defaults
-4. **Type Safety**: Use TypeScript strictly - avoid `any` where possible
-5. **Accessibility**: Include ARIA attributes and semantic HTML
-
-### Performance
-
-1. **Memoization**: Use `useMemo` for expensive computations
-2. **Callbacks**: Use `useCallback` for event handlers passed to children
-3. **Lazy Loading**: Lazy load heavy components
-4. **Conditional Rendering**: Render conditionally to avoid unnecessary work
-
-### Code Organization
-
-1. **File Structure**: One component per file, co-located types
-2. **Imports**: Group imports (React, third-party, local, types)
-3. **Exports**: Use named exports consistently
-4. **Comments**: Document complex logic and non-obvious patterns
-
-### Styling
-
-1. **TailwindCSS**: Use utility classes, avoid custom CSS
-2. **Responsive**: Mobile-first responsive design
-3. **Consistency**: Use design system tokens consistently
-4. **Conditional**: Use `cn()` for conditional classes
-
-### Testing
-
-1. **Data Attributes**: Use `data-slot` for test selectors
-2. **Accessibility**: Test with screen readers
-3. **Edge Cases**: Test loading, error, and empty states
-4. **Interactions**: Test user interactions (click, keyboard, etc.)
-
-## Common Patterns
-
-### Controlled vs Uncontrolled
-
-**Pattern**: Support both controlled and uncontrolled modes
+## Controlled vs Uncontrolled
 
 ```typescript
-// ✅ Good: Controlled component with internal state
+// Support both modes
 const InputComponent: FC<InputProps> = ({
   value: rawValue = '',
   onChange,
-  ...restProps
+  ...props
 }) => {
   const [value, setValue] = useState(rawValue)
 
+  // Sync with prop changes
   useEffect(() => {
     if (rawValue !== value) {
       setValue(rawValue)
@@ -1103,86 +448,97 @@ const InputComponent: FC<InputProps> = ({
     onChange?.(newValue)
   }
 
-  return <input value={value} onChange={handleChange} {...restProps} />
+  return <input value={value} onChange={handleChange} {...props} />
 }
 ```
 
-**Controlled Conventions**:
-- Accept `value` prop for controlled mode
-- Use internal state for uncontrolled mode
-- Sync internal state with prop changes
-- Call `onChange` with new value
-
-### Default Values
-
-**Pattern**: Provide sensible defaults
+## File Organization
 
 ```typescript
-// ✅ Good: Default values in destructuring
-const ButtonComponent: FC<ButtonProps> = ({
-  size = 'lg',
-  type = 'button',
-  loading = false,
-  ...restProps
-}) => {
-  // ...
-}
-```
-
-**Default Conventions**:
-- Provide defaults in function signature
-- Use most common value as default
-- Document defaults in JSDoc comments
-- Allow override via props
-
-## File Naming
-
-### Naming Conventions
-
-- **Components**: PascalCase: `Button.tsx`, `Input.tsx`, `Modal.tsx`
-- **Types**: PascalCase: `ButtonProps`, `InputRef`
-- **Utilities**: camelCase: `cn`, `useFormState`
-- **Constants**: UPPER_SNAKE_CASE: `BADGE_COLORS`
-
-## Import Organization
-
-### Import Order
-
-**Pattern**: Group imports by source
-
-```typescript
-// ✅ Good: Import organization
-// 1. React and React-related
-import { FC, ReactNode, useCallback, useEffect, useState } from 'react'
+// Import order
+// 1. React
+import { FC, ReactNode, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 
-// 2. Third-party libraries
+// 2. Third-party
 import { IconX } from '@tabler/icons-react'
 import { Root, Content } from '@radix-ui/react-dialog'
 
-// 3. Local utilities
-import { cn, useFormState } from '@/utils'
-import { helper, deepEqual } from '@heyform-inc/utils'
+// 3. Local utils
+import { cn } from '@/utils'
+import { helper } from '@heyform-inc/utils'
 
 // 4. Local components
 import { Button } from './Button'
-import { Input } from './Input'
 
 // 5. Types (if separate)
 import type { ButtonProps } from './Button'
 ```
 
-**Import Conventions**:
-- Group by source (React, third-party, local)
-- Use absolute imports for utils: `@/utils`
-- Use relative imports for components: `./Button`
-- Import types separately when needed
-- Use `import type` for type-only imports
+## Export Patterns
+
+```typescript
+// Named export
+export const Button = ButtonComponent
+
+// Composed export
+export const Form = Object.assign(FormComponent, {
+  Item: FormItem,
+  Simple: SimpleForm
+})
+
+// Barrel file (index.ts)
+export * from './Button'
+export * from './Input'
+```
+
+## Best Practices
+
+**Component Design**:
+- Single responsibility
+- Composition over complex props
+- Reusable with sensible defaults
+- Type-safe (avoid `any`)
+- Accessible (ARIA + semantic HTML)
+
+**Performance**:
+- `useMemo` for expensive computations
+- `useCallback` for event handlers passed to children
+- Lazy load heavy components
+- Conditional rendering
+
+**Styling**:
+- TailwindCSS utilities only (no custom CSS)
+- Mobile-first responsive (`sm:`)
+- Use `cn()` for conditional classes
+- `data-*` attributes for state-based styling
+
+**Code Organization**:
+- One component per file
+- Co-located types
+- Named exports
+- Group imports by source
+
+## Critical Gotchas
+
+1. **Always use `cn()`** for className merging (not plain clsx)
+2. **Composition events** prevent duplicate onChange for IME input
+3. **Optional callbacks** use `?.()` syntax
+4. **Custom onChange** must omit original with `Omit<>`
+5. **data-slot** for styling hooks, not class names
+6. **Loading state** disables component + shows overlay
+7. **User className last** in cn() to allow overrides
+8. **useRef for mutable** values that don't trigger re-renders
+
+## Naming Conventions
+
+- **Components**: PascalCase (`Button.tsx`, `Modal.tsx`)
+- **Props**: PascalCase (`ButtonProps`, `InputRef`)
+- **Utilities**: camelCase (`cn`, `useFormState`)
+- **Constants**: UPPER_SNAKE_CASE (`BADGE_COLORS`)
 
 ## References
 
-- [React 19 Documentation](https://react.dev/)
-- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
-- [TailwindCSS Documentation](https://tailwindcss.com/docs)
-- [Radix UI Documentation](https://www.radix-ui.com/)
-- [react-i18next Documentation](https://react.i18next.com/)
+- React components: `packages/webapp/src/components/`
+- Global types: `packages/webapp/src/vite-env.d.ts`
+- cn utility: `packages/webapp/src/utils/index.ts`

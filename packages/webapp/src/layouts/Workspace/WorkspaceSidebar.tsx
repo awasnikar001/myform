@@ -228,7 +228,7 @@ export const WorkspaceSidebarModal = () => {
 const WorkspaceSidebar = () => {
   return (
     <div
-      className="fixed inset-y-0 left-0 w-64 transition-transform duration-300 max-lg:hidden"
+      className="bg-foreground fixed inset-y-0 left-0 z-20 w-64 transition-transform duration-300 max-lg:hidden"
       data-slot="layout-sidebar"
     >
       <WorkspaceSidebarComponent />

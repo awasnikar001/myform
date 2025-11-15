@@ -175,8 +175,8 @@ const InputTableItem: FC<SubmissionCellProps> = ({ answer, field, isTableCell })
   return (
     <div className="scrollbar overflow-x-auto">
       <table className="min-w-full text-left text-sm">
-        <thead className="text-secondary">
-          <tr className="border-accent border-b">
+        <thead className="text-secondary bg-white/25 backdrop-blur-2xl dark:bg-transparent">
+          <tr className="dark:border-accent border-b border-slate-200/60">
             {columns.map(c => (
               <th key={c.id} className="text-nowrap py-2 text-left font-normal">
                 {c.label}

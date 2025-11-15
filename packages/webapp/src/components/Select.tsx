@@ -260,7 +260,7 @@ const SelectComponent: FC<SelectProps> = ({
           align="end"
           {...contentProps}
           className={cn(
-            'bg-foreground ring-accent-light isolate z-10 max-h-[18.5rem] rounded-xl p-1 shadow-lg outline outline-1 outline-transparent ring-1 focus:outline-none',
+            'dark:bg-foreground dark:ring-accent-light isolate z-10 max-h-[18.5rem] rounded-xl border-white/70 bg-white/35 p-1 shadow-2xl shadow-slate-300/60 outline outline-1 outline-transparent ring-1 backdrop-blur-2xl focus:outline-none dark:shadow-lg dark:ring-1',
             contentProps?.className,
             {
               [`w-[var(--radix-select-trigger-width)]`]: contentProps?.position === 'popper'
@@ -409,7 +409,7 @@ const MultiSelect: FC<MultiSelectProps> = ({
           align="start"
           {...contentProps}
           className={cn(
-            'bg-foreground ring-accent-light data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-90 data-[state=open]:zoom-in-90 isolate z-10 max-h-[22rem] origin-top-left rounded-xl p-1 shadow-lg outline outline-1 outline-transparent ring-1 focus:outline-none sm:max-h-[20rem]',
+            'dark:bg-foreground dark:ring-accent-light data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-90 data-[state=open]:zoom-in-90 isolate z-10 max-h-[22rem] origin-top-left rounded-xl border-white/70 bg-white/35 p-1 shadow-2xl shadow-slate-300/60 outline outline-1 outline-transparent ring-1 backdrop-blur-2xl focus:outline-none sm:max-h-[20rem] dark:shadow-lg dark:ring-1',
             contentProps?.className
           )}
           data-slot="content"

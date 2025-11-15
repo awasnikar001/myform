@@ -117,7 +117,7 @@ export default function FormSettings() {
 
         <div className="flex-1">
           <Form
-            className="divide-accent-light space-y-10 divide-y"
+            className="dark:divide-accent-light space-y-10 divide-y divide-white/50"
             form={rcForm}
             initialValues={tempSettings}
             onValuesChange={handleValuesChange}
@@ -129,7 +129,7 @@ export default function FormSettings() {
             <FormSettingsTranslations />
             <FormSettingsProtection />
 
-            <div className="border-accent bg-foreground sticky bottom-0 mt-10 flex items-center justify-end gap-x-4 border-t py-6">
+            <div className="dark:border-accent dark:bg-foreground sticky bottom-0 mt-10 flex items-center justify-end gap-x-4 border-t border-white/50 bg-white/35 py-6 backdrop-blur-2xl">
               {error && !loading && <div className="text-error text-sm/6">{error.message}</div>}
 
               <Button type="submit" loading={loading} disabled={isDisabled}>

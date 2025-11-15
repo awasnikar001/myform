@@ -302,13 +302,13 @@ const FormItem: FC<FormItemProps> = ({ form, isInTrash, onChange }) => {
 
   return (
     <FormItemLink
-      className="first-of-type:border-accent-light last-of-type:border-accent-light group flex min-w-0 items-center justify-between gap-6 py-4 transition-colors first-of-type:border-t last-of-type:border-b hover:bg-slate-50 has-[[data-state=open]]:bg-slate-50 dark:hover:bg-slate-900/50 dark:has-[[data-state=open]]:bg-slate-900/50"
+      className="first-of-type:border-accent-light last-of-type:border-accent-light group flex min-w-0 items-center justify-between gap-6 py-4 transition-colors first-of-type:border-t last-of-type:border-b hover:bg-white/50 hover:backdrop-blur-md has-[[data-state=open]]:bg-white/50 dark:hover:bg-slate-900/50 dark:has-[[data-state=open]]:bg-slate-900/50"
       to={`/workspace/${form.teamId}/project/${form.projectId}/form/${form.id}/analytics`}
       isInTrash={isInTrash}
       isSuspended={form.suspended}
     >
       <div className="flex min-w-0 flex-1 items-start gap-3 pl-2">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/30">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/40 bg-white/60 backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/30">
           <IconFileText className="h-5 w-5 text-slate-500 dark:text-slate-400" strokeWidth={1.75} />
         </div>
         <div className="min-w-0 flex-1 overflow-hidden">

@@ -148,7 +148,7 @@ const MemberItem: FC<{ member: MemberType }> = ({ member }) => {
   }, [workspace?.isOwner, t, isYou])
 
   return (
-    <tr className="hover:bg-primary/[2.5%]">
+    <tr className="dark:hover:bg-primary/[2.5%] hover:bg-white/25 hover:backdrop-blur-lg">
       <td className="border-accent border-b p-4 sm:first:pl-1 sm:last:pr-1">
         <div className="flex items-center gap-4">
           <Avatar

@@ -9,30 +9,24 @@ alwaysApply: true
 
 # Database & Model Conventions
 
-This document outlines the conventions and patterns for MongoDB models, Mongoose schemas, and database operations in the HeyForm monorepo.
+MongoDB models, Mongoose schemas, and database operation patterns.
 
-## Model File Structure (`packages/server/src/model/`)
-
-### Model Class Pattern
-
-**Pattern**: NestJS Mongoose schemas with decorators
+## Model Structure
 
 ```typescript
-// ✅ Good: Standard model pattern
+// Standard NestJS Mongoose model
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { Document, Schema as MongooseSchema } from 'mongoose'
 import { FormStatusEnum } from '@heyform-inc/shared-types-enums'
 import { nanoid } from '@heyform-inc/utils'
 
 @Schema({
-  timestamps: true,
-  toJSON: {
-    virtuals: true
-  }
+  timestamps: true,     // Auto-add createdAt, updatedAt
+  toJSON: { virtuals: true }
 })
 export class FormModel extends Document {
   @Prop({ default: () => nanoid(8) })
-  _id: string
+  _id: string         // Custom IDs (not ObjectId)
 
   @Prop({ required: true, index: true })
   teamId: string
@@ -47,297 +41,124 @@ export class FormModel extends Document {
 
   @Prop({ type: MongooseSchema.Types.Mixed })
   settings?: FormSettings
+
+  @Prop({ default: [], type: [MongooseSchema.Types.Mixed] })
+  fields?: FormField[]
 }
 
 export const FormSchema = SchemaFactory.createForClass(FormModel)
+
+// Compound indexes after schema creation
+FormSchema.index({ teamId: 1, projectId: 1 }, { unique: false })
 ```
 
-### Model Class Conventions
-
-1. **Class Structure**:
-   - Extend `Document` from mongoose
-   - Use `@Schema()` decorator with options
-   - Export both the class and schema
-   - File naming: `{domain}.model.ts` (e.g., `form.model.ts`)
-
-2. **Schema Decorator**:
-   - Always include `timestamps: true` for `createdAt` and `updatedAt`
-   - Use `toJSON: { virtuals: true }` when using virtual properties
-   - Schema options are set at class level, not property level
-
-3. **ID Generation**:
-   - Use `nanoid(8)` for custom IDs: `@Prop({ default: () => nanoid(8) })`
-   - IDs are strings, not ObjectIds
-   - Default function ensures unique ID generation
-
-4. **Property Decorators**:
-   - Use `@Prop()` for all schema properties
-   - Specify `required: true` for mandatory fields
-   - Use `index: true` for frequently queried fields
-   - Use `default` for default values (can be function or value)
-
-5. **Type Definitions**:
-   - Import types from `@heyform-inc/shared-types-enums`
-   - Use TypeScript enums for enum fields
-   - Use `MongooseSchema.Types.Mixed` for complex objects
-   - Use `MongooseSchema.Types.Map` for key-value objects
+**Conventions**:
+- Extend `Document` from mongoose
+- Use `@Schema({ timestamps: true })` for auto timestamps
+- Export both class and schema
+- File naming: `{domain}.model.ts`
+- Custom IDs: `nanoid(8)` (strings, not ObjectIds)
+- Index frequently queried fields: `index: true`
 
 ## Property Patterns
 
-### Required Fields
-
 ```typescript
-// ✅ Good: Required field with index
+// Required fields
 @Prop({ required: true, index: true })
 teamId: string
 
-// ✅ Good: Required field without index
-@Prop({ required: true })
-name: string
-```
-
-### Optional Fields
-
-```typescript
-// ✅ Good: Optional field
-@Prop()
-description?: string
-
-// ✅ Good: Optional field with default
+// Optional with default
 @Prop({ default: false })
 isActive?: boolean
-```
 
-### Enum Fields
-
-```typescript
-// ✅ Good: Enum field with validation
+// Enums (filter by type!)
 @Prop({
   type: Number,
-  required: true,
   enum: Object.values(FormStatusEnum).filter(v => typeof v === 'number'),
   default: FormStatusEnum.NORMAL
 })
 status: FormStatusEnum
 
-// ✅ Good: String enum
-@Prop({ default: UserLangEnum.EN, enum: Object.values(UserLangEnum) })
-lang?: UserLangEnum
-```
-
-**Enum Pattern**:
-- Filter enum values to match the type (number or string)
-- Always provide default value
-- Use TypeScript enum types for type safety
-
-### Complex Types
-
-```typescript
-// ✅ Good: Mixed type for complex objects
+// Complex objects
 @Prop({ type: MongooseSchema.Types.Mixed })
 settings?: FormSettings
 
-// ✅ Good: Array of mixed types
+// Arrays
 @Prop({ default: [], type: [MongooseSchema.Types.Mixed] })
 fields?: FormField[]
 
-// ✅ Good: Map type for key-value pairs
+// Maps/Records
 @Prop({ type: Map, default: {} })
 config?: Record<string, any>
 
-// ✅ Good: Map type for translations
-@Prop({ type: Map, default: {} })
-translations?: Record<string, any>
-```
-
-### Timestamps
-
-```typescript
-// ✅ Good: Unix timestamp
+// Unix timestamps
 @Prop({ default: 0 })
 publishedAt?: number
 
-// ✅ Good: Timestamp with default function
-@Prop({
-  default: () => {
-    return date().add(INVITE_CODE_EXPIRE_DAYS, 'day').unix()
-  }
-})
-inviteCodeExpireAt: number
-```
-
-**Timestamp Conventions**:
-- Use Unix timestamps (numbers) for dates
-- Use `default: 0` for unset timestamps
-- Use functions for calculated defaults
-- Schema-level `timestamps: true` adds `createdAt` and `updatedAt` automatically
-
-### Unique Fields
-
-```typescript
-// ✅ Good: Unique field
+// Unique fields
 @Prop({ default: () => nanoid(), unique: true })
 inviteCode: string
 ```
 
 ## Indexes
 
-### Single Field Indexes
-
 ```typescript
-// ✅ Good: Index on frequently queried field
+// Single field index
 @Prop({ required: true, index: true })
 formId: string
 
-@Prop({ required: true, index: true })
-teamId: string
-```
-
-### Compound Indexes
-
-```typescript
-// ✅ Good: Compound index defined after schema creation
+// Compound indexes (after schema creation)
 FormSchema.index({ teamId: 1, projectId: 1 }, { unique: false })
-
-// ✅ Good: Unique compound index
 TeamMemberSchema.index({ teamId: 1, memberId: 1 }, { unique: true })
-
-// ✅ Good: Integration unique index
 IntegrationSchema.index({ formId: 1, appId: 1 }, { unique: true })
 ```
 
-**Compound Index Guidelines**:
-- Add indexes on fields used in queries (`find()`, `findOne()`)
-- Use compound indexes for multi-field queries
+**Index Rules**:
+- Index fields used in queries
+- Compound indexes for multi-field queries
 - Mark unique indexes explicitly
-- Define compound indexes after schema creation
 
 ## Virtual Properties
 
 ```typescript
-// ✅ Good: Virtual property getter
+// Computed properties (not stored)
+FormSchema.virtual('isDraft').get(function () {
+  return helper.isEmpty(this.fields) && this.version === 0
+})
+
+// Parse JSON virtuals
 FormSchema.virtual('drafts').get(function () {
   if (helper.isValid(this._drafts)) {
     const drafts = parseJson(this._drafts)
-    if (helper.isValidArray(drafts)) {
-      return drafts
-    }
+    if (helper.isValidArray(drafts)) return drafts
   }
   return this.fields || []
 })
-
-// ✅ Good: Computed virtual property
-FormSchema.virtual('isDraft').get(function () {
-  return (
-    helper.isEmpty(this.fields) &&
-    (this.version === 0 || helper.isEmpty(this._drafts) || !this.publishedAt)
-  )
-})
-
-UserSchema.virtual('hasPublishedForm').get(function () {
-  return this.publishedFormAt && this.publishedFormAt > 0
-})
 ```
 
-**Virtual Property Conventions**:
-- Use `function()` syntax (not arrow functions) to access `this`
-- Virtuals are computed properties, not stored in database
-- Enable virtuals in JSON with `toJSON: { virtuals: true }`
-- Use for computed/derived values
+**Rules**:
+- Use `function()` syntax (not arrow) to access `this`
+- Virtuals not stored in DB
+- Enable with `toJSON: { virtuals: true }`
 
-## Model Registration (`packages/server/src/model/module.ts`)
-
-### Module Pattern
+## Model Registration
 
 ```typescript
-// ✅ Good: Model module registration
+// packages/server/src/model/module.ts
 import { MongooseModule } from '@nestjs/mongoose'
 import { FormModel, FormSchema } from './form.model'
-import { UserModel, UserSchema } from './user.model'
 
 export const ModelModule = MongooseModule.forFeature([
-  { name: FormModel.name, schema: FormSchema },
-  { name: UserModel.name, schema: UserSchema },
+  { name: FormModel.name, schema: FormSchema },  // Use .name, not string
   // ... more models
 ])
 ```
 
-**Conventions**:
-- Use `Model.name` for model name (not string literal)
-- Register all models in `module.ts`
-- Import from `index.ts` for re-exports
-- Models are registered as NestJS feature modules
-
-## Model Exports (`packages/server/src/model/index.ts`)
-
-```typescript
-// ✅ Good: Re-export all models
-export * from './form.model'
-export * from './user.model'
-export * from './submission.model'
-// ... all models
-```
-
-**Export Conventions**:
-- Export both model class and schema
-- Use barrel exports (`export *`)
-- Import from `@model` alias in other files
-
-## Database Configuration (`packages/server/src/config/mongo/`)
-
-### MongoDB Connection
-
-```typescript
-// ✅ Good: MongoDB configuration
-import { MongooseModuleOptions, MongooseOptionsFactory } from '@nestjs/mongoose'
-import * as mongoose from 'mongoose'
-
-export class MongoService implements MongooseOptionsFactory {
-  createMongooseOptions(): Promise<MongooseModuleOptions> | MongooseModuleOptions {
-    const options: MongooseModuleOptions = {
-      uri: MONGO_URI,
-      user: MONGO_USER,
-      pass: MONGO_PASSWORD
-      // Removed deprecated options (useNewUrlParser, useFindAndModify, etc.)
-    }
-
-    if (MONGO_SSL_CA_PATH) {
-      options.sslCA = MONGO_SSL_CA_PATH as any
-    }
-
-    return options
-  }
-}
-```
-
-**Configuration Conventions**:
-- Use environment variables for connection details
-- Don't use deprecated Mongoose options (v6+ defaults)
-- Handle SSL conditionally
-- Implement `MongooseOptionsFactory` interface
-
-### Query Debugging
-
-```typescript
-// ✅ Good: Query logging with password hiding
-mongoose.set('debug', (collection: string, method: string, query: any, doc: any) => {
-  const newQuery = clone(query)
-  
-  // Hide passwords from query logs
-  if (newQuery.password) {
-    newQuery.password = '******'
-  }
-  
-  logger.info([collection, method, JSON.stringify(newQuery), JSON.stringify(doc)].join(' '))
-})
-```
-
-## Service Layer Database Operations
+## Service Layer Operations
 
 ### Model Injection
 
 ```typescript
-// ✅ Good: Model injection in service
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
@@ -352,174 +173,103 @@ export class FormService {
 }
 ```
 
-**Model Injection Conventions**:
-
-- Use `@InjectModel(ModelName.name)` decorator
-- Type as `Model<ModelClass>`
-- Make readonly and private
-- Inject in constructor
-
-### Query Operation Methods
+### Query Operations
 
 ```typescript
-// ✅ Good: Find by ID
+// Find by ID
 async findById(id: string): Promise<FormModel | null> {
   return this.formModel.findById(id)
 }
 
-// ✅ Good: Find one with conditions
+// Find one with conditions
 async findByIdInTeam(id: string, teamId: string) {
-  return this.formModel.findOne({
-    _id: id,
-    teamId
+  return this.formModel.findOne({ _id: id, teamId })
+}
+
+// Find all with $in
+async findAllInTeam(teamIds: string[]): Promise<FormModel[]> {
+  return this.formModel.find({
+    teamId: { $in: teamIds }
   })
 }
 
-// ✅ Good: Find all with conditions
-async findAllInTeam(teamId: string | string[]): Promise<FormModel[]> {
-  const conditions: any = {
-    teamId
-  }
-
-  if (helper.isValidArray(teamId)) {
-    conditions.teamId = {
-      $in: teamId
-    }
-  }
-
-  return this.formModel.find(conditions)
-}
-
-// ✅ Good: Find with sorting and limit
-async findRecentInTeam(
-  teamId: string,
-  projectIds: string[],
-  limit = 10,
-  status = FormStatusEnum.NORMAL
-): Promise<FormModel[]> {
-  const conditions: Record<string, any> = {
-    teamId,
-    status
-  }
-
-  if (helper.isValidArray(projectIds)) {
-    conditions.projectId = {
-      $in: projectIds
-    }
-  }
-
+// Find with sort and limit
+async findRecent(teamId: string, limit = 10): Promise<FormModel[]> {
   return this.formModel
-    .find(conditions)
-    .sort({
-      updatedAt: -1
-    })
+    .find({ teamId, status: FormStatusEnum.NORMAL })
+    .sort({ updatedAt: -1 })
     .limit(limit)
 }
-```
 
-**Query Method Conventions**:
-- Use descriptive method names: `findById()`, `findAll()`, `findOne()`
-- Return typed promises: `Promise<ModelType | null>`
-- Use helper functions for array validation
-- Build conditions dynamically
-- Use `$in` operator for array queries
-- Sort by `updatedAt: -1` for recent items
-- Use `.limit()` for pagination
-
-### Search Query Methods
-
-```typescript
-// ✅ Good: Text search with regex
-async searchInTeam(teamId: string, projectIds: string[], keyword: string): Promise<FormModel[]> {
-  const conditions: Record<string, any> = {
+// Search with regex
+async search(teamId: string, keyword: string): Promise<FormModel[]> {
+  return this.formModel.find({
     teamId,
     name: new RegExp(keyword, 'i')  // Case-insensitive
-  }
+  }).sort({ updatedAt: -1 })
+}
 
-  if (helper.isValidArray(projectIds)) {
-    conditions.projectId = {
-      $in: projectIds
-    }
-  }
+// Count
+async count(teamId: string): Promise<number> {
+  return this.formModel.countDocuments({ teamId })
+}
 
-  return this.formModel.find(conditions).sort({
-    updatedAt: -1
-  })
+// Aggregation
+async countByProject(projectIds: string[]) {
+  return this.formModel.aggregate<FormModel>([
+    { $match: { projectId: { $in: projectIds } } },
+    { $group: { _id: '$projectId', count: { $sum: 1 } } }
+  ]).exec()
 }
 ```
 
 ### Create Operations
 
 ```typescript
-// ✅ Good: Create with data
+// Create and return ID
 async create(data: Partial<FormModel>): Promise<string> {
   const form = new this.formModel(data)
   await form.save()
   return form.id
 }
 
-// ✅ Good: Create with defaults
-async create(input: CreateFormInput): Promise<string> {
+// Create with defaults
+async create(input: CreateFormInput, teamId: string): Promise<string> {
   return await this.formService.create({
-    teamId: team.id,
-    memberId: user.id,
+    teamId,
     fields: [],
-    _drafts: JSON.stringify(fields),
-    fieldsUpdatedAt: 0,
     settings: {
       active: false,
-      captchaKind: CaptchaKindEnum.NONE,
-      // ... defaults
+      captchaKind: CaptchaKindEnum.NONE
     },
     ...input
   })
 }
 ```
 
-**Create Operation Conventions**:
-- Use `new Model(data)` then `save()`
-- Return ID string, not full document
-- Merge input with defaults using spread
-- Use `Partial<ModelType>` for data parameter
-
-### Update Operation Methods
+### Update Operations
 
 ```typescript
-// ✅ Good: Update by ID
+// Update by ID
 async update(id: string, updates: Partial<FormModel>): Promise<void> {
   await this.formModel.findByIdAndUpdate(id, updates)
 }
 
-// ✅ Good: Update with query conditions
+// Update many
 async updateMany(teamId: string, updates: Partial<FormModel>): Promise<void> {
   await this.formModel.updateMany({ teamId }, updates)
 }
-
-// ✅ Good: Update with options
-async updateWithOptions(id: string, updates: Partial<FormModel>): Promise<void> {
-  await this.formModel.findByIdAndUpdate(
-    id,
-    updates,
-    { new: true, runValidators: true }
-  )
-}
 ```
 
-**Update Operation Conventions**:
-- Use `findByIdAndUpdate()` for single updates
-- Use `updateMany()` for bulk updates
-- Return `Promise<void>` for update operations
-- Use `Partial<ModelType>` for updates
-
-### Delete Operation Methods
+### Delete Operations
 
 ```typescript
-// ✅ Good: Delete by ID
+// Hard delete
 async delete(id: string): Promise<void> {
   await this.formModel.findByIdAndDelete(id)
 }
 
-// ✅ Good: Soft delete (update status)
+// Soft delete (status update)
 async moveToTrash(id: string): Promise<void> {
   await this.formModel.findByIdAndUpdate(id, {
     status: FormStatusEnum.TRASH,
@@ -527,50 +277,41 @@ async moveToTrash(id: string): Promise<void> {
   })
 }
 
-// ✅ Good: Find items in trash
+// Find trash items
 async findAllInTrash(): Promise<FormModel[]> {
   return this.formModel.find({
-    retentionAt: {
-      $lte: timestamp(),
-      $gt: 0
-    },
+    retentionAt: { $lte: timestamp(), $gt: 0 },
     status: FormStatusEnum.TRASH
   })
 }
 ```
 
-**Delete Operation Conventions**:
-- Use `findByIdAndDelete()` for hard deletes
-- Prefer soft deletes (update status) for data retention
-- Use `retentionAt` timestamp for cleanup scheduling
-- Query soft-deleted items with status and timestamp
-
-### Aggregation Query Methods
+## MongoDB Configuration
 
 ```typescript
-// ✅ Good: Aggregation pipeline
-public async countMaps(projectIds: string[]): Promise<any> {
-  return this.formModel
-    .aggregate<FormModel>([
-      { $match: { projectId: { $in: projectIds } } },
-      { $group: { _id: `$projectId`, count: { $sum: 1 } } }
-    ])
-    .exec()
+// packages/server/src/config/mongo/
+export class MongoService implements MongooseOptionsFactory {
+  createMongooseOptions(): MongooseModuleOptions {
+    const options: MongooseModuleOptions = {
+      uri: MONGO_URI,
+      user: MONGO_USER,
+      pass: MONGO_PASSWORD
+      // No deprecated options (v6+)
+    }
+
+    if (MONGO_SSL_CA_PATH) {
+      options.sslCA = MONGO_SSL_CA_PATH as any
+    }
+
+    return options
+  }
 }
 ```
 
-**Aggregation Conventions**:
-- Use `aggregate()` for complex queries
-- Type with generic: `aggregate<ModelType>`
-- Use `$match`, `$group`, `$sum` operators
-- Call `.exec()` to execute
-
-## Type Safety Patterns
-
-### Shared Types
+## Type Safety
 
 ```typescript
-// ✅ Good: Import types from shared package
+// Import types from shared package
 import {
   FormField,
   FormSettings,
@@ -585,81 +326,37 @@ settings?: FormSettings
 fields?: FormField[]
 ```
 
-**Shared Type Conventions**:
-
-- Import types from `@heyform-inc/shared-types-enums`
-- Use TypeScript interfaces for complex types
-- Use enums for enum fields
-- Keep types in sync between frontend and backend
-
-### Model Type Export Pattern
-
-```typescript
-// ✅ Good: Export model type for use in services
-export class FormModel extends Document {
-  // ... properties
-}
-
-// Use in service
-async findById(id: string): Promise<FormModel | null> {
-  return this.formModel.findById(id)
-}
-```
-
 ## Common Patterns
 
 ### Reference Fields (Not Stored)
 
 ```typescript
-// ✅ Good: Reference fields for populated queries
+// TypeScript-only properties for populated queries
 export class TeamModel extends Document {
   // ... actual schema fields
 
-  /**
-   * Attach references to the team model for easy query,
-   * will not be used as a column in the team schema
-   */
+  // Virtual references (not stored in DB)
   projects?: ProjectModel[]
   memberCount?: number
-  brandKits?: BrandKitModel[]
   isOwner?: boolean
 }
 ```
 
-**Reference Pattern**:
-- Add TypeScript properties for populated fields
-- Document that they're not stored in schema
-- Use for virtual/populated relationships
-- Populate in service layer when needed
-
 ### Default Value Functions
 
 ```typescript
-// ✅ Good: Function for dynamic defaults
-@Prop({
-  default: () => {
-    return date().add(INVITE_CODE_EXPIRE_DAYS, 'day').unix()
-  }
-})
-inviteCodeExpireAt: number
-
+// Dynamic defaults
 @Prop({ default: () => nanoid(8) })
 _id: string
 
-@Prop({ default: () => nanoid(), unique: true })
-inviteCode: string
+@Prop({ default: () => date().add(7, 'day').unix() })
+inviteCodeExpireAt: number
 ```
 
-**Default Function Conventions**:
-- Use functions for computed defaults
-- Use `nanoid()` for unique IDs
-- Use date calculations for expiration times
-- Functions execute on document creation
-
-### Enum Filtering Pattern
+### Enum Filtering
 
 ```typescript
-// ✅ Good: Filter enum values by type
+// CRITICAL: Filter enum values by type
 @Prop({
   type: Number,
   enum: Object.values(FormStatusEnum).filter(v => typeof v === 'number'),
@@ -668,99 +365,62 @@ inviteCode: string
 status: FormStatusEnum
 ```
 
-**Why Filter**:
-- TypeScript enums can have both string and number values
-- Mongoose needs consistent type (Number or String)
-- Filter ensures only matching type values are used
+**Why**: TypeScript enums can have both string and number values; Mongoose needs consistent type
 
 ## Best Practices
 
-1. **Schema Design**:
-   - Use indexes on frequently queried fields
-   - Use compound indexes for multi-field queries
-   - Mark unique constraints explicitly
-   - Use appropriate types (Mixed, Map, Array)
+**Schema Design**:
+- Index frequently queried fields
+- Use compound indexes for multi-field queries
+- Mark unique constraints explicitly
+- Use appropriate types (Mixed, Map, Array)
 
-2. **Query Performance**:
-   - Use indexes for query fields
-   - Limit result sets with `.limit()`
-   - Sort efficiently (indexed fields)
-   - Use `$in` for array queries
+**Query Performance**:
+- Use indexes
+- Limit result sets (`.limit()`)
+- Sort on indexed fields
+- Use `$in` for array queries
 
-3. **Data Integrity**:
-   - Use `required: true` for mandatory fields
-   - Use enum validation
-   - Use unique constraints where needed
-   - Validate with class-validator in GraphQL layer
+**Data Integrity**:
+- Use `required: true` for mandatory fields
+- Use enum validation
+- Use unique constraints
+- Validate in GraphQL layer too
 
-4. **Type Safety**:
-   - Import types from shared package
-   - Use TypeScript interfaces
-   - Type service methods properly
-   - Use `Partial<>` for updates
+**Type Safety**:
+- Import types from shared package
+- Use TypeScript interfaces
+- Type service methods properly
+- Use `Partial<>` for updates
 
-5. **Soft Deletes**:
-   - Prefer soft deletes over hard deletes
-   - Use status enum for delete state
-   - Use `retentionAt` for cleanup scheduling
-   - Query active items with status filter
+**Soft Deletes**:
+- Prefer soft deletes over hard deletes
+- Use status enum for delete state
+- Use `retentionAt` for cleanup scheduling
 
-6. **Virtual Properties**:
-   - Use for computed values
-   - Don't store in database
-   - Enable in JSON serialization
-   - Use function syntax (not arrow functions)
+## Critical Gotchas
+
+1. **IDs are strings** - Use `nanoid(8)`, not ObjectId
+2. **Filter enum values** - `.filter(v => typeof v === 'number')`
+3. **Timestamps are Unix** - Numbers, not Date objects
+4. **Virtual functions** - Use `function()` not arrow functions
+5. **Compound indexes** - Define after schema creation
+6. **Schema timestamps** - Use `@Schema({ timestamps: true })`
+7. **Model.name** - Use `FormModel.name` not `'FormModel'`
 
 ## File Organization
 
 ```
 model/
-├── form.model.ts              # Form model
-├── user.model.ts              # User model
-├── submission.model.ts         # Submission model
-├── team.model.ts               # Team model
-├── project.model.ts            # Project model
-├── integration.model.ts        # Integration model
-├── ... (28 total models)
-├── module.ts                   # Model registration
-└── index.ts                    # Re-exports
+├── form.model.ts         # Form model
+├── user.model.ts         # User model
+├── submission.model.ts   # Submission model
+├── module.ts             # Model registration
+└── index.ts              # Re-exports
 ```
-
-## Import Path Conventions
-
-- `@model` - Models (aliased to `packages/server/src/model`)
-- `@heyform-inc/shared-types-enums` - Shared TypeScript types
-- `@heyform-inc/utils` - Utility functions (nanoid, date, helper)
-
-## Common Model Patterns
-
-### Form Model Pattern
-- Complex schema with nested objects
-- Virtual properties for drafts
-- Status enum for lifecycle
-- Timestamps for tracking
-
-### User Model Pattern
-- Simple schema
-- Virtual for computed properties
-- Enum for language preference
-- Soft delete with scheduled deletion
-
-### Submission Model Pattern
-- References to form
-- Category enum for organization
-- Mixed types for answers
-- User agent tracking
-
-### Team/Project Pattern
-- Reference fields (not stored)
-- Member count as virtual
-- Owner flag for permissions
-- Invite codes with expiration
 
 ## References
 
-- [NestJS Mongoose Documentation](https://docs.nestjs.com/techniques/mongodb)
-- [Mongoose Schema Documentation](https://mongoosejs.com/docs/guide.html)
-- [Mongoose Indexes](https://mongoosejs.com/docs/guide.html#indexes)
-- [Mongoose Virtuals](https://mongoosejs.com/docs/guide.html#virtuals)
+- Models: `packages/server/src/model/`
+- Services: `packages/server/src/service/`
+- Shared types: `@heyform-inc/shared-types-enums`

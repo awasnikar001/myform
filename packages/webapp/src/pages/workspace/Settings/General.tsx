@@ -45,7 +45,7 @@ export default function WorkspaceGeneral() {
   )
 
   return (
-    <section id="general" className="border-accent-light border-b pb-10">
+    <section id="general" className="dark:border-accent-light border-b border-white/50 pb-10">
       <h2 className="text-lg font-semibold">{t('settings.general.title')}</h2>
 
       <div className="mt-4 space-y-8">

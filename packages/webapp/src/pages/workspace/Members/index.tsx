@@ -33,18 +33,18 @@ export default function WorkspaceMembers() {
       <div className="-mx-6 mt-8 overflow-x-auto whitespace-nowrap lg:-mx-10">
         <div className="inline-block min-w-full align-middle sm:px-10">
           <table className="min-w-full text-left text-sm/6">
-            <thead className="text-secondary">
+            <thead className="text-secondary bg-white/25 backdrop-blur-2xl dark:bg-transparent">
               <tr>
-                <th className="border-b-accent-light border-b px-4 py-2 font-medium sm:first:pl-1 sm:last:pr-1">
+                <th className="dark:border-b-accent-light border-b border-b-slate-200/60 px-4 py-2 font-medium sm:first:pl-1 sm:last:pr-1">
                   {t('members.name')}
                 </th>
-                <th className="border-b-accent-light border-b px-4 py-2 font-medium sm:first:pl-1 sm:last:pr-1">
+                <th className="dark:border-b-accent-light border-b border-b-slate-200/60 px-4 py-2 font-medium sm:first:pl-1 sm:last:pr-1">
                   {t('members.role')}
                 </th>
-                <th className="border-b-accent-light border-b px-4 py-2 font-medium sm:first:pl-1 sm:last:pr-1">
+                <th className="dark:border-b-accent-light border-b border-b-slate-200/60 px-4 py-2 font-medium sm:first:pl-1 sm:last:pr-1">
                   {t('members.lastSeen')}
                 </th>
-                <th className="border-b-accent-light border-b px-4 py-2 font-medium sm:first:pl-1 sm:last:pr-1"></th>
+                <th className="dark:border-b-accent-light border-b border-b-slate-200/60 px-4 py-2 font-medium sm:first:pl-1 sm:last:pr-1"></th>
               </tr>
             </thead>
 

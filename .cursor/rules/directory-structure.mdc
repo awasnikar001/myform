@@ -6,432 +6,282 @@ alwaysApply: true
 
 # HeyForm Directory Structure
 
-This document outlines the complete directory structure and important files/folders in the HeyForm monorepo.
+Quick reference for navigating the HeyForm monorepo.
 
-## Root Level Structure
+## Root Structure
 
 ```
 myform/
-├── .cursor/                    # Cursor IDE rules and configuration
-│   └── rules/                  # Cursor rule files (.mdc)
-├── assets/                     # Root-level assets
-│   └── images/                 # Logo and screenshots
-├── packages/                   # Monorepo packages (pnpm workspace)
-│   ├── answer-utils/          # Form submission utilities
-│   ├── embed/                  # Embed JavaScript library
-│   ├── form-renderer/         # Form rendering library
-│   ├── server/                # NestJS backend
-│   ├── shared-types-enums/    # Shared TypeScript types/enums
-│   ├── utils/                 # Common utilities
-│   └── webapp/                # React frontend
-├── project.inlang/            # Internationalization configuration
-├── package.json               # Root package.json with workspace config
-├── pnpm-workspace.yaml        # pnpm workspace configuration
-├── pnpm-lock.yaml             # Dependency lock file
-├── tsconfig.json              # Root TypeScript config
-├── Dockerfile                 # Docker configuration
-└── README.md                  # Project documentation
+├── .cursor/rules/        # Cursor IDE rules (.mdc)
+├── packages/             # Monorepo packages (pnpm workspace)
+│   ├── answer-utils/    # Form submission utilities
+│   ├── embed/           # Embed JavaScript library
+│   ├── form-renderer/   # Form rendering library
+│   ├── server/          # NestJS backend
+│   ├── shared-types-enums/  # Shared types/enums
+│   ├── utils/           # Common utilities
+│   └── webapp/          # React frontend
+├── package.json         # Root config + workspace + overrides
+├── pnpm-workspace.yaml  # pnpm workspace config
+└── tsconfig.json        # Root TypeScript config
 ```
 
-## Package: `packages/webapp` (React Frontend)
+## Frontend (`packages/webapp`)
 
-**Purpose**: Main React 19 frontend application (Vite, TypeScript, TailwindCSS, Apollo Client)
-
-```
-webapp/
-├── src/
-│   ├── assets/                # SVG icons and images (48+ files)
-│   │   ├── *.svg              # Form field icons, embed types, etc.
-│   │   └── waving-hand.webp
-│   ├── components/            # Reusable UI components (37 files)
-│   │   ├── Alert.tsx
-│   │   ├── Button.tsx
-│   │   ├── Input.tsx
-│   │   ├── Modal.tsx
-│   │   ├── Table.tsx
-│   │   └── ... (35 more components)
-│   ├── consts/                # Constants and configuration
-│   │   ├── date.ts
-│   │   ├── env.ts
-│   │   ├── form.ts
-│   │   ├── gql.ts             # GraphQL queries/mutations
-│   │   └── locale.ts
-│   ├── layouts/               # Layout components
-│   │   ├── Auth/              # Authentication layouts
-│   │   ├── Form/              # Form-specific layouts
-│   │   ├── Project/           # Project management layouts
-│   │   ├── PublicLayout/      # Public-facing layouts
-│   │   ├── Template/          # Template layouts
-│   │   └── Workspace/         # Workspace layouts
-│   ├── locales/               # i18n translation files (7 languages)
-│   │   ├── de.json
-│   │   ├── en.json
-│   │   ├── fr.json
-│   │   └── ... (4 more)
-│   ├── pages/                 # Page components (route pages)
-│   │   ├── auth/              # Authentication pages
-│   │   │   ├── Login.tsx
-│   │   │   ├── SignUp.tsx
-│   │   │   └── ... (5 more)
-│   │   ├── form/              # Form-related pages
-│   │   │   ├── Analytics/     # Analytics and reporting
-│   │   │   ├── Builder/       # Form builder (83 files)
-│   │   │   ├── Integrations/  # Third-party integrations
-│   │   │   ├── Render/        # Form renderer preview
-│   │   │   ├── Settings/      # Form settings
-│   │   │   ├── Share/         # Sharing configuration
-│   │   │   └── Submissions/   # Submission management
-│   │   ├── project/           # Project pages
-│   │   └── workspace/         # Workspace pages
-│   ├── routes/                 # Route configuration
-│   │   └── index.ts
-│   ├── services/              # API service layer (GraphQL clients)
-│   │   ├── app.ts
-│   │   ├── auth.ts
-│   │   ├── form.ts
-│   │   ├── submission.ts
-│   │   └── ... (8 more services)
-│   ├── store/                 # State management (Zustand/MobX)
-│   │   ├── app.ts
-│   │   ├── form.ts
-│   │   ├── user.ts
-│   │   └── workspace.ts
-│   ├── styles/                # Global stylesheets
-│   │   ├── builder.scss       # Form builder styles
-│   │   ├── globals.scss       # Global styles
-│   │   └── render.scss        # Form renderer styles
-│   ├── types/                 # TypeScript type definitions
-│   │   ├── form.ts
-│   │   ├── user.ts
-│   │   └── workspace.ts
-│   ├── utils/                 # Utility functions
-│   │   ├── apollo.ts          # Apollo Client setup
-│   │   ├── auth.ts
-│   │   └── ... (5 more utils)
-│   ├── i18n.ts                # i18n configuration
-│   └── main.tsx               # Application entry point
-├── public/                    # Static public assets (17 files)
-├── index.html                 # HTML entry point
-├── package.json
-├── vite.config.mts            # Vite configuration
-├── tailwind.config.js         # TailwindCSS configuration
-└── tsconfig.json
-```
-
-**Key Files**:
-- `src/main.tsx` - Application entry point
-- `src/routes/index.ts` - Route definitions
-- `src/consts/gql.ts` - GraphQL queries and mutations
-- `src/services/*.ts` - API service layer
-- `vite.config.mts` - Build configuration
-
-## Package: `packages/server` (NestJS Backend)
-
-**Purpose**: NestJS 7 backend with GraphQL API, MongoDB, and queue processing
+**Tech**: React 19, Vite, TypeScript, TailwindCSS, Apollo Client
 
 ```
-server/
-├── src/
-│   ├── app.module.ts          # Root application module
-│   ├── main.ts                # Application entry point
-│   ├── apps/                  # Application entry points
-│   │   ├── index.ts           # Main app
-│   │   └── webhook.ts         # Webhook app
-│   ├── common/                # Shared common code
-│   │   ├── decorator/         # Custom decorators (9 files)
-│   │   │   ├── auth.decorator.ts
-│   │   │   ├── form.decorator.ts
-│   │   │   └── ... (6 more)
-│   │   ├── dto/               # Data Transfer Objects
-│   │   ├── filter/            # Exception filters
-│   │   ├── graphql/           # GraphQL schema definitions (12 files)
-│   │   │   ├── app.graphql.ts
-│   │   │   ├── auth.graphql.ts
-│   │   │   ├── form.graphql.ts
-│   │   │   └── ... (9 more)
-│   │   ├── guard/             # Authentication/authorization guards (7 files)
-│   │   ├── interceptor/       # Interceptors
-│   │   └── middleware/        # Middleware (4 files)
-│   ├── config/                # Configuration modules
-│   │   ├── bull/              # Bull queue config
-│   │   ├── cookie/            # Cookie config
-│   │   ├── graphql/           # GraphQL config
-│   │   ├── mongo/             # MongoDB config
-│   │   ├── redis/             # Redis config
-│   │   ├── smtp/              # Email config
-│   │   └── upload/            # File upload config
-│   ├── controller/           # REST controllers (12 files)
-│   │   ├── changelog.controller.ts
-│   │   ├── form.controller.ts
-│   │   ├── upload.controller.ts
-│   │   └── ... (9 more)
-│   ├── model/                 # MongoDB/Mongoose models (28 files)
-│   │   ├── form.model.ts
-│   │   ├── submission.model.ts
-│   │   ├── user.model.ts
-│   │   └── ... (25 more)
-│   ├── queue/                 # Queue processors (7 files)
-│   │   ├── base.queue.ts
-│   │   ├── integration-queue.ts
-│   │   ├── mail.queue.ts
-│   │   └── ... (4 more)
-│   ├── resolver/              # GraphQL resolvers (86 files)
-│   │   ├── apps/              # App resolvers
-│   │   ├── auth/              # Authentication resolvers (4 files)
-│   │   ├── form/              # Form resolvers (22 files)
-│   │   ├── submission/        # Submission resolvers (5 files)
-│   │   ├── user/              # User resolvers (10 files)
-│   │   └── ... (6 more domains)
-│   ├── schedule/              # Scheduled tasks (4 files)
-│   │   ├── delete-form-in-trash.schedule.ts
-│   │   └── ... (3 more)
-│   ├── service/               # Business logic services (23 files)
-│   │   ├── auth.service.ts
-│   │   ├── form.service.ts
-│   │   ├── submission.service.ts
-│   │   └── ... (20 more)
-│   └── utils/                 # Utility functions (31 files)
-│       ├── anti-bot/          # Bot detection
-│       ├── decorators/        # Utility decorators (7 files)
-│       ├── gravatar/          # Gravatar integration
-│       ├── logger/            # Logging utilities
-│       ├── smtp/              # Email utilities
-│       ├── social-login/      # OAuth utilities (4 files)
-│       └── ... (15 more)
-├── resources/
-│   └── email-templates/       # Email HTML templates (12 files)
-├── static/
-│   └── upload/                # Uploaded files storage
-├── view/                      # Server-rendered views
-│   ├── connect-stripe.html
-│   ├── index.html
-│   └── social-login.html
-├── dist/                      # Compiled output
-├── package.json
-├── nest-cli.json              # NestJS CLI configuration
-└── tsconfig.json
+webapp/src/
+├── assets/              # SVG icons, images (48+ files)
+├── components/          # Reusable UI components (37 files)
+│   ├── Button.tsx
+│   ├── Input.tsx
+│   ├── Modal.tsx
+│   └── ...
+├── consts/              # Constants
+│   ├── gql.ts          # GraphQL queries/mutations
+│   └── ...
+├── layouts/             # Layout components
+│   ├── Auth/
+│   ├── Form/
+│   └── Workspace/
+├── locales/             # i18n translations (7 languages)
+├── pages/               # Route pages
+│   ├── auth/           # Login, Signup
+│   ├── form/           # Form pages
+│   │   ├── Builder/   # Form builder (83 files) ⭐
+│   │   ├── Analytics/
+│   │   ├── Settings/
+│   │   └── Submissions/
+│   ├── project/
+│   └── workspace/
+├── routes/              # Route configuration
+├── services/            # API services (GraphQL clients)
+│   ├── form.ts
+│   ├── auth.ts
+│   └── ...
+├── store/               # State management (Zustand/MobX)
+├── styles/              # Global SCSS
+├── utils/               # Utility functions
+├── i18n.ts
+└── main.tsx            # Entry point ⭐
 ```
 
-**Key Files**:
-- `src/main.ts` - Server entry point
-- `src/app.module.ts` - Root module
-- `src/common/graphql/*.graphql.ts` - GraphQL schema definitions
-- `src/resolver/**/*.ts` - GraphQL resolvers
-- `src/service/**/*.ts` - Business logic
-- `src/model/**/*.ts` - Database models
+**Key Locations**:
+- Entry point: `src/main.tsx`
+- Routes: `src/routes/index.ts`
+- GraphQL queries: `src/consts/gql.ts`
+- API services: `src/services/*.ts`
+- Form builder: `src/pages/form/Builder/` (83 files)
 
-## Package: `packages/form-renderer` (Form Rendering Library)
+## Backend (`packages/server`)
 
-**Purpose**: Reusable form rendering library for displaying forms
-
-```
-form-renderer/
-├── src/
-│   ├── blocks/                # Form field block components (30 files)
-│   │   ├── Address.tsx
-│   │   ├── Email.tsx
-│   │   ├── MultipleChoice.tsx
-│   │   ├── Payment.tsx
-│   │   ├── Rating.tsx
-│   │   ├── ShortText.tsx
-│   │   └── ... (24 more field types)
-│   ├── components/            # Reusable components (37 files)
-│   │   ├── Button.tsx
-│   │   ├── Input.tsx
-│   │   ├── FileUploader.tsx
-│   │   ├── Icons/             # Icon components (9 files)
-│   │   └── ... (28 more)
-│   ├── consts/                # Constants (7 files)
-│   │   ├── country.ts
-│   │   ├── date.ts
-│   │   └── payment.ts
-│   ├── locales/               # i18n translations (12 languages)
-│   │   ├── en.ts
-│   │   ├── de.ts
-│   │   └── ... (10 more)
-│   ├── utils/                 # Utility functions (8 files)
-│   ├── views/                 # View components (6 files)
-│   │   ├── Blocks.tsx
-│   │   ├── Header.tsx
-│   │   ├── Progress.tsx
-│   │   └── ... (3 more)
-│   ├── Renderer.tsx           # Main renderer component
-│   ├── store.ts               # State management
-│   ├── style.scss             # Styles
-│   ├── theme.ts               # Theme configuration
-│   └── typings.ts             # Type definitions
-├── dist/                      # Compiled output
-├── package.json
-├── tailwind.config.js
-└── tsconfig.json
-```
-
-**Key Files**:
-- `src/Renderer.tsx` - Main renderer component
-- `src/blocks/*.tsx` - Field type components
-- `src/store.ts` - Form state management
-
-## Package: `packages/embed` (Embed JavaScript Library)
-
-**Purpose**: JavaScript library for embedding forms in external websites
+**Tech**: NestJS 7, GraphQL, MongoDB/Mongoose, Bull queues
 
 ```
-embed/
-├── src/
-│   ├── assets/                # Embed assets (3 SVG icons)
-│   ├── utils/                 # Utility functions (3 files)
-│   ├── config.ts              # Configuration
-│   ├── full-page.ts           # Full-page embed mode
-│   ├── index.ts               # Main entry point
-│   ├── modal.ts               # Modal embed mode
-│   ├── popup.ts               # Popup embed mode
-│   ├── standard.ts            # Standard embed mode
-│   ├── style.scss             # Styles
-│   └── type.ts                # Type definitions
-├── example/                   # Example HTML file
-├── package.json
-└── rollup.config.mjs          # Rollup build config
+server/src/
+├── main.ts              # Entry point ⭐
+├── app.module.ts        # Root module ⭐
+├── common/              # Shared code
+│   ├── decorator/      # Custom decorators (9 files)
+│   ├── graphql/        # GraphQL schema (12 files) ⭐
+│   ├── guard/          # Auth guards (7 files)
+│   ├── filter/         # Exception filters
+│   └── middleware/
+├── config/              # Configuration modules
+│   ├── mongo/
+│   ├── redis/
+│   ├── smtp/
+│   └── upload/
+├── controller/          # REST controllers (12 files)
+│   ├── upload.controller.ts
+│   └── ...
+├── model/               # Mongoose models (28 files) ⭐
+│   ├── form.model.ts
+│   ├── user.model.ts
+│   └── ...
+├── resolver/            # GraphQL resolvers (86 files) ⭐
+│   ├── auth/           # Auth resolvers (4)
+│   ├── form/           # Form resolvers (22)
+│   ├── submission/     # Submission resolvers (5)
+│   └── user/           # User resolvers (10)
+├── service/             # Business logic (23 files) ⭐
+│   ├── form.service.ts
+│   ├── auth.service.ts
+│   └── ...
+├── queue/               # Bull queue processors (7 files)
+├── schedule/            # Scheduled tasks (4 files)
+└── utils/               # Utilities (31 files)
 ```
 
-**Key Files**:
-- `src/index.ts` - Main entry point
-- `src/modal.ts`, `src/popup.ts`, `src/full-page.ts`, `src/standard.ts` - Embed modes
+**Key Locations**:
+- Entry: `src/main.ts`
+- Root module: `src/app.module.ts`
+- GraphQL schemas: `src/common/graphql/*.graphql.ts`
+- Resolvers: `src/resolver/` (organized by domain)
+- Services: `src/service/` (business logic)
+- Models: `src/model/` (database schemas)
 
-## Package: `packages/answer-utils` (Form Submission Utilities)
+## Form Renderer (`packages/form-renderer`)
 
-**Purpose**: Utilities for processing form answers and submissions
+**Tech**: React 18/19, TypeScript, TailwindCSS
+
+```
+form-renderer/src/
+├── Renderer.tsx         # Main renderer ⭐
+├── blocks/              # Field type components (30 files)
+│   ├── Address.tsx
+│   ├── Email.tsx
+│   ├── MultipleChoice.tsx
+│   └── ...
+├── components/          # Reusable components (37 files)
+├── views/               # View components
+├── locales/             # i18n (12 languages)
+├── store.ts             # State management
+└── theme.ts             # Theme configuration
+```
+
+## Embed Library (`packages/embed`)
+
+**Tech**: TypeScript, Rollup
+
+```
+embed/src/
+├── index.ts             # Entry point ⭐
+├── modal.ts             # Modal embed mode
+├── popup.ts             # Popup embed mode
+├── full-page.ts         # Full-page embed mode
+└── standard.ts          # Standard embed mode
+```
+
+## Answer Utils (`packages/answer-utils`)
+
+**Tech**: TypeScript, Vitest
 
 ```
 answer-utils/
-├── src/
-│   ├── answer-parser.ts
-│   ├── answer-to-api-object.ts
-│   ├── answer-to-html.ts
-│   ├── answer-to-json.ts
-│   ├── answer-to-plain.ts
-│   ├── apply-logic-to-fields.ts
-│   ├── calculate-action.ts
-│   ├── field-values-to-answer.ts
-│   ├── fields-to-validate-rules.ts
-│   ├── flatten-fields.ts
-│   ├── validate-condition.ts
-│   ├── validate-payload.ts
+├── src/                 # Utilities
 │   ├── validate.ts
-│   └── ... (5 more utility files)
-├── test/                      # Test files (18+ test files)
-│   ├── fixtures/              # Test fixtures
-│   └── __snapshots__/         # Jest snapshots
-├── package.json
-└── tsconfig.json
+│   ├── answer-parser.ts
+│   ├── apply-logic-to-fields.ts
+│   └── ...
+└── test/                # Test files ⭐
+    ├── __snapshots__/
+    ├── fixtures/
+    └── *.test.ts
 ```
 
-**Key Files**:
-- `src/validate.ts` - Validation logic
-- `src/answer-to-*.ts` - Answer format converters
-- `src/apply-logic-to-fields.ts` - Conditional logic
+## Utils (`packages/utils`)
 
-## Package: `packages/shared-types-enums` (Shared Types)
-
-**Purpose**: Shared TypeScript types and enums used across packages
-
-```
-shared-types-enums/
-├── src/
-│   ├── constants/
-│   │   └── form.ts
-│   ├── enums/
-│   │   ├── form.ts
-│   │   ├── keyboard.ts
-│   │   ├── social-login.ts
-│   │   └── submission.ts
-│   ├── audience.ts
-│   ├── form.ts                # Form type definitions
-│   ├── pexels.ts              # Pexels API types
-│   ├── submission.ts           # Submission types
-│   ├── unsplash.ts            # Unsplash API types
-│   └── index.ts               # Main export
-├── package.json
-└── tsconfig.json
-```
-
-**Key Files**:
-- `src/form.ts` - Form-related types
-- `src/submission.ts` - Submission types
-- `src/enums/*.ts` - Enum definitions
-
-## Package: `packages/utils` (Common Utilities)
-
-**Purpose**: Shared utility functions used across packages
+**Tech**: TypeScript, Vitest
 
 ```
 utils/
-├── src/
-│   ├── bytes.ts               # Byte conversion utilities
-│   ├── clone.ts               # Deep cloning
-│   ├── color.ts               # Color utilities
-│   ├── date.ts                # Date utilities
-│   ├── mime.ts                # MIME type handling
-│   ├── nanoid.ts              # ID generation
-│   ├── slugify.ts             # String slugification
-│   └── ... (8 more utilities)
-├── test/                      # Test files (18+ test files)
-├── package.json
-└── tsconfig.json
+├── src/                 # Common utilities
+│   ├── helper.ts
+│   ├── clone.ts
+│   ├── nanoid.ts
+│   └── ...
+└── test/                # Test files
 ```
 
-## Important Configuration Files
+## Shared Types (`packages/shared-types-enums`)
 
-### Root Level
-- `package.json` - Workspace configuration, scripts, dependency overrides
-- `pnpm-workspace.yaml` - pnpm workspace package definitions
-- `tsconfig.json` - Root TypeScript configuration
-- `.cursor/rules/*.mdc` - Cursor IDE rules
+**Tech**: TypeScript
 
-### Package Level
-- `package.json` - Package-specific dependencies and scripts
-- `tsconfig.json` - Package TypeScript configuration
-- `tailwind.config.js` - TailwindCSS configuration (webapp, form-renderer)
-- `vite.config.mts` - Vite configuration (webapp)
-- `nest-cli.json` - NestJS CLI configuration (server)
-- `rollup.config.mjs` - Rollup configuration (embed)
+```
+shared-types-enums/src/
+├── form.ts              # Form types ⭐
+├── submission.ts        # Submission types
+├── enums/               # Enum definitions
+└── constants/
+```
 
-## Build Output Directories
+## Navigation Tips
 
-- `packages/*/dist/` - Compiled output directories
-- `packages/server/dist/` - Compiled NestJS application
-- `packages/form-renderer/dist/` - Compiled form renderer library
+**Frontend Development**:
+- UI components: `packages/webapp/src/components/`
+- Pages: `packages/webapp/src/pages/`
+- Form builder: `packages/webapp/src/pages/form/Builder/`
+- API services: `packages/webapp/src/services/`
 
-## Test Directories
+**Backend Development**:
+- GraphQL resolvers: `packages/server/src/resolver/`
+- Business logic: `packages/server/src/service/`
+- Database models: `packages/server/src/model/`
+- GraphQL schemas: `packages/server/src/common/graphql/`
 
-- `packages/answer-utils/test/` - Answer utilities tests
-- `packages/utils/test/` - Utility function tests
-- Test files typically use `.test.ts` extension
+**Form Logic**:
+- Field rendering: `packages/form-renderer/src/blocks/`
+- Validation/logic: `packages/answer-utils/src/`
+- Form builder state: `packages/webapp/src/pages/form/Builder/store/`
 
-## Important Patterns
-
-1. **Source Code**: All source code is in `src/` directories
-2. **Types**: Shared types in `shared-types-enums`, package-specific types in `types/` or `typings.ts`
-3. **Services**: API services in `services/` (webapp), business logic in `service/` (server)
-4. **Components**: Reusable UI components in `components/`
-5. **Pages**: Route pages in `pages/` (webapp)
-6. **Resolvers**: GraphQL resolvers in `resolver/` (server)
-7. **Models**: Database models in `model/` (server)
-8. **Styles**: SCSS files with TailwindCSS integration
-9. **Locales**: i18n translation files in `locales/`
+**Shared Code**:
+- Types: `packages/shared-types-enums/src/`
+- Utilities: `packages/utils/src/`
 
 ## File Naming Conventions
 
-- **Components**: PascalCase (e.g., `Button.tsx`, `FormBuilder.tsx`)
-- **Utilities**: camelCase (e.g., `helper.ts`, `dateUtils.ts`)
-- **Types**: camelCase (e.g., `form.ts`, `user.ts`)
-- **Tests**: `.test.ts` extension (e.g., `validate.test.ts`)
-- **Config**: kebab-case or camelCase (e.g., `tailwind.config.js`, `vite.config.mts`)
+- **Components**: PascalCase (`Button.tsx`, `FormBuilder.tsx`)
+- **Services**: camelCase (`form.service.ts`, `auth.service.ts`)
+- **Models**: kebab-case (`form.model.ts`, `user.model.ts`)
+- **Resolvers**: kebab-case (`create-form.resolver.ts`)
+- **Tests**: `*.test.ts` or `*.test.tsx`
+- **Config**: kebab-case or camelCase
 
-## When Navigating the Codebase
+## Build Output
 
-1. **Frontend UI**: Start in `packages/webapp/src/pages/` or `packages/webapp/src/components/`
-2. **Backend API**: Start in `packages/server/src/resolver/` or `packages/server/src/service/`
-3. **Form Rendering**: Check `packages/form-renderer/src/blocks/` for field types
-4. **Shared Types**: Reference `packages/shared-types-enums/src/`
-5. **GraphQL Schema**: Check `packages/server/src/common/graphql/*.graphql.ts`
-6. **API Services**: Check `packages/webapp/src/services/` for GraphQL clients
+- `packages/*/dist/` - Compiled output
+- `packages/server/dist/` - NestJS compiled app
+- `packages/form-renderer/dist/` - Library output
+
+## Configuration Files
+
+**Root**:
+- `package.json` - Workspace + overrides
+- `pnpm-workspace.yaml` - pnpm config
+- `tsconfig.json` - Root TypeScript config
+
+**Per Package**:
+- `package.json` - Package deps + scripts
+- `tsconfig.json` - Package TypeScript config
+- `vite.config.mts` - Vite config (webapp, form-renderer)
+- `nest-cli.json` - NestJS config (server)
+- `rollup.config.mjs` - Rollup config (embed)
+
+## Quick Reference
+
+**Want to...**
+- Add UI component? → `packages/webapp/src/components/`
+- Add form field type? → `packages/form-renderer/src/blocks/`
+- Add GraphQL resolver? → `packages/server/src/resolver/{domain}/`
+- Add backend service? → `packages/server/src/service/`
+- Add database model? → `packages/server/src/model/`
+- Add shared type? → `packages/shared-types-enums/src/`
+- Add utility function? → `packages/utils/src/`
+- Add validation logic? → `packages/answer-utils/src/`
+- Modify form builder? → `packages/webapp/src/pages/form/Builder/`
+- Add API service? → `packages/webapp/src/services/`
+
+## Import Aliases
+
+**Frontend** (`packages/webapp`):
+- `@/utils` → `src/utils`
+- `@/consts` → `src/consts`
+- `@/components` → `src/components`
+- `@/store` → `src/store`
+
+**Backend** (`packages/server`):
+- `@decorator` → `src/common/decorator`
+- `@graphql` → `src/common/graphql`
+- `@model` → `src/model`
+- `@service` → `src/service`
+- `@guard` → `src/common/guard`
+- `@utils` → `src/utils`
+- `@environments` → `src/environments`
+- `@config` → `src/config`
+
+**Shared**:
+- `@heyform-inc/shared-types-enums`
+- `@heyform-inc/utils`
+- `@heyform-inc/answer-utils`

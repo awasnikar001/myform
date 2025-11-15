@@ -9,18 +9,16 @@ globs:
 alwaysApply: true
 ---
 
-# Backend Services & API Routes Conventions
+# Backend Services & API Routes
 
-This document outlines the conventions and patterns for API services, GraphQL resolvers, REST controllers, and routing in the HeyForm monorepo.
+API patterns for frontend services, GraphQL resolvers, REST controllers, and backend services.
 
-## Frontend API Services (`packages/webapp/src/services/`)
+## Frontend API Services
 
-### Service Class Structure
-
-**Pattern**: Static class methods with Apollo Client
+**Location**: `packages/webapp/src/services/`
 
 ```typescript
-// ✅ Good: Standard service pattern
+// Static class methods with Apollo Client
 import { apollo } from '@/utils'
 import { CREATE_FORM_GQL, FORMS_GQL } from '@/consts'
 
@@ -28,113 +26,38 @@ export class FormService {
   static async forms(projectId: string, status = FormStatusEnum.NORMAL) {
     return apollo.query({
       query: FORMS_GQL,
-      variables: {
-        input: {
-          projectId,
-          status
-        }
-      },
+      variables: { input: { projectId, status } },
       fetchPolicy: 'network-only'
     })
   }
 
-  static create(input: {
-    projectId: string
-    name: string
-    interactiveMode: InteractiveModeEnum
-    kind: FormKindEnum
-  }) {
+  static create(input: CreateFormInput) {
     return apollo.mutate({
       mutation: CREATE_FORM_GQL,
-      variables: {
-        input
-      }
+      variables: { input }
     })
   }
 }
 ```
 
-### Conventions
+**Conventions**:
+- Static class methods (no instance)
+- Name: `{Domain}Service` (FormService, AuthService)
+- Import queries from `@/consts` (gql.ts)
+- **Always wrap variables in `input` object**
+- Specify fetchPolicy:
+  - `'network-only'` - Fresh data (forms, submissions)
+  - `'cache-first'` - Use cache (analytics, reports)
+  - `'no-cache'` - Skip cache (integrations)
 
-1. **Class Structure**:
-   - Use static class methods (no instance needed)
-   - Class name follows pattern: `{Domain}Service` (e.g., `FormService`, `AuthService`)
-   - Export as named export: `export class FormService`
+## Backend GraphQL Resolvers
 
-2. **GraphQL Queries**:
-   - Import queries from `@/consts` (aliased to `packages/webapp/src/consts/gql.ts`)
-   - Use `apollo.query()` for queries
-   - Always wrap variables in `input` object
-   - Specify `fetchPolicy` explicitly:
-     - `'network-only'` - Always fetch fresh data (forms list, submissions)
-     - `'cache-first'` - Use cache if available (analytics, reports)
-     - `'no-cache'` - Skip cache entirely (integrations)
-
-3. **GraphQL Mutations**:
-   - Use `apollo.mutate()` for mutations
-   - Wrap variables in `input` object
-   - No fetchPolicy needed (mutations always network-only)
-
-4. **Method Naming**:
-   - Use camelCase: `create()`, `update()`, `delete()`
-   - Be descriptive: `completeSubmission()`, `moveToTrash()`
-   - Query methods: `forms()`, `detail()`, `analytic()`
-   - Mutation methods: `create()`, `update()`, `delete()`, `duplicate()`
-
-5. **Type Safety**:
-   - Import types from `@heyform-inc/shared-types-enums`
-   - Use TypeScript interfaces for input parameters
-   - Return types inferred from Apollo Client responses
-
-### Example Service Files
-
-- `form.ts` - Form CRUD operations, AI features, analytics
-- `auth.ts` - Authentication (login, signup, password reset)
-- `submission.ts` - Submission management and answers
-- `workspace.ts` - Workspace/team operations
-- `project.ts` - Project management
-- `user.ts` - User profile operations
-
-### Fetch Policy Guidelines
+**Location**: `packages/server/src/resolver/`
 
 ```typescript
-// ✅ Good: Explicit fetch policies
-static async detail(formId: string) {
-  return apollo.query({
-    query: FORM_DETAIL_GQL,
-    variables: { input: { formId } },
-    fetchPolicy: 'network-only' // Always fresh data
-  })
-}
-
-static async report(formId: string) {
-  return apollo.query({
-    query: FORM_REPORT_GQL,
-    variables: { input: { formId } },
-    fetchPolicy: 'cache-first' // Can use cached data
-  })
-}
-
-static async integrations(formId: string) {
-  return apollo.query({
-    query: FORM_INTEGRATIONS_GQL,
-    variables: { input: { formId } },
-    fetchPolicy: 'no-cache' // Skip cache entirely
-  })
-}
-```
-
-## Backend GraphQL Resolvers (`packages/server/src/resolver/`)
-
-### Resolver Class Structure
-
-**Pattern**: NestJS GraphQL resolvers with decorators and dependency injection
-
-```typescript
-// ✅ Good: Standard resolver pattern
+// One resolver per operation
 import { Auth, FormGuard, Team, User } from '@decorator'
 import { CreateFormInput } from '@graphql'
-import { TeamModel, UserModel } from '@model'
 import { Args, Mutation, Resolver } from '@nestjs/graphql'
 import { FormService } from '@service'
 
@@ -159,106 +82,37 @@ export class CreateFormResolver {
 }
 ```
 
-### Conventions
+**Conventions**:
+- One resolver class per operation
+- File naming: `{operation}-{domain}.resolver.ts`
+- Dependency injection in constructor
+- Decorators:
+  - `@Resolver()` - GraphQL resolver
+  - `@Auth()` - Requires authentication
+  - `@Query(returns => Type)` / `@Mutation(returns => Type)`
+  - `@FormGuard()` / `@ProjectGuard()` - Access control
+  - `@Team()` / `@User()` / `@Form()` - Inject from context
+  - `@Args('input')` - Extract input
 
-1. **Class Structure**:
-   - One resolver class per operation (e.g., `CreateFormResolver`, `DeleteFormResolver`)
-   - File naming: `{operation}-{domain}.resolver.ts` (e.g., `create-form.resolver.ts`)
-   - Use dependency injection in constructor
-   - Services injected via constructor
-
-2. **Decorators**:
-   - `@Resolver()` - Marks class as GraphQL resolver
-   - `@Auth()` - Requires authentication (applies `DeviceIdGuard` + `AuthGuard`)
-   - `@Query(returns => Type)` - GraphQL query operation
-   - `@Mutation(returns => Type)` - GraphQL mutation operation
-   - `@FormGuard()` - Ensures user has access to form
-   - `@ProjectGuard()` - Ensures user has access to project
-   - `@Team()` - Injects team from request context
-   - `@User()` - Injects user from request context
-   - `@Form()` - Injects form from request context
-   - `@Args('input')` - Extracts input argument
-
-3. **Method Naming**:
-   - Match GraphQL operation name exactly
-   - Use camelCase: `createForm()`, `updateForm()`, `deleteForm()`
-   - Be descriptive and match the resolver class name
-
-4. **Return Types**:
-   - Specify return type in decorator: `@Mutation(returns => String)`
-   - Use TypeScript return type: `Promise<string>`
-   - Return types match GraphQL schema ObjectTypes
-
-5. **Error Handling**:
-   - Throw NestJS exceptions: `BadRequestException`, `NotFoundException`
-   - Use service layer for business logic validation
-   - Log errors with context using Logger utility
-
-### Resolver Organization
-
-Resolvers are organized by domain in subdirectories:
-
+**Resolver Organization**:
 ```
 resolver/
-├── auth/              # Authentication resolvers
-├── form/              # Form operations (22 resolvers)
-├── submission/        # Submission operations
-├── user/              # User operations
-├── project/           # Project operations
-├── team/              # Team/workspace operations
-├── integration/       # Integration operations
-├── payment/           # Payment operations
-└── endpoint/          # Public endpoint resolvers
+├── auth/         # Authentication
+├── form/         # Form operations (22 resolvers)
+├── submission/   # Submissions
+├── user/         # User operations
+├── project/      # Projects
+└── team/         # Teams/workspaces
 ```
 
-### Example Resolver Patterns
+## REST Controllers
+
+**Location**: `packages/server/src/controller/`
 
 ```typescript
-// ✅ Good: Query resolver with guards
-@Resolver()
-@Auth()
-export class FormDetailResolver {
-  constructor(private readonly formService: FormService) {}
-
-  @Query(returns => FormType)
-  @FormGuard()
-  async formDetail(
-    @Team() team: TeamModel,
-    @Args('input') input: FormDetailInput
-  ): Promise<FormType> {
-    return await this.formService.findById(input.formId)
-  }
-}
-
-// ✅ Good: Mutation resolver with validation
-@Resolver()
-@Auth()
-export class UpdateFormResolver {
-  constructor(private readonly formService: FormService) {}
-
-  @Mutation(returns => Boolean)
-  @FormGuard()
-  async updateForm(
-    @Team() team: TeamModel,
-    @Args('input') input: UpdateFormInput
-  ): Promise<boolean> {
-    await this.formService.update(input.formId, input)
-    return true
-  }
-}
-```
-
-## Backend REST Controllers (`packages/server/src/controller/`)
-
-### Controller Class Structure
-
-**Pattern**: NestJS REST controllers for non-GraphQL endpoints
-
-```typescript
-// ✅ Good: Standard REST controller
-import { Controller, Get, Post, Res, UploadedFile, UseInterceptors } from '@nestjs/common'
+// For non-GraphQL endpoints
+import { Controller, Post, UploadedFile, UseInterceptors } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
-import { Response } from 'express'
 
 @Controller()
 export class UploadController {
@@ -269,7 +123,7 @@ export class UploadController {
       storage: getMulterStorage()
     })
   )
-  async index(@UploadedFile() file: any): Promise<{ filename: string; url: string }> {
+  async index(@UploadedFile() file: any) {
     return {
       filename: file.originalname,
       url: file.location || `/static/upload/${file.filename}`
@@ -278,47 +132,20 @@ export class UploadController {
 }
 ```
 
-### Conventions
+**Use Cases**:
+- File uploads (multer)
+- Form rendering (SSR)
+- CSV/Excel exports
+- OAuth callbacks
+- Health checks
 
-1. **Class Structure**:
-   - Use `@Controller()` decorator (empty for root, or path like `@Controller('api')`)
-   - File naming: `{domain}.controller.ts` (e.g., `form.controller.ts`)
-   - Export as named export
+## GraphQL Schema Definitions
 
-2. **Route Decorators**:
-   - `@Get(path)` - GET endpoint
-   - `@Post(path)` - POST endpoint
-   - `@Put(path)` - PUT endpoint
-   - `@Delete(path)` - DELETE endpoint
-   - Paths follow REST conventions: `/api/{resource}`
-
-3. **File Uploads**:
-   - Use `@UseInterceptors(FileInterceptor('fieldName'))`
-   - Configure multer options (limits, fileFilter, storage)
-   - Use `@UploadedFile()` parameter decorator
-   - Return file metadata (filename, url, size)
-
-4. **Response Handling**:
-   - Use Express `Response` type for rendering: `@Res() res: Response`
-   - Return JSON objects for API responses
-   - Use NestJS DTOs for request/response validation
-
-5. **Common Controllers**:
-   - `upload.controller.ts` - File uploads
-   - `form.controller.ts` - Form rendering (SSR)
-   - `export-submissions.controller.ts` - CSV/Excel exports
-   - `health.controller.ts` - Health checks
-   - `social-login.controller.ts` - OAuth callbacks
-
-## GraphQL Schema Definitions (`packages/server/src/common/graphql/`)
-
-### Input Type Structure
-
-**Pattern**: NestJS GraphQL decorators with class-validator
+**Location**: `packages/server/src/common/graphql/`
 
 ```typescript
-// ✅ Good: Input type with validation
-import { IsEnum, IsOptional, IsUrl, Min, Max } from 'class-validator'
+// InputTypes with class-validator
+import { IsEnum, IsOptional, IsUrl, Min } from 'class-validator'
 import { Field, InputType } from '@nestjs/graphql'
 import GraphQLJSON from 'graphql-type-json'
 
@@ -332,10 +159,6 @@ export class CreateFormInput {
 
   @Field(type => Number)
   @IsEnum(Object.values(FormKindEnum))
-  interactiveMode: InteractiveModeEnum
-
-  @Field(type => Number)
-  @IsEnum(Object.values(FormKindEnum))
   kind: FormKindEnum
 }
 
@@ -343,74 +166,42 @@ export class CreateFormInput {
 export class UpdateFormInput extends FormDetailInput {
   @Field({ nullable: true })
   @IsOptional()
-  name?: string
-
-  @Field({ nullable: true })
-  @IsOptional()
   @IsUrl()
   redirectUrl?: string
+}
 
-  @Field({ nullable: true })
-  @IsOptional()
-  @Min(1)
-  quotaLimit?: number
+@ObjectType()
+export class FormType {
+  @Field()
+  id: string
+
+  @Field(type => GraphQLJSON)
+  settings: FormSettings
+
+  @Field(type => [FormFieldType])
+  fields: FormField[]
 }
 ```
 
-### Conventions
+**Conventions**:
+- `@InputType()` for inputs, `@ObjectType()` for responses
+- File naming: `{domain}.graphql.ts`
+- Extend base types when appropriate
+- Use `@Field({ nullable: true })` for optional
+- Validation: `@IsEnum()`, `@IsUrl()`, `@IsOptional()`, `@Min()`, `@Max()`
+- Complex objects: `GraphQLJSON` or `GraphQLJSONObject`
+- Arrays: `@Field(type => [FormFieldType])`
 
-1. **Input Types**:
-   - Use `@InputType()` decorator
-   - File naming: `{domain}.graphql.ts` (e.g., `form.graphql.ts`)
-   - Extend base input types when appropriate
-   - Use `@Field()` decorator for each property
-   - Specify nullable fields: `@Field({ nullable: true })`
+**Naming**:
+- Input types: `{Operation}{Domain}Input` (CreateFormInput)
+- Object types: `{Domain}Type` (FormType)
 
-2. **Object Types**:
-   - Use `@ObjectType()` decorator
-   - Match database model structure
-   - Use GraphQL types: `String`, `Number`, `Boolean`
-   - Use `GraphQLJSON` or `GraphQLJSONObject` for complex objects
-   - Use arrays: `@Field(type => [FormFieldType])`
+## Backend Service Layer
 
-3. **Validation**:
-   - Use class-validator decorators: `@IsEnum()`, `@IsUrl()`, `@IsOptional()`
-   - Use `@Min()`, `@Max()` for numeric validation
-   - Use `@IsArray()`, `@IsObject()` for complex types
-   - Validation runs automatically via NestJS ValidationPipe
-
-4. **Type Organization**:
-   - Group related types in same file
-   - Input types: `{Operation}{Domain}Input` (e.g., `CreateFormInput`)
-   - Object types: `{Domain}Type` (e.g., `FormType`)
-   - Extend base types: `UpdateFormInput extends FormDetailInput`
-
-5. **Shared Types**:
-   - Import enums from `@heyform-inc/shared-types-enums`
-   - Use GraphQL enums: `@Field(type => String)` with `@IsEnum()`
-   - Reference other ObjectTypes: `@Field(type => FormFieldType)`
-
-### Schema File Organization
-
-```
-common/graphql/
-├── form.graphql.ts          # Form types (InputTypes, ObjectTypes)
-├── auth.graphql.ts          # Authentication types
-├── submission.graphql.ts    # Submission types
-├── user.graphql.ts          # User types
-├── project.graphql.ts       # Project types
-├── team.graphql.ts           # Team types
-└── index.ts                  # Re-exports
-```
-
-## Backend Service Layer (`packages/server/src/service/`)
-
-### Service Class Structure
-
-**Pattern**: Injectable NestJS services with Mongoose models
+**Location**: `packages/server/src/service/`
 
 ```typescript
-// ✅ Good: Service with dependency injection
+// Injectable services with Mongoose models
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
@@ -439,63 +230,23 @@ export class FormService {
 }
 ```
 
-### Conventions
-
-1. **Class Structure**:
-   - Use `@Injectable()` decorator
-   - File naming: `{domain}.service.ts` (e.g., `form.service.ts`)
-   - Inject Mongoose models via `@InjectModel(ModelName.name)`
-   - Inject other services via constructor
-
-2. **Method Naming**:
-   - Use descriptive names: `findById()`, `findAll()`, `create()`, `update()`, `delete()`
-   - Query methods: `find*()`, `get*()`, `search*()`, `count*()`
-   - Mutation methods: `create()`, `update()`, `delete()`, `remove()`
-   - Use async/await for all database operations
-
-3. **Database Operations**:
-   - Use Mongoose model methods: `findById()`, `find()`, `findOne()`, `create()`, `save()`
-   - Use aggregation pipelines for complex queries
-   - Return typed results: `Promise<FormModel | null>`
-   - Handle errors appropriately
-
-4. **Business Logic**:
-   - Keep resolvers thin - delegate to services
-   - Services contain business logic and data access
-   - Use helper utilities from `@heyform-inc/utils`
-   - Queue async tasks via Bull queues
-
-5. **Queue Integration**:
-   - Inject queues: `@InjectQueue('QueueName')`
-   - Add jobs: `await this.queue.add('jobName', data)`
-   - Queue names match processor names
-
-### Service Organization
-
-```
-service/
-├── form.service.ts           # Form business logic
-├── submission.service.ts     # Submission business logic
-├── auth.service.ts           # Authentication logic
-├── user.service.ts           # User management
-├── project.service.ts        # Project management
-├── team.service.ts           # Team/workspace management
-└── index.ts                  # Re-exports
-```
+**Conventions**:
+- `@Injectable()` decorator
+- File naming: `{domain}.service.ts`
+- Inject models: `@InjectModel(ModelName.name)`
+- Method naming: `findById()`, `findAll()`, `create()`, `update()`, `delete()`
+- Return typed promises: `Promise<FormModel | null>`
+- Delegate business logic to services (keep resolvers thin)
 
 ## Common Patterns
 
-### Input Wrapping Pattern
+### Input Wrapping
 
-**All GraphQL operations wrap variables in `input` object:**
+**Critical**: All GraphQL operations wrap variables in `input` object
 
 ```typescript
-// ✅ Good: Consistent input wrapping
-// Frontend
-FormService.create({
-  projectId: '123',
-  name: 'My Form'
-})
+// Frontend service
+FormService.create({ projectId: '123', name: 'My Form' })
 
 // GraphQL mutation
 mutation createForm($input: CreateFormInput!) {
@@ -503,47 +254,40 @@ mutation createForm($input: CreateFormInput!) {
 }
 
 // Resolver
-async createForm(@Args('input') input: CreateFormInput) {
-  // ...
-}
+async createForm(@Args('input') input: CreateFormInput) { ... }
 ```
 
-### Error Handling Pattern
+### Error Handling
 
 ```typescript
-// ✅ Good: Consistent error handling
 import { BadRequestException, NotFoundException } from '@nestjs/common'
 
-@Resolver()
-export class FormResolver {
-  async formDetail(@Args('input') input: FormDetailInput) {
-    const form = await this.formService.findById(input.formId)
-    
-    if (!form) {
-      throw new NotFoundException('Form not found')
-    }
-    
-    if (!form.active) {
-      throw new BadRequestException('Form is not active')
-    }
-    
-    return form
-  }
+if (!form) {
+  throw new NotFoundException('Form not found')
+}
+
+if (!form.active) {
+  throw new BadRequestException('Form is not active')
 }
 ```
+
+**Exception Types**:
+- `BadRequestException` - Client errors (400)
+- `NotFoundException` - Resource not found (404)
+- `ForbiddenException` - Permission denied (403)
+- `InternalServerErrorException` - Server errors (500)
 
 ### Authentication Pattern
 
 ```typescript
-// ✅ Good: Authentication decorators
 @Resolver()
 @Auth()  // Requires authentication
 export class FormResolver {
   @Query(returns => FormType)
-  @FormGuard()  // Additional form access check
+  @FormGuard()  // Additional access check
   async formDetail(
-    @Team() team: TeamModel,  // Injected from context
-    @User() user: UserModel,  // Injected from context
+    @Team() team: TeamModel,    // Injected from context
+    @User() user: UserModel,    // Injected from context
     @Args('input') input: FormDetailInput
   ) {
     // Resolver logic
@@ -554,7 +298,6 @@ export class FormResolver {
 ### File Upload Pattern
 
 ```typescript
-// ✅ Good: File upload with validation
 @Controller()
 export class UploadController {
   @Post('/api/upload')
@@ -581,72 +324,61 @@ export class UploadController {
 }
 ```
 
-## Import Path Conventions
+## Import Aliases
 
-### Frontend Services
-- `@/utils` - Utility functions (aliased to `packages/webapp/src/utils`)
-- `@/consts` - Constants and GraphQL queries (aliased to `packages/webapp/src/consts`)
+### Frontend
+- `@/utils` - packages/webapp/src/utils
+- `@/consts` - packages/webapp/src/consts
 - `@heyform-inc/shared-types-enums` - Shared types
 
-### Backend Resolvers/Services
-- `@decorator` - Custom decorators (aliased to `packages/server/src/common/decorator`)
-- `@graphql` - GraphQL types (aliased to `packages/server/src/common/graphql`)
-- `@model` - Mongoose models (aliased to `packages/server/src/model`)
-- `@service` - Services (aliased to `packages/server/src/service`)
-- `@guard` - Guards (aliased to `packages/server/src/common/guard`)
-- `@utils` - Utility functions (aliased to `packages/server/src/utils`)
-- `@environments` - Environment variables (aliased to `packages/server/src/environments`)
-- `@config` - Configuration modules (aliased to `packages/server/src/config`)
+### Backend
+- `@decorator` - server/src/common/decorator
+- `@graphql` - server/src/common/graphql
+- `@model` - server/src/model
+- `@service` - server/src/service
+- `@guard` - server/src/common/guard
+- `@utils` - server/src/utils
+- `@environments` - server/src/environments
+- `@config` - server/src/config
+
+## File Naming
+
+- **Services**: `{domain}.service.ts` (form.service.ts)
+- **Resolvers**: `{operation}-{domain}.resolver.ts` (create-form.resolver.ts)
+- **Controllers**: `{domain}.controller.ts` (upload.controller.ts)
+- **GraphQL Types**: `{domain}.graphql.ts` (form.graphql.ts)
+- **All files**: kebab-case
 
 ## Best Practices
 
-1. **Separation of Concerns**:
-   - Resolvers: Thin layer, delegate to services
-   - Services: Business logic and data access
-   - Models: Database schema definitions
-   - GraphQL Types: API contract definitions
+**Architecture**:
+- Resolvers: Thin layer, delegate to services
+- Services: Business logic + data access
+- Models: Database schema
+- GraphQL Types: API contract
 
-2. **Type Safety**:
-   - Use TypeScript strictly
-   - Import types from shared packages
-   - Use GraphQL types consistently
-   - Validate inputs with class-validator
+**Type Safety**:
+- Use TypeScript strictly
+- Import types from shared packages
+- Validate inputs with class-validator
 
-3. **Error Handling**:
-   - Use NestJS exceptions
-   - Log errors with context
-   - Return appropriate HTTP status codes
-   - Don't expose internal errors to clients
+**Security**:
+- Always use `@Auth()` for protected endpoints
+- Use guards for resource access control
+- Validate all inputs
+- Don't expose internal errors
 
-4. **Performance**:
-   - Use appropriate fetch policies
-   - Implement pagination for lists
-   - Use database indexes
-   - Cache frequently accessed data
+**Performance**:
+- Use appropriate fetch policies (frontend)
+- Implement pagination for lists
+- Use database indexes
+- Cache frequently accessed data
 
-5. **Security**:
-   - Always use `@Auth()` for protected endpoints
-   - Use guards for resource access control
-   - Validate all inputs
-   - Sanitize user data
+## Critical Gotchas
 
-6. **Testing**:
-   - Test services independently
-   - Mock dependencies in resolvers
-   - Test GraphQL schema validation
-   - Test error scenarios
-
-## File Naming Conventions
-
-- **Services**: `{domain}.service.ts` (e.g., `form.service.ts`)
-- **Resolvers**: `{operation}-{domain}.resolver.ts` (e.g., `create-form.resolver.ts`)
-- **Controllers**: `{domain}.controller.ts` (e.g., `upload.controller.ts`)
-- **GraphQL Types**: `{domain}.graphql.ts` (e.g., `form.graphql.ts`)
-- **All files**: Use kebab-case
-
-## References
-
-- [NestJS GraphQL Documentation](https://docs.nestjs.com/graphql/quick-start)
-- [Apollo Client Documentation](https://www.apollographql.com/docs/react/)
-- [NestJS Controllers](https://docs.nestjs.com/controllers)
-- [class-validator Documentation](https://github.com/typestack/class-validator)
+1. **Always wrap in `input`** - GraphQL variables must be wrapped
+2. **One resolver per operation** - Not one resolver per domain
+3. **Specify fetchPolicy** - Don't rely on defaults
+4. **Use guards** - @Auth() for auth, @FormGuard() for access
+5. **Thin resolvers** - Business logic belongs in services
+6. **Type enums properly** - Filter enum values by type (number/string)

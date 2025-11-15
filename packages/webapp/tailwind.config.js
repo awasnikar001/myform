@@ -30,7 +30,28 @@ module.exports = {
           DEFAULT: 'rgba(var(--hf-accent))',
           light: 'rgba(var(--hf-accent-light))'
         },
-        error: 'rgba(var(--hf-error))'
+        error: 'rgba(var(--hf-error))',
+        slate: {
+          50: 'rgba(var(--hf-slate-50))',
+          100: 'rgba(var(--hf-slate-100))',
+          200: 'rgba(var(--hf-slate-200))',
+          600: 'rgba(var(--hf-slate-600))',
+          700: 'rgba(var(--hf-slate-700))',
+          800: 'rgba(var(--hf-slate-800))'
+        },
+        'icon-blue': 'rgba(var(--hf-icon-blue))',
+        'icon-purple': 'rgba(var(--hf-icon-purple))',
+        'icon-green': 'rgba(var(--hf-icon-green))',
+        'icon-amber': 'rgba(var(--hf-icon-amber))',
+        // Glass effect colors
+        glass: {
+          light: 'rgba(255, 255, 255, 0.7)',
+          border: 'rgba(255, 255, 255, 0.18)'
+        }
+      },
+      backdropBlur: {
+        xs: '2px',
+        '3xl': '64px'
       },
       screens: {
         'builder-md': '1230px',

@@ -309,11 +309,11 @@ export default function FormSubmissions() {
             ref={tableRef}
             classNames={{
               container: cn(
-                'scrollbar overflow-auto rounded-md border border-accent text-sm',
+                'scrollbar overflow-auto rounded-md border border-slate-200/60 dark:border-accent text-sm',
                 isMaximized ? 'h-[calc(100vh-9rem)]' : 'h-[calc(100vh-23.45rem)]'
               ),
               table:
-                'min-w-full text-left [&_tbody_td]:max-w-60 [&_tbody_td]:h-10 [&_tbody_td]:px-4 [&_tbody_td]:text-left [&_tbody_td]:font-normal [&_thead_th]:truncate [&_thead_th]:max-w-60 [&_thead_th]:px-4 [&_thead_th]:h-10 [&_thead_th]:text-left [&_thead_th]:font-normal [&_thead_tr]:sticky [&_thead_tr]:top-0 [&_thead_tr]:bg-foreground [&_thead]:text-secondary',
+                'min-w-full text-left [&_tbody_td]:max-w-60 [&_tbody_td]:h-10 [&_tbody_td]:px-4 [&_tbody_td]:text-left [&_tbody_td]:font-normal [&_thead_th]:truncate [&_thead_th]:max-w-60 [&_thead_th]:px-4 [&_thead_th]:h-10 [&_thead_th]:text-left [&_thead_th]:font-normal [&_thead_tr]:sticky [&_thead_tr]:top-0 [&_thead_tr]:bg-white/25 [&_thead_tr]:backdrop-blur-2xl dark:[&_thead_tr]:bg-foreground [&_thead]:text-secondary',
               footer: 'text-sm justify-end'
             }}
             columns={columns}

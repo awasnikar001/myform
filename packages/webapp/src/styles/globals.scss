@@ -4,16 +4,31 @@
 
 @layer base {
   :root {
-    --hf-background: 244, 244, 245;
+    /* Softer, more elegant light mode colors */
+    --hf-background: 247, 249, 251;
     --hf-foreground: 255, 255, 255;
-    --hf-input: 9, 9, 11, 15%;
-    --hf-primary: 9, 9, 11;
+    --hf-input: 9, 9, 11, 8%;
+    --hf-primary: 15, 23, 42;
     --hf-primary-light: 255, 255, 255;
-    --hf-secondary: 113, 113, 122;
-    --hf-secondary-light: 9, 9, 11, 2.5%;
-    --hf-accent: 230, 230, 230;
-    --hf-accent-light: 9, 9, 11, 5%;
+    --hf-secondary: 100, 116, 139;
+    --hf-secondary-light: 15, 23, 42, 3%;
+    --hf-accent: 226, 232, 240;
+    --hf-accent-light: 15, 23, 42, 4%;
     --hf-error: 220, 38, 38;
+    
+    /* Slate color palette */
+    --hf-slate-50: 248, 250, 252;
+    --hf-slate-100: 241, 245, 249;
+    --hf-slate-200: 226, 232, 240;
+    --hf-slate-600: 71, 85, 105;
+    --hf-slate-700: 51, 65, 85;
+    --hf-slate-800: 30, 41, 59;
+    
+    /* Icon accent colors - slightly more vibrant */
+    --hf-icon-blue: 59, 130, 246;
+    --hf-icon-purple: 147, 51, 234;
+    --hf-icon-green: 16, 185, 129;
+    --hf-icon-amber: 245, 158, 11;
   }
 
   .dark {
@@ -27,18 +42,74 @@
     --hf-accent: 230, 230, 230;
     --hf-accent-light: 255, 255, 255, 5%;
     --hf-error: 220, 38, 38;
+    
+    /* Slate color palette (dark mode) */
+    --hf-slate-50: 15, 23, 42;
+    --hf-slate-100: 30, 41, 59;
+    --hf-slate-200: 51, 65, 85;
+    --hf-slate-600: 148, 163, 184;
+    --hf-slate-700: 203, 213, 225;
+    --hf-slate-800: 226, 232, 240;
   }
 }
 
 html {
   scroll-behavior: smooth;
+  @apply bg-foreground;
 }
 
 body {
-  @apply text-primary antialiased lg:bg-background;
+  @apply text-primary antialiased bg-foreground;
 }
 
 @layer components {
+  /* Glass effect utility classes */
+  .glass-card {
+    @apply bg-white/40 backdrop-blur-2xl border border-white/60 shadow-2xl shadow-slate-300/60;
+  }
+  
+  .glass-card-subtle {
+    @apply bg-white/30 backdrop-blur-xl border border-white/50;
+  }
+  
+  /* Gradient background for glass effect visibility - light mode only */
+  .glass-background {
+    position: relative;
+  }
+  
+  @media (prefers-color-scheme: light) {
+    .glass-background {
+      background: linear-gradient(135deg, #f7f9fb 0%, #edf2f7 50%, #f1f5f9 100%);
+    }
+  }
+  
+  /* Light mode - always show gradient when not in dark mode */
+  html:not(.dark) .glass-background {
+    background: linear-gradient(135deg, #f7f9fb 0%, #edf2f7 50%, #f1f5f9 100%);
+  }
+  
+  /* Dark mode - ensure transparent */
+  html.dark .glass-background {
+    background: transparent !important;
+  }
+  
+  /* Subtle mesh pattern overlay - light mode only */
+  .mesh-pattern::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle at 1px 1px, rgba(148, 163, 184, 0.15) 1px, transparent 0);
+    background-size: 24px 24px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  
+  /* Hide mesh in dark mode */
+  html.dark .mesh-pattern::before {
+    content: none;
+    display: none;
+  }
+  
   .scrollbar {
     overflow-y: auto;
 

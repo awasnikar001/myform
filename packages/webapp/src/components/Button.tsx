@@ -35,7 +35,7 @@ const ButtonComponent: FC<ButtonProps> = ({
   return (
     <button
       className={cn(
-        'bg-primary text-primary-light relative h-11 cursor-pointer rounded-lg border border-transparent px-3.5 text-base/6 font-medium transition-colors duration-100 focus:outline-none focus-visible:outline-none focus-visible:ring-0 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 data-[size=md]:h-9 data-[size=sm]:h-9 data-[size=lg]:hover:bg-opacity-80 data-[size=md]:hover:bg-opacity-80 sm:h-10 sm:px-3 sm:text-sm/6 data-[size=md]:sm:h-9 data-[size=sm]:sm:h-8',
+        'bg-primary text-primary-light focus-visible:ring-primary relative h-11 cursor-pointer rounded-lg border border-transparent px-3.5 text-base/6 font-medium transition-all duration-200 focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 data-[size=md]:h-9 data-[size=sm]:h-9 data-[size=lg]:hover:bg-opacity-80 data-[size=md]:hover:bg-opacity-80 data-[size=lg]:hover:shadow-sm data-[size=md]:hover:shadow-sm sm:h-10 sm:px-3 sm:text-sm/6 data-[size=md]:sm:h-9 data-[size=sm]:sm:h-8',
         {
           '[&_[data-slot=button]]:opacity-0': loading,
           'w-11 px-0 data-[size=md]:w-9 data-[size=sm]:w-9 sm:w-10 sm:px-0 data-[size=md]:sm:w-9 data-[size=sm]:sm:w-8':
@@ -64,7 +64,7 @@ const ButtonComponent: FC<ButtonProps> = ({
 const GhostButton: FC<ButtonProps> = ({ className, ...restProps }) => (
   <ButtonComponent
     className={cn(
-      'border-input bg-foreground text-primary hover:bg-accent-light border',
+      'dark:border-input dark:bg-foreground text-primary border border-white/60 bg-white/35 backdrop-blur-xl transition-all duration-200 hover:bg-white/50 hover:shadow-lg dark:hover:bg-slate-800',
       className
     )}
     {...restProps}
@@ -74,7 +74,7 @@ const GhostButton: FC<ButtonProps> = ({ className, ...restProps }) => (
 const LinkButton: FC<ButtonProps> = ({ className, ...restProps }) => (
   <ButtonComponent
     className={cn(
-      'text-primary hover:bg-accent-light aria-expanded:bg-accent-light border-0 bg-transparent outline-0 hover:outline-0',
+      'text-primary border-0 bg-transparent outline-0 transition-all duration-200 hover:bg-white/30 hover:outline-0 hover:backdrop-blur-md aria-expanded:bg-white/30 aria-expanded:backdrop-blur-md dark:hover:bg-slate-800 dark:aria-expanded:bg-slate-800',
       className
     )}
     {...restProps}

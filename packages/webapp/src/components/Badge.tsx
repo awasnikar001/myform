@@ -8,7 +8,7 @@ const BADGE_COLORS = {
   amber: 'bg-amber-400/20 text-amber-700 group-data-[hover]:bg-amber-400/30 ',
   yellow: 'bg-yellow-400/20 text-yellow-700 group-data-[hover]:bg-yellow-400/30 ',
   lime: 'bg-lime-400/20 text-lime-700 group-data-[hover]:bg-lime-400/30 ',
-  green: 'bg-green-500/15 text-green-700 group-data-[hover]:bg-green-500/25 ',
+  green: 'bg-green-500/15 text-green-700 dark:text-green-400 group-data-[hover]:bg-green-500/25 ',
   emerald: 'bg-emerald-500/15 text-emerald-700 group-data-[hover]:bg-emerald-500/25 ',
   teal: 'bg-teal-500/15 text-teal-700 group-data-[hover]:bg-teal-500/25 ',
   cyan: 'bg-cyan-400/20 text-cyan-700 group-data-[hover]:bg-cyan-400/30 ',
@@ -20,7 +20,7 @@ const BADGE_COLORS = {
   fuchsia: 'bg-fuchsia-400/15 text-fuchsia-700 group-data-[hover]:bg-fuchsia-400/25 ',
   pink: 'bg-pink-400/15 text-pink-700 group-data-[hover]:bg-pink-400/25 ',
   rose: 'bg-rose-400/15 text-rose-700 group-data-[hover]:bg-rose-400/25 ',
-  zinc: 'bg-zinc-600/10 text-secondary group-data-[hover]:bg-zinc-600/20 '
+  zinc: 'bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 group-data-[hover]:bg-slate-300 dark:group-data-[hover]:bg-slate-600 '
 }
 
 interface BadgeProps extends ComponentProps {
@@ -31,7 +31,7 @@ export const Badge: FC<BadgeProps> = ({ color = 'zinc', className, children }) =
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-x-1.5 rounded-md px-1.5 py-0.5 text-sm/5 font-medium sm:text-xs/5 forced-colors:outline',
+        'inline-flex items-center gap-x-1.5 rounded-md px-1.5 py-0.5 text-sm/5 font-medium backdrop-blur-sm sm:text-xs/5 forced-colors:outline',
         BADGE_COLORS[color],
         className
       )}

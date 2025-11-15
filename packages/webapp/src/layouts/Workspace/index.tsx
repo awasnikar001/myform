@@ -257,7 +257,7 @@ const LayoutComponent: FC<LayoutProps> = ({ options, children }) => {
     <>
       <div
         className={cn(
-          'bg-foreground lg:bg-background relative isolate flex min-h-svh w-full max-lg:flex-col',
+          'bg-foreground relative isolate flex min-h-svh w-full max-lg:flex-col',
           {
             '[&_[data-slot=layout-main]]:pt-16 [&_[data-slot=layout-main]]:lg:pt-16 [&_[data-slot=layout-sidebar]]:top-16': false
           },
@@ -267,14 +267,17 @@ const LayoutComponent: FC<LayoutProps> = ({ options, children }) => {
         <WorkspaceSidebar />
 
         <main
-          className="flex flex-1 flex-col pb-2 lg:min-w-0 lg:pl-64 lg:pr-2 lg:pt-2"
+          className="lg:glass-background lg:mesh-pattern flex flex-1 flex-col overflow-x-hidden pb-2 lg:min-w-0 lg:pl-64 lg:pr-2 lg:pt-2 dark:!bg-transparent"
           data-slot="layout-main"
         >
           <div
-            className="lg:bg-foreground lg:ring-accent-light dark:lg:ring-input grow p-6 lg:rounded-lg lg:p-10 lg:shadow-sm lg:ring-1"
+            className="dark:lg:bg-foreground dark:lg:ring-input grow overflow-x-hidden p-6 lg:relative lg:z-10 lg:rounded-2xl lg:bg-white/30 lg:p-10 lg:shadow-2xl lg:shadow-slate-300/70 lg:ring-1 lg:ring-white/60 lg:backdrop-blur-2xl dark:lg:shadow-none"
             data-slot="layout-container"
           >
-            <div className="mx-auto flex min-h-full max-w-6xl flex-col" data-slot="layout-inner">
+            <div
+              className="mx-auto flex min-h-full max-w-6xl flex-col overflow-x-hidden"
+              data-slot="layout-inner"
+            >
               <div className="mb-6 flex items-center justify-between lg:hidden">
                 <Button.Link
                   size="md"

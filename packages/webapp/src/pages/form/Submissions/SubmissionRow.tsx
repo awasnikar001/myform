@@ -26,7 +26,7 @@ const SubmissionRow: FC<SubmissionRowProps> = ({ fields, submission }) => {
   )
 
   return (
-    <tr className="border-accent hover:bg-primary/[2.5%] max-w-60 border-b">
+    <tr className="dark:border-accent dark:hover:bg-primary/[2.5%] max-w-60 border-b border-slate-200/60 hover:bg-white/25 hover:backdrop-blur-lg">
       {cells.map(cell => (
         <td key={cell.field.id} className="px-4 py-2">
           {cell.answer && (

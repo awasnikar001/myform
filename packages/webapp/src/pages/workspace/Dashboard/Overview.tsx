@@ -28,21 +28,21 @@ export default function Overview() {
       icon: IconForms,
       label: 'dashboard.forms',
       iconColor: 'text-icon-blue',
-      iconBg: 'bg-blue-50 dark:bg-blue-950/20'
+      iconBg: 'bg-blue-50/60 dark:bg-blue-950/20 backdrop-blur-sm'
     },
     {
       key: 'submissionQuota',
       icon: IconDatabase,
       label: 'dashboard.submission',
       iconColor: 'text-icon-purple',
-      iconBg: 'bg-purple-50 dark:bg-purple-950/20'
+      iconBg: 'bg-purple-50/60 dark:bg-purple-950/20 backdrop-blur-sm'
     },
     {
       key: 'memberCount',
       icon: IconUsers,
       label: 'dashboard.members',
       iconColor: 'text-icon-green',
-      iconBg: 'bg-green-50 dark:bg-green-950/20',
+      iconBg: 'bg-green-50/60 dark:bg-green-950/20 backdrop-blur-sm',
       valueTransform: (val: number) => val || 1
     },
     {
@@ -50,7 +50,7 @@ export default function Overview() {
       icon: IconServer,
       label: 'dashboard.storage',
       iconColor: 'text-icon-amber',
-      iconBg: 'bg-amber-50 dark:bg-amber-950/20',
+      iconBg: 'bg-amber-50/60 dark:bg-amber-950/20 backdrop-blur-sm',
       valueTransform: formatBytes
     }
   ]
@@ -58,15 +58,18 @@ export default function Overview() {
   return (
     <div className="mt-4 grid grid-cols-2 gap-8 xl:grid-cols-4">
       {STATS_CONFIG.map(({ key, icon: Icon, label, iconColor, iconBg, valueTransform }) => (
-        <div key={key} className="group">
+        <div
+          key={key}
+          className="group relative overflow-hidden rounded-2xl border border-white/60 bg-white/35 p-4 shadow-xl shadow-slate-300/60 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:bg-white/45 hover:shadow-2xl hover:shadow-slate-300/70 dark:border-slate-700/50 dark:bg-slate-900/50 dark:shadow-none dark:hover:bg-slate-900/70"
+        >
           <div className="flex items-start gap-3">
             <div
               className={cn(
-                'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
+                'flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ring-1 ring-white/50 backdrop-blur-sm transition-transform duration-300 group-hover:scale-110',
                 iconBg
               )}
             >
-              <Icon className={cn('h-5 w-5', iconColor)} strokeWidth={2} />
+              <Icon className={cn('h-6 w-6', iconColor)} strokeWidth={2} />
             </div>
             <div className="min-w-0 flex-1">
               <div className="text-secondary text-sm/5 font-medium">{t(label)}</div>
