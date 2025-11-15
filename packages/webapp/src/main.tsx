@@ -43,7 +43,7 @@ const App = () => {
       }
     } else {
       if (isLoggedIn && options?.redirectIfLogged) {
-        return <Navigate to="/" replace />
+        return <Navigate to="/app" replace />
       } else {
         return children
       }

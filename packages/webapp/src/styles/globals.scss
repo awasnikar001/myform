@@ -30,6 +30,10 @@
   }
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   @apply text-primary antialiased lg:bg-background;
 }

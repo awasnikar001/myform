@@ -14,7 +14,7 @@ const Login = () => {
 
   async function fetch(values: any) {
     await AuthService.login(values)
-    router.replace('/')
+    router.replace('/app')
   }
 
   return (

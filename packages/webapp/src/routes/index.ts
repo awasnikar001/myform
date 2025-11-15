@@ -3,6 +3,7 @@ import {
   BaseLayout,
   FormLayout,
   ProjectLayout,
+  PublicLayout,
   WorkspaceGuard,
   WorkspaceLayout
 } from '@/layouts'
@@ -19,6 +20,7 @@ import FormRender from '@/pages/form/Render'
 import FormSettings from '@/pages/form/Settings'
 import FormShare from '@/pages/form/Share'
 import FormSubmissions from '@/pages/form/Submissions'
+import Landing from '@/pages/marketing/Landing'
 import ProjectForms from '@/pages/project/Forms'
 import ProjectTrash from '@/pages/project/Trash'
 import CreateWorkspace from '@/pages/workspace/Create'
@@ -29,11 +31,21 @@ import WorkspaceSettings from '@/pages/workspace/Settings'
 
 const routes = [
   {
+    path: '/',
+    component: Landing,
+    layout: PublicLayout,
+    options: {
+      title: 'HeyForm - Build Beautiful Forms in Minutes',
+      loginRequired: false
+    }
+  },
+  {
     path: '/login',
     component: Login,
     layout: AuthLayout,
     options: {
-      title: 'login.title'
+      title: 'login.title',
+      redirectIfLogged: true
     }
   },
   {
@@ -41,7 +53,8 @@ const routes = [
     component: SignUp,
     layout: AuthLayout,
     options: {
-      title: 'signUp.title'
+      title: 'signUp.title',
+      redirectIfLogged: true
     }
   },
   {
@@ -49,7 +62,8 @@ const routes = [
     component: ForgotPassword,
     layout: AuthLayout,
     options: {
-      title: 'forgotPassword.title'
+      title: 'forgotPassword.title',
+      redirectIfLogged: true
     }
   },
   {
@@ -57,7 +71,8 @@ const routes = [
     component: ResetPassword,
     layout: AuthLayout,
     options: {
-      title: 'resetPassword.title'
+      title: 'resetPassword.title',
+      redirectIfLogged: true
     }
   },
   {
@@ -79,7 +94,7 @@ const routes = [
     }
   },
   {
-    path: '/',
+    path: '/app',
     layout: WorkspaceGuard,
     component: () => null,
     options: {
