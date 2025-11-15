@@ -55,9 +55,9 @@ const Link: FC<LinkProps> = ({ to, icon: Icon, label }) => {
     <NavLink
       className={({ isActive }) =>
         cn(
-          'hover:bg-primary/5 group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium sm:px-2 sm:py-1.5 lg:py-2',
+          'group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-all hover:bg-slate-100 sm:px-2 sm:py-1.5 lg:py-2 dark:hover:bg-slate-700/50',
           {
-            'before:bg-primary [&_[data-slot=icon]]:stroke-primary relative before:absolute before:inset-y-2 before:-left-4 before:w-0.5 before:rounded-full':
+            'text-primary before:bg-primary relative bg-slate-100 before:absolute before:inset-y-2 before:-left-4 before:w-0.5 before:rounded-full dark:bg-slate-800/50':
               isActive
           }
         )
@@ -65,8 +65,27 @@ const Link: FC<LinkProps> = ({ to, icon: Icon, label }) => {
       to={to}
       end
     >
-      <Icon className="stroke-secondary group-hover:stroke-primary h-5 w-5" data-slot="icon" />
-      <span className="truncate">{label}</span>
+      {({ isActive }) => (
+        <>
+          <div
+            className={cn(
+              'flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors',
+              isActive
+                ? 'bg-slate-200 dark:bg-slate-700/50'
+                : 'group-hover:bg-slate-200 dark:group-hover:bg-slate-700/50'
+            )}
+          >
+            <Icon
+              className={cn(
+                'h-5 w-5 transition-colors',
+                isActive ? 'stroke-primary' : 'stroke-secondary group-hover:stroke-primary'
+              )}
+              data-slot="icon"
+            />
+          </div>
+          <span className="truncate">{label}</span>
+        </>
+      )}
     </NavLink>
   )
 }
@@ -91,14 +110,16 @@ const WorkspaceSidebarComponent = () => {
 
           {/* Search */}
           <button
-            className="hover:bg-primary/5 group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium sm:px-2 sm:py-1.5 lg:py-2"
+            className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-all hover:bg-slate-100 sm:px-2 sm:py-1.5 lg:py-2 dark:hover:bg-slate-700/50"
             onClick={() => openModal('SearchModal')}
           >
-            <IconSearch
-              className="stroke-secondary group-hover:stroke-primary h-5 w-5"
-              data-slot="icon"
-            />
-            <span className="truncate">{t('workspace.sidebar.search')}</span>
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors group-hover:bg-slate-200 dark:group-hover:bg-slate-700/50">
+              <IconSearch
+                className="stroke-secondary group-hover:stroke-primary h-5 w-5 transition-colors"
+                data-slot="icon"
+              />
+            </div>
+            <span className="text-primary truncate">{t('workspace.sidebar.search')}</span>
           </button>
 
           {/* Members */}
@@ -164,10 +185,12 @@ const WorkspaceSidebarComponent = () => {
               href={row.href}
               target="_blank"
               rel="noreferrer"
-              className="hover:bg-accent-light flex w-full items-center gap-3 rounded-lg px-2.5 py-2.5 text-left text-sm font-medium sm:px-1.5 sm:py-1.5 lg:py-2"
+              className="group flex w-full items-center gap-3 rounded-lg px-2.5 py-2.5 text-left text-sm font-medium transition-all hover:bg-slate-100 sm:px-1.5 sm:py-1.5 lg:py-2 dark:hover:bg-slate-700/50"
             >
-              <row.icon className="stroke-secondary group-hover:stroke-primary h-5 w-5" />
-              <span className="truncate">{t(row.title)}</span>
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors group-hover:bg-slate-200 dark:group-hover:bg-slate-700/50">
+                <row.icon className="stroke-secondary group-hover:stroke-primary h-5 w-5 transition-colors" />
+              </div>
+              <span className="text-primary truncate">{t(row.title)}</span>
             </a>
           ))}
 

@@ -1,6 +1,7 @@
 import {
   IconCopy,
   IconDots,
+  IconFileText,
   IconPencil,
   IconRestore,
   IconShare,
@@ -301,27 +302,32 @@ const FormItem: FC<FormItemProps> = ({ form, isInTrash, onChange }) => {
 
   return (
     <FormItemLink
-      className="first-of-type:border-accent-light last-of-type:border-accent-light hover:bg-secondary-light has-[[data-state=open]]:bg-secondary-light group flex items-center justify-between gap-6 py-4 first-of-type:border-t last-of-type:border-b"
+      className="first-of-type:border-accent-light last-of-type:border-accent-light group flex min-w-0 items-center justify-between gap-6 py-4 transition-colors first-of-type:border-t last-of-type:border-b hover:bg-slate-50 has-[[data-state=open]]:bg-slate-50 dark:hover:bg-slate-900/50 dark:has-[[data-state=open]]:bg-slate-900/50"
       to={`/workspace/${form.teamId}/project/${form.projectId}/form/${form.id}/analytics`}
       isInTrash={isInTrash}
       isSuspended={form.suspended}
     >
-      <div className="flex-1 pl-2">
-        <div className="text-sm/6 font-medium">{form.name}</div>
-        <div className="text-secondary text-sm/6">
-          {isInTrash
-            ? t('form.metadata2', {
-                count: form.submissionCount,
-                date: timeToNow(form.retentionAt, i18n.language)
-              })
-            : t('form.metadata', {
-                count: form.submissionCount,
-                date: timeFromNow(form.updatedAt, i18n.language)
-              })}
+      <div className="flex min-w-0 flex-1 items-start gap-3 pl-2">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/30">
+          <IconFileText className="h-5 w-5 text-slate-500 dark:text-slate-400" strokeWidth={1.75} />
+        </div>
+        <div className="min-w-0 flex-1 overflow-hidden">
+          <div className="truncate text-sm/6 font-medium">{form.name}</div>
+          <div className="text-secondary truncate text-sm/6">
+            {isInTrash
+              ? t('form.metadata2', {
+                  count: form.submissionCount,
+                  date: timeToNow(form.retentionAt, i18n.language)
+                })
+              : t('form.metadata', {
+                  count: form.submissionCount,
+                  date: timeFromNow(form.updatedAt, i18n.language)
+                })}
+          </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex shrink-0 items-center gap-4">
         {!isInTrash && !form.suspended && (
           <div className="_hidden flex items-center group-hover:block">
             <Tooltip label={t('components.edit')}>
@@ -355,7 +361,11 @@ const FormItem: FC<FormItemProps> = ({ form, isInTrash, onChange }) => {
             multiLanguage
             onClick={handleClick}
           >
-            <Button.Link size="sm" className="data-[state=open]:bg-accent-light" iconOnly>
+            <Button.Link
+              size="sm"
+              className="data-[state=open]:bg-slate-200 dark:data-[state=open]:bg-slate-700/50"
+              iconOnly
+            >
               <Tooltip label={t('form.menuTip')}>
                 <IconDots className="h-4 w-4" />
               </Tooltip>

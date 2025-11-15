@@ -28,11 +28,13 @@ export default function ChangelogButton() {
   return (
     <div
       role="button"
-      className="hover:bg-accent-light flex w-full items-center rounded-lg px-2.5 py-2.5 text-left text-sm font-medium sm:px-1.5 sm:py-1.5 lg:py-2"
+      className="flex w-full items-center rounded-lg px-2.5 py-2.5 text-left text-sm font-medium hover:bg-slate-100 sm:px-1.5 sm:py-1.5 lg:py-2 dark:hover:bg-slate-700/50"
       onClick={handleClick}
     >
       <div className="flex flex-1 items-center gap-3">
-        <IconGift className="stroke-secondary group-hover:stroke-primary h-5 w-5" />
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors group-hover:bg-slate-200 dark:group-hover:bg-slate-700/50">
+          <IconGift className="stroke-secondary group-hover:stroke-primary h-5 w-5 transition-colors" />
+        </div>
         <span className="truncate">{t('workspace.sidebar.whatsNew')}</span>
       </div>
 

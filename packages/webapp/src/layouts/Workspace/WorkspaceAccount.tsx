@@ -82,20 +82,22 @@ export default function WorkspaceAccount({
         <DropdownMenu.Trigger asChild>
           <Button.Link
             className={cn(
-              'h-auto w-full px-3 py-2.5 sm:h-auto sm:px-2 sm:py-1.5 [&_[data-slot=button]]:justify-start [&_[data-slot=button]]:gap-x-3.5',
+              'group h-auto w-full px-3 py-2.5 transition-colors hover:bg-slate-100 data-[state=open]:bg-slate-100 sm:h-auto sm:px-2 sm:py-1.5 dark:hover:bg-slate-700/50 dark:data-[state=open]:bg-slate-700/50 [&_[data-slot=button]]:justify-start [&_[data-slot=button]]:gap-x-3.5',
               className
             )}
           >
-            <Avatar
-              className="h-8 w-8"
-              src={user?.avatar}
-              fallback={user?.name}
-              data-slot="avatar"
-              resize={{ width: 100, height: 100 }}
-            />
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-slate-50 ring-2 ring-slate-200 transition-all group-hover:ring-slate-300 dark:bg-slate-900/50 dark:ring-slate-800 dark:group-hover:ring-slate-700">
+              <Avatar
+                className="h-full w-full"
+                src={user?.avatar}
+                fallback={user?.name}
+                data-slot="avatar"
+                resize={{ width: 100, height: 100 }}
+              />
+            </div>
             {isNameVisible && (
-              <div className="flex-1 text-left">
-                <div className="text-sm">{user?.name}</div>
+              <div className="min-w-0 flex-1 text-left">
+                <div className="truncate text-sm">{user?.name}</div>
                 <div className="text-secondary text-xs">{t('workspace.sidebar.viewProfile')}</div>
               </div>
             )}
@@ -110,7 +112,7 @@ export default function WorkspaceAccount({
           >
             <DropdownMenu.Item className="focus-visible:outline-none">
               <Button.Link
-                className="data-[highlighted]:bg-accent-light w-full [&_[data-slot=button]]:justify-start"
+                className="w-full hover:bg-slate-100 data-[highlighted]:bg-slate-100 dark:hover:bg-slate-700/50 dark:data-[highlighted]:bg-slate-800/50 [&_[data-slot=button]]:justify-start"
                 size="md"
                 onClick={() => openModal('UserAccountModal')}
               >
@@ -122,7 +124,7 @@ export default function WorkspaceAccount({
             <DropdownMenu.Sub>
               <DropdownMenu.SubTrigger asChild>
                 <Button.Link
-                  className="data-[highlighted]:bg-accent-light data-[state=open]:bg-accent-light hidden w-full sm:block [&_[data-slot=button]]:justify-between"
+                  className="hidden w-full hover:bg-slate-100 data-[highlighted]:bg-slate-100 data-[state=open]:bg-slate-100 sm:block dark:hover:bg-slate-700/50 dark:data-[highlighted]:bg-slate-800/50 dark:data-[state=open]:bg-slate-800/50 [&_[data-slot=button]]:justify-between"
                   size="md"
                 >
                   {t('workspace.sidebar.language')}
@@ -139,7 +141,7 @@ export default function WorkspaceAccount({
                   {LOCALE_OPTIONS.map(l => (
                     <DropdownMenu.Item
                       key={l.value}
-                      className="text-primary data-[highlighted]:bg-accent-light grid cursor-pointer grid-cols-[theme(spacing.5),1fr] items-center gap-x-2.5 rounded-lg px-3 py-2.5 text-base/6 outline-none focus-visible:outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 sm:grid-cols-[theme(spacing.4),1fr] sm:px-2 sm:py-1.5 sm:text-sm/6"
+                      className="text-primary grid cursor-pointer grid-cols-[theme(spacing.5),1fr] items-center gap-x-2.5 rounded-lg px-3 py-2.5 text-base/6 outline-none focus-visible:outline-none data-[disabled]:pointer-events-none data-[highlighted]:bg-slate-100 data-[disabled]:opacity-50 sm:grid-cols-[theme(spacing.4),1fr] sm:px-2 sm:py-1.5 sm:text-sm/6 dark:data-[highlighted]:bg-slate-800/50"
                       onClick={() => i18n.changeLanguage(l.value)}
                     >
                       {i18n.language === l.value ? (
@@ -169,7 +171,7 @@ export default function WorkspaceAccount({
             <DropdownMenu.Sub>
               <DropdownMenu.SubTrigger asChild>
                 <Button.Link
-                  className="data-[highlighted]:bg-accent-light data-[state=open]:bg-accent-light hidden w-full sm:block [&_[data-slot=button]]:justify-between"
+                  className="hidden w-full hover:bg-slate-100 data-[highlighted]:bg-slate-100 data-[state=open]:bg-slate-100 sm:block dark:hover:bg-slate-700/50 dark:data-[highlighted]:bg-slate-800/50 dark:data-[state=open]:bg-slate-800/50 [&_[data-slot=button]]:justify-between"
                   size="md"
                 >
                   {t('workspace.appearance.title')}
@@ -186,7 +188,7 @@ export default function WorkspaceAccount({
                   {APPEARANCE_OPTIONS.map(l => (
                     <DropdownMenu.Item
                       key={l.value}
-                      className="text-primary data-[highlighted]:bg-accent-light grid cursor-pointer grid-cols-[theme(spacing.5),1fr] items-center gap-x-2.5 rounded-lg px-3 py-2.5 text-base/6 outline-none focus-visible:outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 sm:grid-cols-[theme(spacing.4),1fr] sm:px-2 sm:py-1.5 sm:text-sm/6"
+                      className="text-primary grid cursor-pointer grid-cols-[theme(spacing.5),1fr] items-center gap-x-2.5 rounded-lg px-3 py-2.5 text-base/6 outline-none focus-visible:outline-none data-[disabled]:pointer-events-none data-[highlighted]:bg-slate-100 data-[disabled]:opacity-50 sm:grid-cols-[theme(spacing.4),1fr] sm:px-2 sm:py-1.5 sm:text-sm/6 dark:data-[highlighted]:bg-slate-800/50"
                       onClick={() => setAppearance(l.value)}
                     >
                       {appearance === l.value ? (
@@ -205,12 +207,12 @@ export default function WorkspaceAccount({
             </DropdownMenu.Sub>
 
             <DropdownMenu.Item className="focus-visible:outline-none" onClick={handleLogout}>
-              <Button.Link className="data-[highlighted]:bg-accent-light w-full [&_[data-slot=button]]:justify-start">
+              <Button.Link className="w-full hover:bg-slate-100 data-[highlighted]:bg-slate-100 dark:hover:bg-slate-700/50 dark:data-[highlighted]:bg-slate-800/50 [&_[data-slot=button]]:justify-start">
                 {t('workspace.sidebar.logout')}
               </Button.Link>
             </DropdownMenu.Item>
 
-            <DropdownMenu.Separator className="bg-accent-light mx-2 mb-1 mt-2 h-px sm:mx-2" />
+            <DropdownMenu.Separator className="mx-2 mb-1 mt-2 h-px bg-slate-200 sm:mx-2 dark:bg-slate-800" />
 
             <DropdownMenu.Item className="focus-visible:outline-none">
               <div className="text-secondary px-3 py-2.5 text-sm/6 sm:px-2 sm:py-2">

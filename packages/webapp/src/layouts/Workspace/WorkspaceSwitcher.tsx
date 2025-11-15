@@ -23,7 +23,7 @@ const WorkspaceItem: FC<WorkspaceItemProps> = ({ workspace, isActive, onClick })
   return (
     <DropdownMenu.Item
       key={workspace.id}
-      className="text-primary data-[highlighted]:bg-accent-light flex cursor-pointer items-center gap-x-2 rounded-lg px-3 py-2.5 text-base/6 outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 sm:px-2 sm:py-1.5 sm:text-sm/6"
+      className="text-primary flex cursor-pointer items-center gap-x-2 rounded-lg px-3 py-2.5 text-base/6 outline-none data-[disabled]:pointer-events-none data-[highlighted]:bg-slate-100 data-[disabled]:opacity-50 sm:px-2 sm:py-1.5 sm:text-sm/6 dark:data-[highlighted]:bg-slate-800/50"
       onClick={handleClick}
     >
       <div className="flex max-w-[calc(100%-1rem)] flex-1 items-center gap-x-2.5">
@@ -55,7 +55,7 @@ export default function WorkspaceSwitcher() {
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
-        <Button.Link className="data-[state=open]:bg-accent-light w-full px-3 py-2.5 sm:px-2 sm:py-1.5 [&_[data-slot=button]]:justify-between">
+        <Button.Link className="w-full px-3 py-2.5 data-[state=open]:bg-slate-100 sm:px-2 sm:py-1.5 dark:data-[state=open]:bg-slate-800/50 [&_[data-slot=button]]:justify-between">
           <div className="flex max-w-[calc(100%-1.25rem)] flex-1 items-center gap-x-2">
             <Avatar
               className="h-6 w-6"
@@ -89,10 +89,10 @@ export default function WorkspaceSwitcher() {
             ))}
           </div>
 
-          <DropdownMenu.Separator className="bg-accent-light mx-2 mb-1 mt-2 h-px sm:mx-2" />
+          <DropdownMenu.Separator className="mx-2 mb-1 mt-2 h-px bg-slate-200 sm:mx-2 dark:bg-slate-800" />
 
           <DropdownMenu.Item onClick={() => openModal('CreateWorkspaceModal')}>
-            <Button.Link className="w-full [&_[data-slot=button]]:justify-start">
+            <Button.Link className="w-full hover:bg-slate-100 data-[highlighted]:bg-slate-100 dark:hover:bg-slate-700/50 dark:data-[highlighted]:bg-slate-800/50 [&_[data-slot=button]]:justify-start">
               <IconPlus className="h-[1.125rem] w-[1.125rem]" />
               <span>{t('workspace.creation.title')}</span>
             </Button.Link>

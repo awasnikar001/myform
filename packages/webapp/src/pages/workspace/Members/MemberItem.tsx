@@ -134,7 +134,11 @@ const MemberItem: FC<{ member: MemberType }> = ({ member }) => {
         multiLanguage
         onClick={handleClick}
       >
-        <Button.Link className="data-[state=open]:bg-accent-light" size="sm" iconOnly>
+        <Button.Link
+          className="data-[state=open]:bg-slate-200 dark:data-[state=open]:bg-slate-700/50"
+          size="sm"
+          iconOnly
+        >
           <Tooltip label={t('members.menuTip')}>
             <IconDots className="text-secondary h-5 w-5" />
           </Tooltip>

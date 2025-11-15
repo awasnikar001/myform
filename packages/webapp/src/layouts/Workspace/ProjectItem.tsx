@@ -1,4 +1,4 @@
-import { IconDots, IconTag, IconTrash } from '@tabler/icons-react'
+import { IconDots, IconFolder, IconTag, IconTrash } from '@tabler/icons-react'
 import { useTranslation } from 'react-i18next'
 import { NavLink } from 'react-router-dom'
 
@@ -74,37 +74,53 @@ export default function ProjectItem({ project }: ProjectItemProps) {
     <NavLink
       className={({ isActive }) =>
         cn(
-          'hover:bg-accent-light has-[[data-state=open]]:bg-accent-light group flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium sm:px-2 sm:py-1.5 lg:py-2',
+          'group flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-all hover:bg-slate-100 has-[[data-state=open]]:bg-slate-100 sm:px-2 sm:py-1.5 lg:py-2 dark:hover:bg-slate-700/50 dark:has-[[data-state=open]]:bg-slate-700/50',
           {
-            'before:bg-primary relative before:absolute before:inset-y-2 before:-left-4 before:w-0.5 before:rounded-full':
+            'before:bg-primary relative bg-slate-100 before:absolute before:inset-y-2 before:-left-4 before:w-0.5 before:rounded-full dark:bg-slate-800/50':
               isActive
           }
         )
       }
       to={`/workspace/${workspaceId}/project/${project.id}/`}
     >
-      <span className="flex-1 truncate">{project.name}</span>
-      <Dropdown
-        contentProps={{
-          className: 'min-w-36 [&_[data-value=delete]]:text-error',
-          side: 'bottom',
-          sideOffset: 8,
-          align: 'start'
-        }}
-        options={PROJECT_ACTIONS}
-        multiLanguage
-        onClick={handleClick}
-      >
-        <Button.Link
-          className="data-[state=open]:bg-accent-light !h-5 !w-5 rounded opacity-0 group-hover:opacity-100 data-[state=open]:opacity-100"
-          size="sm"
-          iconOnly
-        >
-          <Tooltip label={t('project.menuTip')}>
-            <IconDots className="text-secondary h-4 w-4" />
-          </Tooltip>
-        </Button.Link>
-      </Dropdown>
+      {({ isActive }) => (
+        <>
+          <div className="flex min-w-0 flex-1 items-center gap-3">
+            <div
+              className={cn(
+                'flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors',
+                isActive
+                  ? 'bg-slate-200 dark:bg-slate-700/50'
+                  : 'group-hover:bg-slate-200 dark:group-hover:bg-slate-700/50'
+              )}
+            >
+              <IconFolder className="h-5 w-5 text-slate-600 dark:text-slate-300" strokeWidth={2} />
+            </div>
+            <span className="flex-1 truncate">{project.name}</span>
+          </div>
+          <Dropdown
+            contentProps={{
+              className: 'min-w-36 [&_[data-value=delete]]:text-error',
+              side: 'bottom',
+              sideOffset: 8,
+              align: 'start'
+            }}
+            options={PROJECT_ACTIONS}
+            multiLanguage
+            onClick={handleClick}
+          >
+            <Button.Link
+              className="!h-5 !w-5 rounded opacity-0 group-hover:opacity-100 data-[state=open]:bg-slate-200 data-[state=open]:opacity-100 dark:data-[state=open]:bg-slate-700/50"
+              size="sm"
+              iconOnly
+            >
+              <Tooltip label={t('project.menuTip')}>
+                <IconDots className="text-secondary h-4 w-4" />
+              </Tooltip>
+            </Button.Link>
+          </Dropdown>
+        </>
+      )}
     </NavLink>
   )
 }

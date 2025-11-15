@@ -277,7 +277,7 @@ const SearchModalComponent = () => {
                 {g.items.map(row => (
                   <Command.Item
                     key={row.value}
-                    className="aria-selected:bg-accent-light mx-2 cursor-pointer rounded-lg"
+                    className="mx-2 cursor-pointer rounded-lg aria-selected:bg-slate-100 dark:aria-selected:bg-slate-800/50"
                     value={JSON.stringify({ type: g.type, value: row.value })}
                     onSelect={handleSelect}
                   >
