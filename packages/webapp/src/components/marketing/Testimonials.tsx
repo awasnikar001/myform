@@ -1,34 +1,25 @@
 import { FC } from 'react'
 
+import { cn } from '@/utils'
+
+import { useScrollAnimation } from '@/hooks/useScrollAnimation'
+import { ANIMATION_DELAYS, SCROLL_ANIMATION_THRESHOLD } from '@/pages/marketing/constants'
+import { testimonials } from '@/pages/marketing/content'
+
 import { TestimonialCard } from './TestimonialCard'
 
-const testimonials = [
-  {
-    quote:
-      'HeyForm has transformed how we collect leads. The conditional logic and integrations saved us hours every week. Our conversion rates increased by 40%!',
-    name: 'Sarah Johnson',
-    role: 'Marketing Manager',
-    company: 'TechCorp'
-  },
-  {
-    quote:
-      'As a product manager, I use HeyForm for user research surveys. The analytics dashboard gives me instant insights, and the branching logic makes complex surveys simple.',
-    name: 'Michael Chen',
-    role: 'Product Manager',
-    company: 'StartupXYZ'
-  },
-  {
-    quote:
-      'We switched all our onboarding forms to HeyForm. The drag-and-drop builder is so intuitive, and our HR team loves how easy it is to update forms without IT help.',
-    name: 'Emily Rodriguez',
-    role: 'HR Coordinator',
-    company: 'Global Inc'
-  }
-]
-
 export const Testimonials: FC = () => {
+  const { ref, isVisible } = useScrollAnimation({ threshold: SCROLL_ANIMATION_THRESHOLD })
+
   return (
-    <section id="testimonials" className="bg-slate-950 py-20 lg:py-32">
+    <section
+      id="testimonials"
+      ref={ref}
+      className={cn('bg-slate-950 py-20 transition-all duration-700 lg:py-32', {
+        'translate-y-8 opacity-0': !isVisible,
+        'translate-y-0 opacity-100': isVisible
+      })}
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-12 text-center">
           <h2 className="mb-4 text-3xl font-bold text-white lg:text-4xl">
@@ -39,12 +30,17 @@ export const Testimonials: FC = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
           {testimonials.map((testimonial, index) => (
             <div
               key={testimonial.name}
-              className="animate-in fade-in-0 slide-in-from-bottom-4 duration-700"
-              style={{ animationDelay: `${index * 100}ms` }}
+              className={cn('transition-transform duration-300 hover:scale-105', {
+                'translate-y-8 opacity-0': !isVisible,
+                'translate-y-0 opacity-100': isVisible
+              })}
+              style={{
+                transitionDelay: isVisible ? `${index * ANIMATION_DELAYS.STAGGER_ITEM}ms` : '0ms'
+              }}
             >
               <TestimonialCard {...testimonial} />
             </div>

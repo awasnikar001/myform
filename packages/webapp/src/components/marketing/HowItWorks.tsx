@@ -1,30 +1,22 @@
-import { IconHandClick, IconShare, IconTemplate } from '@tabler/icons-react'
 import { FC } from 'react'
 
-const steps = [
-  {
-    icon: IconTemplate,
-    title: 'Choose a template or start from scratch',
-    description:
-      'Browse 50+ professionally designed templates or create your form from a blank canvas. Templates cover everything from surveys to event registrations.'
-  },
-  {
-    icon: IconHandClick,
-    title: 'Customize with drag-and-drop',
-    description:
-      'Add fields, logic, and styling without code. Our intuitive builder lets you create complex forms with conditional branching and calculations.'
-  },
-  {
-    icon: IconShare,
-    title: 'Share and collect responses',
-    description:
-      'Publish your form and start receiving submissions instantly. Share via link, embed on your website, or integrate with your existing tools.'
-  }
-]
+import { cn } from '@/utils'
+
+import { useScrollAnimation } from '@/hooks/useScrollAnimation'
+import { SCROLL_ANIMATION_THRESHOLD } from '@/pages/marketing/constants'
+import { howItWorksSteps, iconMap } from '@/pages/marketing/content'
 
 export const HowItWorks: FC = () => {
+  const { ref, isVisible } = useScrollAnimation({ threshold: SCROLL_ANIMATION_THRESHOLD })
+
   return (
-    <section className="bg-slate-950 py-20 lg:py-32">
+    <section
+      ref={ref}
+      className={cn('bg-slate-950 py-20 transition-all duration-700 lg:py-32', {
+        'translate-y-8 opacity-0': !isVisible,
+        'translate-y-0 opacity-100': isVisible
+      })}
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-12 text-center">
           <h2 className="mb-4 text-3xl font-bold text-white lg:text-4xl">
@@ -36,8 +28,8 @@ export const HowItWorks: FC = () => {
         </div>
 
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-          {steps.map((step, index) => {
-            const Icon = step.icon
+          {howItWorksSteps.map((step, index) => {
+            const Icon = iconMap[step.icon]
             return (
               <div
                 key={step.title}

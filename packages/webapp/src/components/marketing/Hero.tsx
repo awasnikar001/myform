@@ -6,7 +6,7 @@ export const Hero: FC = () => {
   const navigate = useNavigate()
 
   return (
-    <section className="relative overflow-hidden bg-slate-950">
+    <section className="pattern-dots relative overflow-hidden bg-slate-950">
       <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-32">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:items-center">
           {/* Left Column - Text Content */}
@@ -32,7 +32,7 @@ export const Hero: FC = () => {
             <div className="flex flex-col gap-4 sm:flex-row">
               <button
                 onClick={() => navigate('/sign-up')}
-                className="rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-3 text-base font-medium text-white transition-all hover:scale-105 hover:shadow-xl hover:shadow-purple-500/20"
+                className="btn-ripple animate-gradient rounded-lg bg-gradient-to-r from-purple-600 via-blue-600 to-purple-600 px-6 py-3 text-base font-medium text-white transition-all hover:scale-105 hover:shadow-xl hover:shadow-purple-500/20"
               >
                 Start Free Trial
               </button>
@@ -57,8 +57,10 @@ export const Hero: FC = () => {
                   {/* Placeholder for product screenshot */}
                   <div className="flex h-full items-center justify-center">
                     <div className="text-center">
-                      <div className="mb-4 text-6xl">📋</div>
-                      <p className="text-sm text-slate-400">Form Builder Preview</p>
+                      <div className="mb-4 text-6xl" role="img" aria-label="Form icon">
+                        📋
+                      </div>
+                      <p className="text-sm text-slate-400">Product Preview</p>
                     </div>
                   </div>
                 </div>

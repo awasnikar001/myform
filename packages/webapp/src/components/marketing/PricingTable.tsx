@@ -2,61 +2,25 @@ import { IconCheck } from '@tabler/icons-react'
 import { FC } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-const plans = [
-  {
-    name: 'Starter',
-    price: '$100',
-    period: '/month',
-    description: 'Perfect for small teams',
-    features: [
-      '1,000 responses/month',
-      '5 forms',
-      'Basic integrations',
-      'Email support',
-      'Basic analytics'
-    ],
-    cta: 'Start Free Trial',
-    popular: false
-  },
-  {
-    name: 'Pro',
-    price: '$200',
-    period: '/month',
-    description: 'Most popular for growing teams',
-    features: [
-      '10,000 responses/month',
-      'Unlimited forms',
-      'All integrations',
-      'Priority support',
-      'Custom branding',
-      'Advanced analytics'
-    ],
-    cta: 'Start Free Trial',
-    popular: true
-  },
-  {
-    name: 'Enterprise',
-    price: '$300',
-    period: '/month',
-    description: 'For large organizations',
-    features: [
-      'Unlimited responses',
-      'Unlimited forms',
-      'Advanced features',
-      'Dedicated support',
-      'SLA guarantee',
-      'Custom integrations'
-    ],
-    cta: 'Contact Sales',
-    popular: false
-  }
-]
+import { cn } from '@/utils'
+
+import { useScrollAnimation } from '@/hooks/useScrollAnimation'
+import { SCROLL_ANIMATION_THRESHOLD } from '@/pages/marketing/constants'
+import { pricingPlans } from '@/pages/marketing/content'
 
 export const PricingTable: FC = () => {
   const navigate = useNavigate()
+  const { ref, isVisible } = useScrollAnimation({ threshold: SCROLL_ANIMATION_THRESHOLD })
 
   return (
-    <section id="pricing" className="bg-slate-950 py-20 lg:py-32">
+    <section
+      id="pricing"
+      ref={ref}
+      className={cn('bg-slate-950 py-20 transition-all duration-700 lg:py-32', {
+        'translate-y-8 opacity-0': !isVisible,
+        'translate-y-0 opacity-100': isVisible
+      })}
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-12 text-center">
           <h2 className="mb-4 text-3xl font-bold text-white lg:text-4xl">
@@ -66,7 +30,7 @@ export const PricingTable: FC = () => {
         </div>
 
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-          {plans.map((plan, index) => (
+          {pricingPlans.map((plan, index) => (
             <div
               key={plan.name}
               className={`animate-in fade-in-0 slide-in-from-bottom-4 relative rounded-2xl border p-8 transition-all duration-700 ${
@@ -112,7 +76,7 @@ export const PricingTable: FC = () => {
                 }}
                 className={`w-full rounded-lg px-6 py-3 text-base font-medium transition-all ${
                   plan.popular
-                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20'
+                    ? 'btn-ripple animate-gradient bg-gradient-to-r from-purple-600 via-blue-600 to-purple-600 text-white hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20'
                     : 'border border-slate-800 bg-slate-900/50 text-white hover:border-slate-700'
                 }`}
               >

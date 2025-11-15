@@ -1,15 +1,24 @@
-import { useEffect } from 'react'
+import { Suspense, lazy, useEffect } from 'react'
 
-import {
-  BenefitsGrid,
-  CTASection,
-  FAQ,
-  Hero,
-  HowItWorks,
-  LogoCloud,
-  PricingTable,
-  Testimonials
-} from '@/components/marketing'
+import { Hero } from '@/components/marketing'
+
+const LogoCloud = lazy(() => import('@/components/marketing').then(m => ({ default: m.LogoCloud })))
+const BenefitsGrid = lazy(() =>
+  import('@/components/marketing').then(m => ({ default: m.BenefitsGrid }))
+)
+const HowItWorks = lazy(() =>
+  import('@/components/marketing').then(m => ({ default: m.HowItWorks }))
+)
+const PricingTable = lazy(() =>
+  import('@/components/marketing').then(m => ({ default: m.PricingTable }))
+)
+const Testimonials = lazy(() =>
+  import('@/components/marketing').then(m => ({ default: m.Testimonials }))
+)
+const FAQ = lazy(() => import('@/components/marketing').then(m => ({ default: m.FAQ })))
+const CTASection = lazy(() =>
+  import('@/components/marketing').then(m => ({ default: m.CTASection }))
+)
 
 export default function Landing() {
   useEffect(() => {
@@ -26,13 +35,27 @@ export default function Landing() {
   return (
     <div className="relative">
       <Hero />
-      <LogoCloud />
-      <BenefitsGrid />
-      <HowItWorks />
-      <PricingTable />
-      <Testimonials />
-      <FAQ />
-      <CTASection />
+      <Suspense fallback={<div className="h-32" />}>
+        <LogoCloud />
+      </Suspense>
+      <Suspense fallback={<div className="h-96" />}>
+        <BenefitsGrid />
+      </Suspense>
+      <Suspense fallback={<div className="h-96" />}>
+        <HowItWorks />
+      </Suspense>
+      <Suspense fallback={<div className="h-96" />}>
+        <PricingTable />
+      </Suspense>
+      <Suspense fallback={<div className="h-96" />}>
+        <Testimonials />
+      </Suspense>
+      <Suspense fallback={<div className="h-96" />}>
+        <FAQ />
+      </Suspense>
+      <Suspense fallback={<div className="h-96" />}>
+        <CTASection />
+      </Suspense>
     </div>
   )
 }

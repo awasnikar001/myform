@@ -9,8 +9,19 @@ import Logo from '@/assets/logo.svg?react'
 export const Navbar: FC = () => {
   const [scrolled, setScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isNavigating, setIsNavigating] = useState(false)
   const navigate = useNavigate()
   const isLoggedIn = getAuthState()
+
+  const handleSignUp = () => {
+    setIsNavigating(true)
+    navigate('/sign-up')
+  }
+
+  const handleApp = () => {
+    setIsNavigating(true)
+    navigate('/app')
+  }
 
   useEffect(() => {
     const handleScroll = () => {
@@ -19,6 +30,26 @@ export const Navbar: FC = () => {
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && mobileMenuOpen) {
+        setMobileMenuOpen(false)
+      }
+    }
+
+    if (mobileMenuOpen) {
+      document.addEventListener('keydown', handleEscape)
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape)
+      document.body.style.overflow = ''
+    }
+  }, [mobileMenuOpen])
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id)
@@ -58,6 +89,7 @@ export const Navbar: FC = () => {
               <button
                 key={link.label}
                 onClick={link.action}
+                aria-label={`Navigate to ${link.label} section`}
                 className="text-sm font-medium text-slate-300 transition-colors hover:text-white"
               >
                 {link.label}
@@ -65,10 +97,16 @@ export const Navbar: FC = () => {
             ))}
             {isLoggedIn ? (
               <button
-                onClick={() => navigate('/app')}
-                className="rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 text-sm font-medium text-white transition-all hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20"
+                onClick={handleApp}
+                disabled={isNavigating}
+                className={cn(
+                  'btn-ripple animate-gradient rounded-lg bg-gradient-to-r from-purple-600 via-blue-600 to-purple-600 px-4 py-2 text-sm font-medium text-white transition-all hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20',
+                  {
+                    'cursor-not-allowed opacity-50': isNavigating
+                  }
+                )}
               >
-                Go to App
+                {isNavigating ? 'Loading...' : 'Go to App'}
               </button>
             ) : (
               <>
@@ -79,10 +117,16 @@ export const Navbar: FC = () => {
                   Login
                 </Link>
                 <button
-                  onClick={() => navigate('/sign-up')}
-                  className="rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 text-sm font-medium text-white transition-all hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20"
+                  onClick={handleSignUp}
+                  disabled={isNavigating}
+                  className={cn(
+                    'rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 text-sm font-medium text-white transition-all hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20',
+                    {
+                      'cursor-not-allowed opacity-50': isNavigating
+                    }
+                  )}
                 >
-                  Get Started Free
+                  {isNavigating ? 'Loading...' : 'Get Started Free'}
                 </button>
               </>
             )}
@@ -91,6 +135,8 @@ export const Navbar: FC = () => {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={mobileMenuOpen}
             className="text-slate-300 md:hidden"
           >
             {mobileMenuOpen ? <IconX className="h-6 w-6" /> : <IconMenu2 className="h-6 w-6" />}
@@ -99,48 +145,71 @@ export const Navbar: FC = () => {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="border-t border-white/10 py-4 md:hidden">
-            <div className="flex flex-col gap-4">
-              {navLinks.map(link => (
-                <button
-                  key={link.label}
-                  onClick={link.action}
-                  className="text-left text-sm font-medium text-slate-300 transition-colors hover:text-white"
-                >
-                  {link.label}
-                </button>
-              ))}
-              {isLoggedIn ? (
-                <button
-                  onClick={() => {
-                    navigate('/app')
-                    setMobileMenuOpen(false)
-                  }}
-                  className="rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 text-sm font-medium text-white transition-all hover:scale-105"
-                >
-                  Go to App
-                </button>
-              ) : (
-                <>
-                  <Link
-                    to="/login"
-                    className="text-sm font-medium text-slate-300 transition-colors hover:text-white"
+          <>
+            {/* Backdrop */}
+            <div
+              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
+              onClick={() => setMobileMenuOpen(false)}
+              aria-hidden="true"
+            />
+
+            {/* Mobile Menu */}
+            <div className="relative z-50 border-t border-white/10 py-4 md:hidden">
+              <div className="flex flex-col gap-4">
+                {navLinks.map(link => (
+                  <button
+                    key={link.label}
+                    onClick={link.action}
+                    aria-label={`Navigate to ${link.label} section`}
+                    className="text-left text-sm font-medium text-slate-300 transition-colors hover:text-white"
                   >
-                    Login
-                  </Link>
+                    {link.label}
+                  </button>
+                ))}
+                {isLoggedIn ? (
                   <button
                     onClick={() => {
-                      navigate('/sign-up')
+                      handleApp()
                       setMobileMenuOpen(false)
                     }}
-                    className="rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 text-sm font-medium text-white transition-all hover:scale-105"
+                    disabled={isNavigating}
+                    className={cn(
+                      'rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 text-sm font-medium text-white transition-all hover:scale-105',
+                      {
+                        'cursor-not-allowed opacity-50': isNavigating
+                      }
+                    )}
                   >
-                    Get Started Free
+                    {isNavigating ? 'Loading...' : 'Go to App'}
                   </button>
-                </>
-              )}
+                ) : (
+                  <>
+                    <Link
+                      to="/login"
+                      className="text-sm font-medium text-slate-300 transition-colors hover:text-white"
+                    >
+                      Login
+                    </Link>
+                    <button
+                      onClick={() => {
+                        handleSignUp()
+                        setMobileMenuOpen(false)
+                      }}
+                      disabled={isNavigating}
+                      className={cn(
+                        'rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 text-sm font-medium text-white transition-all hover:scale-105',
+                        {
+                          'cursor-not-allowed opacity-50': isNavigating
+                        }
+                      )}
+                    >
+                      {isNavigating ? 'Loading...' : 'Get Started Free'}
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
-          </div>
+          </>
         )}
       </div>
     </nav>

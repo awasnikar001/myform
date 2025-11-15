@@ -1,0 +1,13 @@
+export const ANIMATION_DELAYS = {
+  SECTION: 200,
+  STAGGER_ITEM: 100,
+  GRADIENT: 8000
+}
+
+export const ANIMATION_DURATIONS = {
+  FAST: 300,
+  NORMAL: 700,
+  SLOW: 1000
+}
+
+export const SCROLL_ANIMATION_THRESHOLD = 0.1
