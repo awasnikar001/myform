@@ -3,6 +3,7 @@ import {
   BaseLayout,
   FormLayout,
   ProjectLayout,
+  PublicLayout,
   WorkspaceGuard,
   WorkspaceLayout
 } from '@/layouts'
@@ -21,6 +22,15 @@ import FormShare from '@/pages/form/Share'
 import FormSubmissions from '@/pages/form/Submissions'
 import ProjectForms from '@/pages/project/Forms'
 import ProjectTrash from '@/pages/project/Trash'
+import PublicFeatures from '@/pages/public/Features'
+import PublicHome from '@/pages/public/Home'
+import PublicIntegrations from '@/pages/public/Integrations'
+import PublicPricing from '@/pages/public/Pricing'
+import PublicTemplates from '@/pages/public/Templates'
+import CustomerSuccessPersonaPage from '@/pages/public/personas/CustomerSuccess'
+import MarketingPersonaPage from '@/pages/public/personas/Marketing'
+import OperationsPersonaPage from '@/pages/public/personas/Operations'
+import ProductPersonaPage from '@/pages/public/personas/Product'
 import CreateWorkspace from '@/pages/workspace/Create'
 import WorkspaceDashboard from '@/pages/workspace/Dashboard'
 import WorkspaceInvitation from '@/pages/workspace/Invitation'
@@ -28,6 +38,87 @@ import WorkspaceMembers from '@/pages/workspace/Members'
 import WorkspaceSettings from '@/pages/workspace/Settings'
 
 const routes = [
+  {
+    path: '/public',
+    component: PublicHome,
+    layout: PublicLayout,
+    options: {
+      metaTitle: 'HeyForm — Build public & customer-facing forms',
+      loginRequired: false
+    }
+  },
+  {
+    path: '/public/features',
+    component: PublicFeatures,
+    layout: PublicLayout,
+    options: {
+      metaTitle: 'HeyForm Features',
+      loginRequired: false
+    }
+  },
+  {
+    path: '/public/templates',
+    component: PublicTemplates,
+    layout: PublicLayout,
+    options: {
+      metaTitle: 'HeyForm Templates',
+      loginRequired: false
+    }
+  },
+  {
+    path: '/public/integrations',
+    component: PublicIntegrations,
+    layout: PublicLayout,
+    options: {
+      metaTitle: 'HeyForm Integrations',
+      loginRequired: false
+    }
+  },
+  {
+    path: '/public/pricing',
+    component: PublicPricing,
+    layout: PublicLayout,
+    options: {
+      metaTitle: 'HeyForm Pricing',
+      loginRequired: false
+    }
+  },
+  {
+    path: '/public/personas/marketing',
+    component: MarketingPersonaPage,
+    layout: PublicLayout,
+    options: {
+      metaTitle: 'Solutions for Marketing Teams | HeyForm',
+      loginRequired: false
+    }
+  },
+  {
+    path: '/public/personas/product',
+    component: ProductPersonaPage,
+    layout: PublicLayout,
+    options: {
+      metaTitle: 'Solutions for Product Teams | HeyForm',
+      loginRequired: false
+    }
+  },
+  {
+    path: '/public/personas/operations',
+    component: OperationsPersonaPage,
+    layout: PublicLayout,
+    options: {
+      metaTitle: 'Solutions for HR & Operations | HeyForm',
+      loginRequired: false
+    }
+  },
+  {
+    path: '/public/personas/customer-success',
+    component: CustomerSuccessPersonaPage,
+    layout: PublicLayout,
+    options: {
+      metaTitle: 'Solutions for Customer Success | HeyForm',
+      loginRequired: false
+    }
+  },
   {
     path: '/login',
     component: Login,
