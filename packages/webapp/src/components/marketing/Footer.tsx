@@ -13,7 +13,7 @@ export const Footer: FC = () => {
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <Logo className="h-8 w-8 text-white" />
-              <span className="text-xl font-bold text-white">HeyForm</span>
+              <span className="text-xl font-bold text-white">LyticsForm</span>
             </div>
             <p className="text-sm text-slate-400">
               Build beautiful forms in minutes. No coding required.
@@ -106,7 +106,7 @@ export const Footer: FC = () => {
         {/* Bottom Bar */}
         <div className="mt-8 flex flex-col items-center justify-between border-t border-slate-800 pt-8 md:flex-row">
           <p className="text-sm text-slate-400">
-            © {new Date().getFullYear()} HeyForm. All rights reserved.
+            © {new Date().getFullYear()} LyticsForm. All rights reserved.
           </p>
           <div className="mt-4 flex gap-4 md:mt-0">
             <a

@@ -35,7 +35,7 @@ const routes = [
     component: Landing,
     layout: PublicLayout,
     options: {
-      title: 'HeyForm - Build Beautiful Forms in Minutes',
+      title: 'LyticsForm - Build Beautiful Forms in Minutes',
       loginRequired: false
     }
   },

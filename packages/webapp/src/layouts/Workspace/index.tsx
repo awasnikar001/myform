@@ -70,7 +70,7 @@ export const LoginGuard: FC<LayoutProps> = ({ options, children }) => {
 
   useEffect(() => {
     if (helper.isValid(options?.title)) {
-      document.title = `${t(options!.title)} - HeyForm`
+      document.title = `${t(options!.title)} - LyticsForm`
     }
   }, [options, t])
 
@@ -157,7 +157,7 @@ export const WorkspaceGuard: FC<LayoutProps> = ({ options, children }) => {
     selectWorkspace(workspaceId)
 
     if (workspaceId) {
-      let title = `${workspace?.name} - HeyForm`
+      let title = `${workspace?.name} - LyticsForm`
 
       if (helper.isValid(options?.title)) {
         title = `${t(options!.title)} · ` + title
@@ -171,7 +171,7 @@ export const WorkspaceGuard: FC<LayoutProps> = ({ options, children }) => {
     selectProject(projectId)
 
     if (projectId) {
-      let title = `${workspace?.name}/${project?.name} - HeyForm`
+      let title = `${workspace?.name}/${project?.name} - LyticsForm`
 
       if (helper.isValid(options?.title)) {
         title = `${t(options!.title)} · ` + title
@@ -198,7 +198,7 @@ export const BaseLayout: FC<LayoutProps> = ({ options, children }) => {
 
   useEffect(() => {
     if (helper.isValid(options?.title)) {
-      document.title = `${t(options!.title)} - HeyForm`
+      document.title = `${t(options!.title)} - LyticsForm`
     }
   }, [options, t])
 
@@ -206,9 +206,9 @@ export const BaseLayout: FC<LayoutProps> = ({ options, children }) => {
     <LoginGuard>
       <div className="bg-foreground flex min-h-screen flex-col">
         <div className="bg-foreground sticky top-0 flex items-center justify-between p-4">
-          <a href="/" className="flex items-center gap-2" title="HeyForm">
+          <a href="/" className="flex items-center gap-2" title="LyticsForm">
             <Logo className="h-8 w-auto" />
-            <span className="text-xl font-medium">HeyForm</span>
+            <span className="text-xl font-medium">LyticsForm</span>
           </a>
 
           <WorkspaceAccount

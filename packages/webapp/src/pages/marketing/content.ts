@@ -54,21 +54,21 @@ export const benefits: Benefit[] = [
 export const testimonials: Testimonial[] = [
   {
     quote:
-      'HeyForm has transformed how we collect leads. The conditional logic and integrations saved us hours every week. Our conversion rates increased by 40%!',
+      'LyticsForm has transformed how we collect leads. The conditional logic and integrations saved us hours every week. Our conversion rates increased by 40%!',
     name: 'Sarah Johnson',
     role: 'Marketing Manager',
     company: 'TechCorp'
   },
   {
     quote:
-      'As a product manager, I use HeyForm for user research surveys. The analytics dashboard gives me instant insights, and the branching logic makes complex surveys simple.',
+      'As a product manager, I use LyticsForm for user research surveys. The analytics dashboard gives me instant insights, and the branching logic makes complex surveys simple.',
     name: 'Michael Chen',
     role: 'Product Manager',
     company: 'StartupXYZ'
   },
   {
     quote:
-      'We switched all our onboarding forms to HeyForm. The drag-and-drop builder is so intuitive, and our HR team loves how easy it is to update forms without IT help.',
+      'We switched all our onboarding forms to LyticsForm. The drag-and-drop builder is so intuitive, and our HR team loves how easy it is to update forms without IT help.',
     name: 'Emily Rodriguez',
     role: 'HR Coordinator',
     company: 'Global Inc'

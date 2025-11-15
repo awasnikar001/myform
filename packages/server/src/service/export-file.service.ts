@@ -90,7 +90,7 @@ export class ExportFileService {
         size: 'A4',
         info: {
           Title: formName,
-          Author: 'HeyForm',
+          Author: 'LyticsForm',
           Subject: 'Form Submissions Export'
         }
       })

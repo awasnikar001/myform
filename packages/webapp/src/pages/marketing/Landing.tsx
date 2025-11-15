@@ -22,7 +22,7 @@ const CTASection = lazy(() =>
 
 export default function Landing() {
   useEffect(() => {
-    document.title = 'HeyForm - Build Beautiful Forms in Minutes'
+    document.title = 'LyticsForm - Build Beautiful Forms in Minutes'
     const meta = document.querySelector('meta[name="description"]')
     if (meta) {
       meta.setAttribute(

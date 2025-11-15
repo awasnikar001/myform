@@ -20,7 +20,7 @@ export const BenefitsGrid: FC = () => {
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-12 text-center">
-          <h2 className="mb-4 text-3xl font-bold text-white lg:text-4xl">Why Choose HeyForm?</h2>
+          <h2 className="mb-4 text-3xl font-bold text-white lg:text-4xl">Why Choose LyticsForm?</h2>
           <p className="text-lg text-slate-400">
             Focus on how it helps users instead of what features it has
           </p>

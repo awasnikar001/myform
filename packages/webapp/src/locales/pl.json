@@ -499,24 +499,24 @@
   "oauth": {
     "title": "Autoryzacja",
     "headline": "Połącz się z {{name}}",
-    "subHeadline": "Użyj {{name}}, aby zintegrować HeyForm z ulubionymi aplikacjami, takimi jak Chat, Email lub SMS.",
+    "subHeadline": "Użyj {{name}}, aby zintegrować LyticsForm z ulubionymi aplikacjami, takimi jak Chat, Email lub SMS.",
     "would": "{{name}} chciałby:",
     "scopes": [
       "Odczyt przestrzeni roboczej",
-      "Pobierz dane o wszystkich przestrzeniach roboczych w swoim koncie HeyForm",
+      "Pobierz dane o wszystkich przestrzeniach roboczych w swoim koncie LyticsForm",
       "Odczyt projektu",
-      "Pobierz dane o wszystkich projektach w swojej przestrzeni roboczej HeyForm",
+      "Pobierz dane o wszystkich projektach w swojej przestrzeni roboczej LyticsForm",
       "Odczyt formularza",
-      "Pobierz dane o wszystkich formularzach w swoim projekcie HeyForm",
+      "Pobierz dane o wszystkich formularzach w swoim projekcie LyticsForm",
       "Odczyt zgłoszeń",
       "Pobierz zgłoszenia formularza, które zebrałeś",
       "Odczyt kont",
-      "Pobierz informacje o swoim koncie HeyForm"
+      "Pobierz informacje o swoim koncie LyticsForm"
     ]
   },
   "workspace": {
     "notExist": "To miejsce pracy nie istnieje.",
-    "backHome": "Powrót do HeyForm",
+    "backHome": "Powrót do LyticsForm",
     "appearance": {
       "title": "Wygląd",
       "system": "Preferencje systemowe",
@@ -617,15 +617,15 @@
       "required": "Adres e-mail nie może być pusty",
       "sentSuccess_one": "{{count}} zaproszenie wysłane",
       "sentSuccess_other": "{{count}} zaproszeń wysłanych",
-      "sentSuccessMessage": "Zaproszeni członkowie zostali powiadomieni e-mailem, aby zarejestrować się w HeyForm"
+      "sentSuccessMessage": "Zaproszeni członkowie zostali powiadomieni e-mailem, aby zarejestrować się w LyticsForm"
     }
   },
   "settings": {
     "title": "Ustawienia miejsca pracy",
     "branding": {
       "title": "Branding",
-      "removeBrandingHeadline": "Usuń branding HeyForm",
-      "removeBrandingSubHeadline": "Aby HeyForm wyglądał jak całkowicie należący do Twojej marki, usuń logo HeyForm w stopce formularza.",
+      "removeBrandingHeadline": "Usuń branding LyticsForm",
+      "removeBrandingSubHeadline": "Aby LyticsForm wyglądał jak całkowicie należący do Twojej marki, usuń logo LyticsForm w stopce formularza.",
       "viewBrandKit": "Zobacz",
       "logo": {
         "title": "Logo",
@@ -786,8 +786,8 @@
       "defaultName": "Bez tytułu"
     },
     "chat": {
-      "title": "HeyForm Asystent AI",
-      "welcome": "Witamy w HeyForm Asystent AI! To innowacyjna funkcja zasilana najnowocześniejszą technologią AI, zaprojektowana, aby pomóc Ci tworzyć pytania i logikę formularzy.",
+      "title": "LyticsForm Asystent AI",
+      "welcome": "Witamy w LyticsForm Asystent AI! To innowacyjna funkcja zasilana najnowocześniejszą technologią AI, zaprojektowana, aby pomóc Ci tworzyć pytania i logikę formularzy.",
       "compose": "Zapytaj mnie o cokolwiek...",
       "fieldsUpdated": "Pytania w Twoim formularzu zostały zaktualizowane.",
       "logicUpdated": "Logika Twojego formularza została zaktualizowana.",
@@ -858,9 +858,9 @@
       "fileManagement": "Zarządzanie plikami",
       "mapFields": {
         "headline": "Mapuj pola",
-        "subHeadline": "Mapuj HeyForm do kolumn {{name}}. Jeśli zmienisz kolumnę w {{name}}, zaktualizuj ją również tutaj, w przeciwnym razie integracja nie będzie działać zgodnie z oczekiwaniami.",
+        "subHeadline": "Mapuj LyticsForm do kolumn {{name}}. Jeśli zmienisz kolumnę w {{name}}, zaktualizuj ją również tutaj, w przeciwnym razie integracja nie będzie działać zgodnie z oczekiwaniami.",
         "requried": "Pole mapy nie może być puste",
-        "leftPlaceholder": "Wybierz pytanie HeyForm",
+        "leftPlaceholder": "Wybierz pytanie LyticsForm",
         "rightPlaceholder": "Kolumna {{name}}",
         "requireLeft": "Lewa strona pola {{index}} nie może być pusta",
         "requireRight": "Prawa strona pola {{index}} nie może być pusta",
@@ -868,7 +868,7 @@
       },
       "authorization": {
         "headline": "Autoryzacja",
-        "subHeadline": "Najpierw proszę autoryzować HeyForm do dostępu do Twoich danych.",
+        "subHeadline": "Najpierw proszę autoryzować LyticsForm do dostępu do Twoich danych.",
         "loginWith": "Zaloguj się przez {{name}}"
       },
       "webhook": {
@@ -878,7 +878,7 @@
       "telegram": {
         "label": "ID czatu",
         "required": "ID czatu nie może być puste",
-        "footer": "Dodaj <a>@HeyForm_bot</a> do swojej grupy na Telegramie i wpisz <code>/start@HeyForm_bot</code> w grupie. Otrzymasz wtedy wiadomość z ID czatu."
+        "footer": "Dodaj <a>@LyticsForm_bot</a> do swojej grupy na Telegramie i wpisz <code>/start@LyticsForm_bot</code> w grupie. Otrzymasz wtedy wiadomość z ID czatu."
       },
       "legacyslack": {
         "label": "URL webhooka",
@@ -919,7 +919,7 @@
         },
         "folder": {
           "headline": "Wybierz folder",
-          "footer": "Możesz wybrać folder, w którym umieścisz pliki przesłane z HeyForm."
+          "footer": "Możesz wybrać folder, w którym umieścisz pliki przesłane z LyticsForm."
         }
       },
       "googlesheets": {
@@ -1058,7 +1058,7 @@
         "description": "Opis",
         "preview": {
           "headline": "Podgląd",
-          "subHeadline": "HeyForm automatycznie generuje obraz <a>Open Graph</a> dla ciebie. Możesz również <button>wgrać własny obraz</button>.",
+          "subHeadline": "LyticsForm automatycznie generuje obraz <a>Open Graph</a> dla ciebie. Możesz również <button>wgrać własny obraz</button>.",
           "uploadTitle": "Wgraj własny obraz Open Graph",
           "uploadDescription": "Zalecany rozmiar: 1200x630 | JPG, PNG."
         }
@@ -1097,7 +1097,7 @@
         "bottomRight": "Dolny prawy róg",
         "transparentBackground": "Przezroczyste tło",
         "code": {
-          "headline": "Dodaj HeyForm do swojej strony internetowej",
+          "headline": "Dodaj LyticsForm do swojej strony internetowej",
           "subHeadline": "Wklej poniższy fragment kodu w sekcji body swojej strony internetowej."
         }
       }
@@ -1108,7 +1108,7 @@
         "title": "Ogólne",
         "archive": {
           "headline": "Archiwum zgłoszeń",
-          "subHeadline": "Wyłącz archiwum zgłoszeń, jeśli nie chcesz, aby HeyForm zapisywał Twoje zgłoszenia."
+          "subHeadline": "Wyłącz archiwum zgłoszeń, jeśli nie chcesz, aby LyticsForm zapisywał Twoje zgłoszenia."
         },
         "redirect": {
           "headline": "Przekierowanie po zakończeniu",
@@ -1297,7 +1297,7 @@
         "payment": {
           "title": "Płatność",
           "headline": "Połącz ze Stripe",
-          "subHeadline": "<div>Zbieraj i otrzymuj płatności bezpośrednio na swoje konto bankowe za pośrednictwem Stripe.</div><div>Użytkownicy darmowej wersji HeyForm zbierają płatności według stawki <a>5% prowizji HeyForm + opłata transakcyjna Stripe.</a></div><div>Aby usunąć 5% prowizję HeyForm od płatności, uaktualnij do <button>HeyForm Premium</button>.</div>",
+          "subHeadline": "<div>Zbieraj i otrzymuj płatności bezpośrednio na swoje konto bankowe za pośrednictwem Stripe.</div><div>Użytkownicy darmowej wersji LyticsForm zbierają płatności według stawki <a>5% prowizji LyticsForm + opłata transakcyjna Stripe.</a></div><div>Aby usunąć 5% prowizję LyticsForm od płatności, uaktualnij do <button>LyticsForm Premium</button>.</div>",
           "stripeAccount": "Konto Stripe",
           "revoke": "Cofnij dostęp",
           "price": "Cena",
@@ -1503,7 +1503,7 @@
     "subHeadline": "Zmiany w ustawieniach konta będą dotyczyć wszystkich Twoich przestrzeni roboczych.",
     "avatar": {
       "headline": "Awatar",
-      "subHeadline": "Gravatar jest domyślnie używany jako Twój awatar HeyForm, możesz tutaj przesłać własny awatar."
+      "subHeadline": "Gravatar jest domyślnie używany jako Twój awatar LyticsForm, możesz tutaj przesłać własny awatar."
     },
     "name": "Twoje imię",
     "email": {

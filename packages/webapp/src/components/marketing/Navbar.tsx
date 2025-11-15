@@ -80,7 +80,7 @@ export const Navbar: FC = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
             <Logo className="h-8 w-8 text-white" />
-            <span className="text-xl font-bold text-white">HeyForm</span>
+            <span className="text-xl font-bold text-white">LyticsForm</span>
           </Link>
 
           {/* Desktop Navigation */}

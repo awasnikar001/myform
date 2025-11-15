@@ -27,7 +27,7 @@ export const CTASection: FC = () => {
           Ready to Build Better Forms?
         </h2>
         <p className="mb-8 text-xl text-white/90">
-          Join thousands of teams already using HeyForm to create beautiful forms and collect
+          Join thousands of teams already using LyticsForm to create beautiful forms and collect
           responses faster.
         </p>
         <button
