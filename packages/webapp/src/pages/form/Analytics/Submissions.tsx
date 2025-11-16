@@ -83,7 +83,22 @@ const AnswerValue: FC<{ answer: AnyMap }> = ({ answer }) => {
       return answer.value && [answer.value.start, answer.value.end].filter(Boolean).join(' - ')
 
     case FieldKindEnum.FILE_UPLOAD:
-      return <div>{answer.value?.filename}</div>
+      // Handle both object format and simple URL string format
+      if (helper.isObject(answer.value)) {
+        return <div>{answer.value.filename}</div>
+      } else if (helper.isURL(answer.value)) {
+        // Extract filename from URL
+        const urlParts = answer.value.split('/')
+        let filename = urlParts[urlParts.length - 1]
+        filename = decodeURIComponent(filename)
+        // Remove nanoid prefix
+        const match = filename.match(/^[a-zA-Z0-9]{12}-(.+)$/)
+        if (match) {
+          filename = match[1]
+        }
+        return <div>{filename}</div>
+      }
+      return null
 
     case FieldKindEnum.SIGNATURE:
       // Display the signature image if it's a valid URL or base64 data URL

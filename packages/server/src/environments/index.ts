@@ -161,3 +161,13 @@ export const S3_BUCKET = process.env.S3_BUCKET
 export const S3_ACCESS_KEY_ID = process.env.S3_ACCESS_KEY_ID
 export const S3_SECRET_ACCESS_KEY = process.env.S3_SECRET_ACCESS_KEY
 export const S3_PUBLIC_URL = process.env.S3_PUBLIC_URL
+// TEMPORARY DEBUG - Remove after testing
+console.log('🔍 S3 Configuration Check:')
+console.log('   S3_ENDPOINT:', S3_ENDPOINT || '❌ NOT SET')
+console.log('   S3_REGION:', S3_REGION || '❌ NOT SET')
+console.log('   S3_BUCKET:', S3_BUCKET || '❌ NOT SET')
+console.log(
+  '   S3_ACCESS_KEY_ID:',
+  S3_ACCESS_KEY_ID ? `✅ SET (${S3_ACCESS_KEY_ID.substring(0, 8)}...)` : '❌ NOT SET'
+)
+console.log('   S3_SECRET_ACCESS_KEY:', S3_SECRET_ACCESS_KEY ? '✅ SET' : '❌ NOT SET')

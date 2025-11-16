@@ -19,6 +19,8 @@ import { isStripeEnabled } from '../utils/payment'
 import { Uploader } from '../utils/uploader'
 import { helper } from '@heyform-inc/utils'
 
+import { GOOGLE_RECAPTCHA_KEY } from '@/consts/env'
+
 import { PasswordCheck } from './PasswordCheck'
 
 interface RendererProps {
@@ -126,7 +128,89 @@ export const Renderer: FC<RendererProps> = ({ form, query, locale, contactId }) 
         break
 
       case CaptchaKindEnum.GOOGLE_RECAPTCHA:
-        captchaRef = window.grecaptcha
+        // Check if key exists
+        if (!GOOGLE_RECAPTCHA_KEY) {
+          console.error(
+            'Google reCAPTCHA key is not configured. Please check environment variables.'
+          )
+          break
+        }
+
+        console.log('Initializing Google reCAPTCHA with key:', GOOGLE_RECAPTCHA_KEY)
+
+        // Load the reCAPTCHA script dynamically
+        await new Promise<void>((resolve, reject) => {
+          // Check if grecaptcha already loaded
+          if (window.grecaptcha) {
+            captchaRef = window.grecaptcha
+            console.log('Google reCAPTCHA already loaded')
+            resolve()
+            return
+          }
+
+          // Check if script tag already exists
+          const existingScript = document.querySelector(
+            'script[src*="google.com/recaptcha/api.js"]'
+          )
+
+          if (existingScript) {
+            console.log('reCAPTCHA script already exists, waiting for load...')
+            // Script exists but not loaded yet, wait for it
+            const checkInterval = setInterval(() => {
+              if (window.grecaptcha) {
+                captchaRef = window.grecaptcha
+                clearInterval(checkInterval)
+                console.log('Google reCAPTCHA loaded successfully')
+                resolve()
+              }
+            }, 100)
+
+            setTimeout(() => {
+              clearInterval(checkInterval)
+              if (!window.grecaptcha) {
+                console.error('Google reCAPTCHA failed to load after 10 seconds')
+                reject(new Error('reCAPTCHA script failed to load'))
+              }
+            }, 10000)
+            return
+          }
+
+          // Create and load the script
+          console.log('Loading reCAPTCHA script...')
+          const script = document.createElement('script')
+          script.src = `https://www.google.com/recaptcha/api.js?render=${GOOGLE_RECAPTCHA_KEY}`
+          script.async = true
+          script.defer = true
+
+          script.onload = () => {
+            console.log('reCAPTCHA script loaded, waiting for grecaptcha object...')
+            // Wait for grecaptcha to be available
+            const checkInterval = setInterval(() => {
+              if (window.grecaptcha) {
+                captchaRef = window.grecaptcha
+                clearInterval(checkInterval)
+                console.log('Google reCAPTCHA initialized successfully')
+                resolve()
+              }
+            }, 100)
+
+            // Timeout after 10 seconds
+            setTimeout(() => {
+              clearInterval(checkInterval)
+              if (!window.grecaptcha) {
+                console.error('grecaptcha object not available after script load')
+                reject(new Error('grecaptcha not available after script load'))
+              }
+            }, 10000)
+          }
+
+          script.onerror = error => {
+            console.error('Failed to load reCAPTCHA script:', error)
+            reject(new Error('Failed to load reCAPTCHA script'))
+          }
+
+          document.head.appendChild(script)
+        })
         break
     }
   }
@@ -136,7 +220,9 @@ export const Renderer: FC<RendererProps> = ({ form, query, locale, contactId }) 
 
     if (!form.suspended && form.settings?.active) {
       openForm()
-      initCaptcha()
+      initCaptcha().catch(err => {
+        console.error('Failed to initialize captcha:', err)
+      })
     }
   }, [])
 
@@ -283,12 +369,6 @@ export const Renderer: FC<RendererProps> = ({ form, query, locale, contactId }) 
       `
         }}
       />
-
-      {form.settings?.captchaKind === CaptchaKindEnum.GOOGLE_RECAPTCHA && (
-        <script
-          src={`https://www.google.com/recaptcha/api.js?render=${window.heyform.googleRecaptchaKey}`}
-        />
-      )}
 
       {form.settings?.captchaKind === CaptchaKindEnum.GEETEST_CAPTCHA && (
         <script src="https://static.geetest.com/v4/gt4.js" />

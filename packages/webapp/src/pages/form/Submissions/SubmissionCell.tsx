@@ -97,18 +97,40 @@ const DateRangeItem: FC<SubmissionCellProps> = ({ answer, field, isTableCell }) 
 }
 
 const FileUploadItem: FC<SubmissionCellProps> = ({ answer, field, isTableCell }) => {
-  if (answer.kind !== field.kind || !helper.isObject(answer.value)) {
+  if (answer.kind !== field.kind) {
     return null
   }
 
-  const filename = encodeURIComponent(answer.value.filename)
-  const downloadUrl = `${answer.value.cdnUrlPrefix}/${answer.value.cdnKey}?attname=${filename}`
+  // Handle both object format and simple URL string format
+  let filename: string
+  let downloadUrl: string
+
+  if (helper.isObject(answer.value)) {
+    // Object format: {filename, cdnUrlPrefix, cdnKey}
+    filename = answer.value.filename
+    downloadUrl = `${answer.value.cdnUrlPrefix}/${answer.value.cdnKey}?attname=${encodeURIComponent(filename)}`
+  } else if (helper.isURL(answer.value)) {
+    // Simple URL string format (S3 direct URL)
+    downloadUrl = answer.value
+    // Extract filename from URL
+    const urlParts = answer.value.split('/')
+    filename = urlParts[urlParts.length - 1]
+    // Decode any URL encoding in filename
+    filename = decodeURIComponent(filename)
+    // Remove nanoid prefix (e.g., "r7TEgaYF9vCg-filename.pdf" -> "filename.pdf")
+    const match = filename.match(/^[a-zA-Z0-9]{12}-(.+)$/)
+    if (match) {
+      filename = match[1]
+    }
+  } else {
+    return null
+  }
 
   if (isTableCell) {
     return (
       <div className="flex gap-1">
         <IconFile className="text-secondary h-5 w-5" />
-        <div className="flex-1 truncate">{answer.value.filename}</div>
+        <div className="flex-1 truncate">{filename}</div>
       </div>
     )
   }
@@ -121,7 +143,7 @@ const FileUploadItem: FC<SubmissionCellProps> = ({ answer, field, isTableCell })
       rel="noreferrer"
     >
       <IconFile className="text-secondary h-5 w-5" />
-      <div className="flex-1 whitespace-nowrap">{answer.value.filename}</div>
+      <div className="flex-1 whitespace-nowrap">{filename}</div>
     </a>
   )
 }

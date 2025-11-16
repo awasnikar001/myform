@@ -34,6 +34,14 @@ export function getMulterStorage() {
       s3,
       acl: 'public-read',
       bucket: S3_BUCKET,
+      contentType: (req: any, file: any, cb: any) => {
+        // Set proper content type for inline viewing
+        cb(null, file.mimetype)
+      },
+      contentDisposition: (req: any, file: any, cb: any) => {
+        // Set to 'inline' so PDFs and images open in browser, not download
+        cb(null, 'inline')
+      },
       metadata: (req: any, file: any, cb: any) => {
         cb(null, { fieldName: file.fieldname })
       },
