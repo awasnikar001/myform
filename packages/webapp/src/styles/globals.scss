@@ -72,20 +72,32 @@ body {
     @apply bg-white/30 backdrop-blur-xl border border-white/50;
   }
   
-  /* Gradient background for glass effect visibility - light mode only */
+  /* Enhanced gradient background for stronger glass effect - light mode only */
   .glass-background {
     position: relative;
   }
   
   @media (prefers-color-scheme: light) {
     .glass-background {
-      background: linear-gradient(135deg, #f7f9fb 0%, #edf2f7 50%, #f1f5f9 100%);
+      background: linear-gradient(135deg, 
+        #e8f0fe 0%, 
+        #f0f4f8 25%, 
+        #faf5ff 50%, 
+        #f0f9ff 75%, 
+        #f5f3ff 100%
+      );
     }
   }
   
-  /* Light mode - always show gradient when not in dark mode */
+  /* Light mode - stronger gradient with multiple colors */
   html:not(.dark) .glass-background {
-    background: linear-gradient(135deg, #f7f9fb 0%, #edf2f7 50%, #f1f5f9 100%);
+    background: linear-gradient(135deg, 
+      #e8f0fe 0%, 
+      #f0f4f8 25%, 
+      #faf5ff 50%, 
+      #f0f9ff 75%, 
+      #f5f3ff 100%
+    );
   }
   
   /* Dark mode - ensure transparent */
@@ -93,13 +105,13 @@ body {
     background: transparent !important;
   }
   
-  /* Subtle mesh pattern overlay - light mode only */
+  /* Enhanced mesh pattern with more visibility */
   .mesh-pattern::before {
     content: '';
     position: absolute;
     inset: 0;
-    background-image: radial-gradient(circle at 1px 1px, rgba(148, 163, 184, 0.15) 1px, transparent 0);
-    background-size: 24px 24px;
+    background-image: radial-gradient(circle at 1px 1px, rgba(100, 116, 139, 0.25) 1px, transparent 0);
+    background-size: 20px 20px;
     pointer-events: none;
     z-index: 0;
   }

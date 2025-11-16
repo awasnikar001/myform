@@ -52,7 +52,7 @@ export default function RecentForms() {
         </div>
       }
       emptyRender={() => (
-        <div className="mt-4 flex flex-1 items-center justify-center rounded-2xl border border-dashed border-white/60 bg-white/30 py-36 shadow-xl shadow-slate-300/60 backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900/50 dark:shadow-none">
+        <div className="mt-4 flex flex-1 items-center justify-center rounded-2xl border-2 border-dashed border-white/70 bg-white/20 py-36 shadow-2xl shadow-slate-400/50 backdrop-blur-2xl dark:border-slate-700 dark:bg-slate-900/50 dark:shadow-none">
           <EmptyState
             headline={t('dashboard.noForms')}
             subHeadline={t('dashboard.pickTemplate')}

@@ -28,21 +28,21 @@ export default function Overview() {
       icon: IconForms,
       label: 'dashboard.forms',
       iconColor: 'text-icon-blue',
-      iconBg: 'bg-blue-50/60 dark:bg-blue-950/20 backdrop-blur-sm'
+      iconBg: 'bg-blue-50/40 dark:bg-blue-950/20 backdrop-blur-md'
     },
     {
       key: 'submissionQuota',
       icon: IconDatabase,
       label: 'dashboard.submission',
       iconColor: 'text-icon-purple',
-      iconBg: 'bg-purple-50/60 dark:bg-purple-950/20 backdrop-blur-sm'
+      iconBg: 'bg-purple-50/40 dark:bg-purple-950/20 backdrop-blur-md'
     },
     {
       key: 'memberCount',
       icon: IconUsers,
       label: 'dashboard.members',
       iconColor: 'text-icon-green',
-      iconBg: 'bg-green-50/60 dark:bg-green-950/20 backdrop-blur-sm',
+      iconBg: 'bg-green-50/40 dark:bg-green-950/20 backdrop-blur-md',
       valueTransform: (val: number) => val || 1
     },
     {
@@ -50,7 +50,7 @@ export default function Overview() {
       icon: IconServer,
       label: 'dashboard.storage',
       iconColor: 'text-icon-amber',
-      iconBg: 'bg-amber-50/60 dark:bg-amber-950/20 backdrop-blur-sm',
+      iconBg: 'bg-amber-50/40 dark:bg-amber-950/20 backdrop-blur-md',
       valueTransform: formatBytes
     }
   ]
@@ -60,7 +60,7 @@ export default function Overview() {
       {STATS_CONFIG.map(({ key, icon: Icon, label, iconColor, iconBg, valueTransform }) => (
         <div
           key={key}
-          className="group relative overflow-hidden rounded-2xl border border-white/60 bg-white/35 p-4 shadow-xl shadow-slate-300/60 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:bg-white/45 hover:shadow-2xl hover:shadow-slate-300/70 dark:border-slate-700/50 dark:bg-slate-900/50 dark:shadow-none dark:hover:bg-slate-900/70"
+          className="group relative overflow-hidden rounded-2xl border-2 border-white/70 bg-white/20 p-4 shadow-2xl shadow-slate-400/40 backdrop-blur-3xl transition-all duration-300 hover:-translate-y-2 hover:bg-white/30 hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] dark:border-slate-700/50 dark:bg-slate-900/50 dark:shadow-none dark:hover:bg-slate-900/70"
         >
           <div className="flex items-start gap-3">
             <div

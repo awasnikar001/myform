@@ -83,7 +83,7 @@ export const Toaster = () => {
       {toasts.map(row => (
         <Root
           key={row.id}
-          className="dark:bg-foreground dark:ring-accent data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full relative w-full rounded-lg border-white/60 bg-white/40 px-3 py-2 opacity-100 shadow-2xl shadow-slate-300/60 ring-1 ring-white/50 backdrop-blur-2xl data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none dark:shadow-lg dark:ring-1"
+          className="dark:bg-foreground dark:ring-accent data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full relative w-full rounded-lg border-2 border-white/70 bg-white/25 px-3 py-2 opacity-100 shadow-[0_15px_40px_-10px_rgba(0,0,0,0.35)] ring-1 ring-white/60 backdrop-blur-3xl data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none dark:shadow-lg dark:ring-1"
           duration={row.duration}
           onOpenChange={open => !open && remove(row.id)}
         >

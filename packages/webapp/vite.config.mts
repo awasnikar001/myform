@@ -118,6 +118,35 @@ export default ({ mode }: ConfigEnv) => {
           target: proxyTarget,
           secure: false,
           changeOrigin: true
+        },
+        // Development-only: Proxy OAuth routes to backend
+        // This is NOT needed in production (backend serves everything)
+        '/connect': {
+          target: proxyTarget,
+          secure: false,
+          changeOrigin: true,
+          // Let browser handle OAuth redirects to Google (no followRedirects)
+          cookieDomainRewrite: {
+            [cookieDomainRewrite]: cookieDomain
+          },
+          configure: (proxy: any) => {
+            proxy.on('proxyRes', function(proxyRes: any) {
+              const removeSecure = (str: string) => str.replace(/; Secure|; SameSite=[^;]/gi, '')
+              const set = proxyRes.headers['set-cookie']
+
+              if (set) {
+                proxyRes.headers['set-cookie'] = Array.isArray(set)
+                  ? set.map(removeSecure)
+                  : removeSecure(set)
+              }
+            })
+          }
+        },
+        // Development-only: Proxy logout route to backend
+        '/logout': {
+          target: proxyTarget,
+          secure: false,
+          changeOrigin: true
         }
       }
     }

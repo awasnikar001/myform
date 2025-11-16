@@ -271,7 +271,7 @@ const LayoutComponent: FC<LayoutProps> = ({ options, children }) => {
           data-slot="layout-main"
         >
           <div
-            className="dark:lg:bg-foreground dark:lg:ring-input grow overflow-x-hidden p-6 lg:relative lg:z-10 lg:rounded-2xl lg:bg-white/30 lg:p-10 lg:shadow-2xl lg:shadow-slate-300/70 lg:ring-1 lg:ring-white/60 lg:backdrop-blur-2xl dark:lg:shadow-none"
+            className="dark:lg:bg-foreground dark:lg:ring-input grow overflow-x-hidden p-6 lg:relative lg:z-10 lg:rounded-2xl lg:bg-white/15 lg:p-10 lg:shadow-[0_25px_70px_-15px_rgba(0,0,0,0.3)] lg:ring-2 lg:ring-white/70 lg:backdrop-blur-3xl dark:lg:shadow-none"
             data-slot="layout-container"
           >
             <div

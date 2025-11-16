@@ -64,7 +64,7 @@ const ButtonComponent: FC<ButtonProps> = ({
 const GhostButton: FC<ButtonProps> = ({ className, ...restProps }) => (
   <ButtonComponent
     className={cn(
-      'dark:border-input dark:bg-foreground text-primary border border-white/60 bg-white/35 backdrop-blur-xl transition-all duration-200 hover:bg-white/50 hover:shadow-lg dark:hover:bg-slate-800',
+      'dark:border-input dark:bg-foreground text-primary border-2 border-white/70 bg-white/20 backdrop-blur-2xl transition-all duration-200 hover:bg-white/35 hover:shadow-xl dark:hover:bg-slate-800',
       className
     )}
     {...restProps}

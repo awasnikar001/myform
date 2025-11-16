@@ -92,7 +92,7 @@ export const Dropdown: FC<DropdownProps> = ({
           align="end"
           {...contentProps}
           className={cn(
-            'dark:bg-foreground dark:ring-accent-light animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 isolate z-10 w-max overflow-y-auto rounded-xl border-white/70 bg-white/40 p-1 shadow-2xl shadow-slate-300/60 outline outline-1 outline-transparent ring-1 backdrop-blur-2xl focus:outline-none dark:shadow-lg dark:ring-1',
+            'dark:bg-foreground dark:ring-accent-light animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 isolate z-10 w-max overflow-y-auto rounded-xl border-2 border-white/80 bg-white/20 p-1 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.4)] outline outline-1 outline-transparent ring-1 backdrop-blur-3xl focus:outline-none dark:shadow-lg dark:ring-1',
             contentProps?.className
           )}
         >
