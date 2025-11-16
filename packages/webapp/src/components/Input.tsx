@@ -429,7 +429,7 @@ const TextArea: FC<TextAreaProps> = ({
       <textarea
         ref={inputRef}
         className={cn(
-          'scrollbar focus:ring-primary/20 focus:border-primary block w-full appearance-none rounded-lg border-2 border-gray-300 bg-white px-3.5 py-2.5 text-base/[1.4rem] ring-0 transition-all placeholder:text-gray-400 focus:shadow-sm focus:outline-none focus:ring-2 sm:px-3 sm:py-2 sm:text-sm/[1.4rem] dark:border-gray-400 dark:bg-gray-950 dark:placeholder:text-gray-500',
+          'scrollbar focus:ring-primary/20 focus:border-primary block w-full appearance-none rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 ring-0 transition-all placeholder:text-slate-400 focus:shadow-sm focus:outline-none focus:ring-2 sm:px-3 sm:py-2 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-400',
           hasError ? 'border-error focus:border-error focus:ring-error/20' : ''
         )}
         data-slot="textarea"
