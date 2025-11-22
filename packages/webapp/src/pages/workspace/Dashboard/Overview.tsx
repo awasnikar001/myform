@@ -60,7 +60,7 @@ export default function Overview() {
       {STATS_CONFIG.map(({ key, icon: Icon, label, iconColor, iconBg, valueTransform }) => (
         <div
           key={key}
-          className="group relative overflow-hidden rounded-2xl border-2 border-white/70 bg-white/20 p-4 shadow-2xl shadow-slate-400/40 backdrop-blur-3xl transition-all duration-300 hover:-translate-y-2 hover:bg-white/30 hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] dark:border-slate-700/50 dark:bg-slate-900/50 dark:shadow-none dark:hover:bg-slate-900/70"
+          className="group glass-card relative overflow-hidden rounded-2xl p-4 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] dark:hover:bg-white/[0.03]"
         >
           <div className="flex items-start gap-3">
             <div

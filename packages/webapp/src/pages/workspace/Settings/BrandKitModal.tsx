@@ -119,7 +119,7 @@ const ModalComponent = () => {
 
   return (
     <div className="flex h-full">
-      <div className="scrollbar border-accent-light bg-foreground h-full w-full border-r px-4 py-6 sm:w-80">
+      <div className="scrollbar border-accent-light bg-background h-full w-full border-r px-4 py-6 sm:w-80">
         <Form initialValues={brandKit} onValuesChange={handleValuesChange} onFinish={run}>
           <div className="flex items-center justify-between">
             <h2 className="text-base/6 font-semibold">{t('settings.branding.brandKitHeadline')}</h2>
@@ -337,7 +337,7 @@ export default function BrandKitModal() {
       }}
       contentProps={{
         className:
-          'p-0 w-screen max-w-screen max-h-[80vh] overflow-hidden h-screen bg-foreground focus:outline-none focus-visible:outline-none sm:bg-background sm:max-h-screen sm:!border-none sm:!rounded-none'
+          'p-0 w-screen max-w-screen max-h-[80vh] overflow-hidden h-screen bg-background focus:outline-none focus-visible:outline-none sm:bg-background sm:max-h-screen sm:!border-none sm:!rounded-none'
       }}
       isCloseButtonShow={false}
       onOpenChange={onOpenChange}

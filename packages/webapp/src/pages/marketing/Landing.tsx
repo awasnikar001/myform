@@ -1,6 +1,8 @@
 import { Suspense, lazy, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { Hero } from '@/components/marketing'
+import { SEO } from '@/components'
 
 const LogoCloud = lazy(() => import('@/components/marketing').then(m => ({ default: m.LogoCloud })))
 const BenefitsGrid = lazy(() =>
@@ -21,19 +23,19 @@ const CTASection = lazy(() =>
 )
 
 export default function Landing() {
+  const { t } = useTranslation()
+
   useEffect(() => {
-    document.title = 'LyticsForm - Build Beautiful Forms in Minutes'
-    const meta = document.querySelector('meta[name="description"]')
-    if (meta) {
-      meta.setAttribute(
-        'content',
-        'Create stunning forms with drag-and-drop builder. No coding required. Real-time analytics, smart logic, and 100+ integrations.'
-      )
-    }
+    // document.title and meta description are now handled by the SEO component
   }, [])
 
   return (
-    <div className="relative">
+    <div className="bg-background text-foreground min-h-screen">
+      <SEO
+        title={t('landing.hero.headline', 'Build Beautiful Forms')}
+        description={t('landing.hero.subHeadline', 'The most powerful form builder for modern teams.')}
+      />
+
       <Hero />
       <Suspense fallback={<div className="h-32" />}>
         <LogoCloud />

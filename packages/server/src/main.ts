@@ -4,6 +4,8 @@ import { NestExpressApplication } from '@nestjs/platform-express'
 import * as cookieParser from 'cookie-parser'
 import * as rateLimit from 'express-rate-limit'
 import * as helmet from 'helmet'
+import * as Sentry from '@sentry/node'
+import { nodeProfilingIntegration } from '@sentry/profiling-node'
 import { join } from 'path'
 import * as serveStatic from 'serve-static'
 
@@ -15,6 +17,17 @@ import { AppModule } from './app.module'
 import { AllExceptionsFilter } from './common/filter'
 
 async function bootstrap() {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    integrations: [
+      nodeProfilingIntegration(),
+    ],
+    // Tracing
+    tracesSampleRate: 1.0, //  Capture 100% of the transactions
+    // Set sampling rate for profiling - this is relative to tracesSampleRate
+    profilesSampleRate: 1.0,
+  })
+
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bodyParser: false
   })

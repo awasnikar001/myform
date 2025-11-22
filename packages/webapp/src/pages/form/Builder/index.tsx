@@ -53,7 +53,7 @@ const Builder: FC<IBuilderProps> = ({ form }) => {
       <div className="bg-background flex h-screen flex-col">
         <BuilderNavBar />
 
-        <main className="flex h-[calc(100vh-3.5rem)] flex-1 sm:gap-2 sm:px-2 sm:pb-2">
+        <main className="flex h-[calc(100vh-3.5rem)] flex-1">
           {state.activeTabName === 'logic' ? (
             <LogicFlow />
           ) : (

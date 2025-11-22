@@ -103,10 +103,10 @@ interface DateInputProps extends Omit<InputProps, 'value' | 'onChange'> {
 
 interface DatePickerProps
   extends Optional<
-      SharedProps,
-      'locale' | 'weekStartsOn' | 'timeIntervals' | 'pendingDate' | 'selectedDate'
-    >,
-    Omit<ComponentProps, 'onChange'> {
+    SharedProps,
+    'locale' | 'weekStartsOn' | 'timeIntervals' | 'pendingDate' | 'selectedDate'
+  >,
+  Omit<ComponentProps, 'onChange'> {
   placeholder?: string
   showTimeSelect?: boolean
 }
@@ -293,7 +293,7 @@ const createStore = (initialState: SharedProps) => {
             const keys = Object.keys(updates) as (keyof SharedProps)[]
 
             keys.forEach(key => {
-              ;(state as Any)[key] = updates[key]
+              ; (state as Any)[key] = updates[key]
             })
           })
         },
@@ -928,7 +928,7 @@ export const DatePicker: FC<DatePickerProps> = ({
 
     properties.forEach(property => {
       if ((restProps as AnyMap)[property]) {
-        ;(updates as AnyMap)[property] = (restProps as AnyMap)[property]
+        ; (updates as AnyMap)[property] = (restProps as AnyMap)[property]
       }
     })
 
@@ -958,7 +958,7 @@ export const DatePicker: FC<DatePickerProps> = ({
 
         <Portal>
           <Content
-            className="dark:bg-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-90 data-[state=open]:zoom-in-90 z-10 origin-top-left rounded-lg border-2 border-white/80 bg-white/20 text-sm shadow-[0_20px_60px_-15px_rgba(0,0,0,0.4)] ring-1 ring-white/60 backdrop-blur-3xl focus:outline-none dark:shadow-lg dark:ring-black dark:ring-opacity-5"
+            className="dark:bg-slate-900 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-90 data-[state=open]:zoom-in-90 z-10 origin-top-left rounded-lg border-2 border-white/80 bg-white/20 text-sm shadow-[0_20px_60px_-15px_rgba(0,0,0,0.4)] ring-1 ring-white/60 backdrop-blur-3xl focus:outline-none dark:shadow-lg dark:ring-black dark:ring-opacity-5"
             sideOffset={8}
             align="start"
           >

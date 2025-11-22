@@ -22,7 +22,7 @@ export const BuilderLeftSidebarModal = () => {
     <Root open={isOpen} onOpenChange={onOpenChange}>
       <Portal>
         <Overlay className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-10 bg-black/60" />
-        <Content className="border-accent-light bg-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-bottom-0 data-[state=open]:slide-in-from-bottom-[80%] fixed bottom-0 left-0 right-0 z-10 max-h-[80vh] rounded-lg border shadow-lg duration-200">
+        <Content className="border-accent-light bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-bottom-0 data-[state=open]:slide-in-from-bottom-[80%] fixed bottom-0 left-0 right-0 z-10 max-h-[80vh] rounded-lg border shadow-lg duration-200 dark:bg-slate-900">
           <Title>
             <VisuallyHidden />
           </Title>
@@ -38,7 +38,7 @@ export const BuilderLeftSidebarModal = () => {
 
 export default function BuilderLeftSidebar() {
   return (
-    <div className="builder-sidebar bg-foreground lg:ring-primary/5 flex h-full w-[16rem] flex-col max-lg:hidden lg:rounded-lg lg:shadow-sm lg:ring-1">
+    <div className="builder-sidebar flex h-full w-[16rem] flex-col max-lg:hidden">
       <BuilderLeftSidebarComponent />
     </div>
   )

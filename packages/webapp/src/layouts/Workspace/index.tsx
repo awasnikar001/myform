@@ -204,8 +204,8 @@ export const BaseLayout: FC<LayoutProps> = ({ options, children }) => {
 
   return (
     <LoginGuard>
-      <div className="bg-foreground flex min-h-screen flex-col">
-        <div className="bg-foreground sticky top-0 flex items-center justify-between p-4">
+      <div className="bg-background flex min-h-screen flex-col">
+        <div className="bg-background sticky top-0 flex items-center justify-between p-4">
           <a href="/" className="flex items-center gap-2" title="LyticsForm">
             <Logo className="h-8 w-auto" />
             <span className="text-xl font-medium">LyticsForm</span>
@@ -257,7 +257,7 @@ const LayoutComponent: FC<LayoutProps> = ({ options, children }) => {
     <>
       <div
         className={cn(
-          'bg-foreground relative isolate flex min-h-svh w-full max-lg:flex-col',
+          'bg-background relative isolate flex min-h-svh w-full max-lg:flex-col',
           {
             '[&_[data-slot=layout-main]]:pt-16 [&_[data-slot=layout-main]]:lg:pt-16 [&_[data-slot=layout-sidebar]]:top-16': false
           },
@@ -271,7 +271,7 @@ const LayoutComponent: FC<LayoutProps> = ({ options, children }) => {
           data-slot="layout-main"
         >
           <div
-            className="dark:lg:bg-foreground dark:lg:ring-input grow overflow-x-hidden p-6 lg:relative lg:z-10 lg:rounded-2xl lg:bg-white/15 lg:p-10 lg:shadow-[0_25px_70px_-15px_rgba(0,0,0,0.3)] lg:ring-2 lg:ring-white/70 lg:backdrop-blur-3xl dark:lg:shadow-none"
+            className="dark:lg:bg-slate-950/50 dark:lg:ring-white/10 grow overflow-x-hidden p-6 lg:relative lg:z-10 lg:rounded-2xl lg:bg-white/15 lg:p-10 lg:shadow-[0_25px_70px_-15px_rgba(0,0,0,0.3)] lg:ring-2 lg:ring-white/70 lg:backdrop-blur-3xl dark:lg:shadow-none"
             data-slot="layout-container"
           >
             <div

@@ -3,13 +3,34 @@
 
 
 .builder-sidebar {
+  /* Floating Island Style */
+  @apply h-[calc(100vh-3rem)] my-6 ml-6 rounded-3xl glass-panel border-none overflow-hidden transition-all duration-500 ease-out;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+
   .question-group {
-    @apply rounded-lg border border-accent-light p-1;
+    @apply rounded-xl border border-white/5 bg-white/[0.02] p-1.5 mb-2 transition-all duration-300;
+
+    &:hover {
+      @apply bg-white/[0.04] border-white/10;
+    }
   }
 
   .question-item-body {
+    @apply rounded-lg transition-all duration-300 relative overflow-hidden;
+
+    /* Spotlight Effect Base */
+    &::before {
+      content: '';
+      @apply absolute inset-0 opacity-0 transition-opacity duration-300 pointer-events-none;
+      background: radial-gradient(600px circle at var(--mouse-x, 0) var(--mouse-y, 0), rgba(255, 255, 255, 0.06), transparent 40%);
+    }
+
     &:hover {
-      @apply bg-secondary-light;
+      @apply bg-white/[0.03];
+
+      &::before {
+        @apply opacity-100;
+      }
 
       .question-dropdown,
       .question-collapsed {
@@ -19,11 +40,12 @@
   }
 
   .question-selected {
-    & > .question-item-body {
-      @apply bg-accent-light;
+    &>.question-item-body {
+      @apply bg-white/[0.08] shadow-lg shadow-black/20 border border-white/10;
+      backdrop-filter: blur(10px);
 
       .question-title {
-        @apply text-primary;
+        @apply text-white font-bold tracking-wide;
       }
     }
   }
@@ -46,7 +68,25 @@
 }
 
 .react-flow {
-  @apply h-full flex-1 bg-foreground lg:rounded-lg lg:shadow-sm lg:ring-1 lg:ring-primary/5;
+  /* Floating Canvas - "The Stage" */
+  @apply h-[calc(100vh-3rem)] my-6 mx-6 flex-1 rounded-3xl glass-card border border-white/10 shadow-2xl relative overflow-hidden;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 20px 50px -10px rgba(0, 0, 0, 0.6);
+
+  /* Sophisticated Grid Pattern */
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: center center;
+
+  /* Vignette effect for depth */
+  &::after {
+    content: '';
+    @apply absolute inset-0 pointer-events-none;
+    background: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.4) 100%);
+  }
 }
 
 
@@ -77,8 +117,8 @@
 }
 
 .compose {
-  
-  
+
+
   .heyform-layout {
     @apply pointer-events-none absolute rounded-lg;
     z-index: 2;
@@ -89,6 +129,7 @@
   }
 
   .heyform-theme-background {
+
     &,
     &:before {
       @apply rounded-lg;
@@ -174,8 +215,8 @@
     }
   }
 
-  
-  
+
+
   .heyform-radio {
     @apply mb-2 h-10;
   }
@@ -185,7 +226,7 @@
     background-color: var(--heyform-answer-opacity-5-color);
     color: var(--heyform-answer-color);
     border: 1.5px solid transparent;
-    box-shadow: 
+    box-shadow:
       0 1px 3px rgba(0, 0, 0, 0.05),
       0 1px 2px rgba(0, 0, 0, 0.1);
     backdrop-filter: blur(8px);
@@ -193,7 +234,7 @@
     &:hover {
       background-color: var(--heyform-answer-opacity-10-color);
       border-color: var(--heyform-answer-opacity-30-color);
-      box-shadow: 
+      box-shadow:
         0 4px 12px rgba(0, 0, 0, 0.08),
         0 2px 4px rgba(0, 0, 0, 0.06);
       transform: translateY(-2px);
@@ -254,8 +295,8 @@
     background-color: var(--heyform-answer-opacity-10-color);
   }
 
-  
-  
+
+
   .heyform-select {
     @apply w-full;
   }
@@ -297,8 +338,8 @@
     }
   }
 
-  
-  
+
+
   .heyform-block-container {
     @apply scrollbar absolute inset-0 inset-0 z-10 px-20;
 
@@ -382,8 +423,8 @@
     color: var(--heyform-label-color);
   }
 
-  
-  
+
+
   .heyform-submit-container {
     @apply mt-8 flex items-center justify-start transition-opacity duration-500;
   }
@@ -395,8 +436,8 @@
     color: var(--heyform-button-text-color);
   }
 
-  
-  
+
+
   .heyform-empty-state {
     .heyform-block-title {
       @apply mb-4 text-3xl;
@@ -409,6 +450,7 @@
   }
 
   .heyform-statement {
+
     .heyform-block-title,
     .heyform-block-description,
     .heyform-layout-inline {
@@ -418,6 +460,7 @@
 
   .heyform-welcome,
   .heyform-thank-you {
+
     .heyform-block-title,
     .heyform-block-description {
       @apply text-left;
@@ -440,8 +483,8 @@
     }
   }
 
-  
-  
+
+
   // Override Tailwind Forms plugin and any other input styles
   input,
   input[type='text'],
@@ -454,34 +497,24 @@
   input.heyform-input,
   input.input.heyform-input,
   .input.heyform-input {
-    @apply w-full border-none p-0 pb-2 text-2xl shadow-none outline-none transition-all duration-300 ease-out;
+    @apply w-full border-none p-3 text-2xl shadow-none outline-none transition-all duration-300 ease-out rounded-lg;
     color: var(--heyform-answer-color) !important;
     background-color: transparent !important;
     background: transparent !important;
-    border-bottom: 2px solid var(--heyform-answer-opacity-60-color) !important;
-    border-radius: 0 !important;
-    border-top: none !important;
-    border-left: none !important;
-    border-right: none !important;
+    border: 1px solid transparent !important;
     box-shadow: none !important;
 
     &:hover {
-      background-color: transparent !important;
-      background: transparent !important;
-      border-bottom-color: var(--heyform-answer-opacity-80-color) !important;
+      background-color: rgba(255, 255, 255, 0.03) !important;
     }
 
     &:focus {
-      background-color: transparent !important;
-      background: transparent !important;
-      border-bottom-color: var(--heyform-answer-color) !important;
-      box-shadow: 0 2px 0 0 var(--heyform-answer-color) !important;
+      background-color: rgba(255, 255, 255, 0.05) !important;
+      border-color: rgba(255, 255, 255, 0.1) !important;
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        0 0 20px rgba(255, 255, 255, 0.05) !important;
       transform: translateY(-1px);
-      border-top: none !important;
-      border-left: none !important;
-      border-right: none !important;
-      outline: none !important;
-      ring: none !important;
     }
 
     &::placeholder,
@@ -491,7 +524,7 @@
       color: #999999 !important;
       transition: color 0.2s ease;
     }
-    
+
     &:not(:focus)::placeholder,
     &:not(:focus)::-webkit-input-placeholder,
     &:not(:focus)::-moz-placeholder,
@@ -517,8 +550,8 @@
     border-bottom: 2px solid var(--heyform-answer-opacity-60-color) !important;
   }
 
-  
-  
+
+
   .heyform-textarea {
     @apply h-10 resize-none overflow-hidden;
     color: var(--heyform-answer-color);
@@ -537,8 +570,8 @@
     color: var(--heyform-answer-color);
   }
 
-  
-  
+
+
   .heyform-opinion-scale {
     .heyform-radio {
       @apply h-14 flex-1;
@@ -558,8 +591,8 @@
     color: var(--heyform-answer-color);
   }
 
-  
-  
+
+
   .heyform-multiple-choice-list {
     @apply inline-flex flex-col max-w-full;
     min-width: 10rem;
@@ -589,7 +622,7 @@
         @apply visible opacity-100;
       }
     }
-    
+
     .heyform-radio-remove {
       @apply right-2 top-1/2 -translate-y-1/2;
     }
@@ -657,8 +690,8 @@
     }
   }
 
-  
-  
+
+
   .heyform-picture-choice-list {
     @apply -mx-1 -mb-2 flex flex-wrap items-stretch;
 
@@ -722,8 +755,8 @@
     }
   }
 
-  
-  
+
+
   .heyform-file-uploader {
     @apply flex h-72 cursor-pointer items-center justify-center rounded-xl transition-all duration-300 ease-out;
     color: var(--heyform-answer-opacity-60-color);
@@ -734,7 +767,7 @@
     &:hover {
       background: linear-gradient(135deg, var(--heyform-answer-opacity-10-color) 0%, var(--heyform-answer-opacity-15-color) 100%);
       border-color: var(--heyform-answer-opacity-80-color);
-      box-shadow: 
+      box-shadow:
         0 8px 24px rgba(99, 102, 241, 0.15),
         0 4px 12px rgba(0, 0, 0, 0.08);
       transform: translateY(-2px);
@@ -755,8 +788,8 @@
     color: var(--heyform-label-color);
   }
 
-  
-  
+
+
   .heyform-signature-wrapper {
     @apply h-40 rounded-xl;
     border: 2px dashed var(--heyform-answer-color);
@@ -776,8 +809,8 @@
     color: var(--heyform-label-color);
   }
 
-  
-  
+
+
   .rate {
     @apply flex items-center;
   }
@@ -817,8 +850,8 @@
     }
   }
 
-  
-  
+
+
   .heyform-phone-number {
     .heyform-input {
       @apply ml-4 w-80;
@@ -835,8 +868,8 @@
     color: var(--heyform-answer-color);
   }
 
-  
-  
+
+
   .heyform-date-root {
     @apply flex items-end;
   }
@@ -883,8 +916,8 @@
     }
   }
 
-  
-  
+
+
   .heyform-table-scrollable {
     @apply w-full overflow-x-auto;
   }
@@ -955,6 +988,7 @@
     }
 
     tr {
+
       td,
       th {
         @apply border-0 p-0;
@@ -979,8 +1013,8 @@
     }
   }
 
-  
-  
+
+
   .heyform-payment-header,
   .heyform-payment-label {
     @apply text-base;
@@ -1279,13 +1313,61 @@
 .logic-panel,
 .logic-bulk-edit-panel,
 .variable-panel {
-  @apply fixed right-0 z-20 flex flex-col border-l border-gray-200 bg-foreground shadow-xl;
+  @apply fixed right-0 z-20 flex flex-col border-l border-gray-200 bg-background shadow-xl;
   width: 40rem;
   top: 3.75rem;
   bottom: 0;
 
+  .panel-header {
+    @apply border-accent-light flex items-center justify-between border-b px-6 py-4;
+
+    h2 {
+      @apply text-base/6 font-semibold;
+    }
+  }
+
+  .panel-body {
+    @apply scrollbar flex-1 overflow-y-auto p-6;
+  }
+
+  .panel-footer {
+    @apply border-accent-light flex items-center justify-between border-t px-6 py-4;
+  }
+
   .field-icon {
     @apply mr-3;
+  }
+}
+
+.logic-bulk-edit-panel {
+  .panel-body {
+    @apply space-y-6;
+  }
+
+  .logic-bulk-edit-item {
+    @apply space-y-4;
+
+    .logic-bulk-edit-item-header {
+      @apply flex items-center gap-x-2;
+
+      .question-icon {
+        @apply shrink-0;
+      }
+    }
+
+    .logic-bulk-edit-item-body {
+      @apply space-y-2;
+    }
+  }
+}
+
+.variable-panel {
+  .panel-body {
+    @apply space-y-4;
+  }
+
+  .variable-item {
+    @apply border-accent-light flex items-center justify-between rounded-lg border p-4;
   }
 }
 
@@ -1322,6 +1404,9 @@
   &:nth-of-type(1) {
     @apply pt-0;
   }
+
+  /* Add subtle background for better readability in dark mode */
+  @apply rounded-lg border border-white/5 bg-white/5 p-4;
 }
 
 .payload-item {
@@ -1348,9 +1433,9 @@
 }
 
 .flow-custom-node {
-  @apply h-28 w-56 rounded-lg border border-accent-light bg-foreground p-4 text-sm text-primary transition-all;
+  @apply h-28 w-56 rounded-lg border border-accent-light bg-background p-4 text-sm text-primary transition-all;
   box-shadow: rgba(0, 0, 0, 0.08) 0 0.125rem 0.25rem,
-  rgba(0, 0, 0, 0.06) 0 0.125rem 0.75rem;
+    rgba(0, 0, 0, 0.06) 0 0.125rem 0.75rem;
 }
 
 .react-flow__node-customNode {
@@ -1382,6 +1467,53 @@
   -webkit-line-clamp: 4;
   overflow: hidden;
 }
+
+/* Enhanced Logic Flow Visibility */
+.logic-flow {
+
+  /* Connection lines - make them much more visible */
+  .react-flow__edge-path {
+    stroke: rgba(255, 255, 255, 0.4) !important;
+    stroke-width: 2px !important;
+  }
+
+  /* Connection line on hover */
+  .react-flow__edge:hover .react-flow__edge-path {
+    stroke: rgba(255, 255, 255, 0.7) !important;
+    stroke-width: 3px !important;
+  }
+
+  /* Connection handles */
+  .react-flow__handle {
+    background: rgba(255, 255, 255, 0.6) !important;
+    border: 2px solid rgba(255, 255, 255, 0.8) !important;
+    width: 10px !important;
+    height: 10px !important;
+  }
+
+  /* Edge labels */
+  .react-flow__edge-text {
+    fill: rgba(255, 255, 255, 0.9) !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+  }
+
+  /* Improve node visibility */
+  .flow-custom-node {
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    box-shadow:
+      0 4px 12px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+  }
+
+  .flow-custom-node:hover {
+    border-color: rgba(255, 255, 255, 0.4) !important;
+    box-shadow:
+      0 8px 24px rgba(0, 0, 0, 0.4),
+      0 0 0 1px rgba(255, 255, 255, 0.2) !important;
+  }
+}
+
 
 .react-flow__controls-button {
   @extend .button;
@@ -1424,7 +1556,7 @@ button.connect-stripe {
   .heyform-radio-label {
     @apply break-all;
   }
-  
+
   /* Remove gradient bar from header in preview */
   .heyform-header {
     background: transparent !important;
@@ -1432,7 +1564,7 @@ button.connect-stripe {
     -webkit-backdrop-filter: none !important;
     border-bottom: none !important;
   }
-  
+
   /* Remove gradient bar from footer in preview */
   .heyform-footer {
     background: transparent !important;
@@ -1441,20 +1573,20 @@ button.connect-stripe {
     border-top: none !important;
     box-shadow: none !important;
   }
-  
+
   /* Ensure footer buttons are visible and styled */
   .heyform-footer-right {
     pointer-events: auto !important;
     display: flex !important;
     visibility: visible !important;
   }
-  
+
   .heyform-pagination {
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
   }
-  
+
   .heyform-pagination .button,
   .heyform-branding {
     background: linear-gradient(135deg, var(--heyform-button-color) 0%, var(--heyform-button-opacity-80-color) 100%) !important;
@@ -1617,7 +1749,7 @@ button.connect-stripe {
 }
 
 .heyform-report-border,
-.heyform-report-divide > :not([hidden]) ~ :not([hidden]) {
+.heyform-report-divide> :not([hidden])~ :not([hidden]) {
   border-color: var(--heyform-report-question-a05);
 }
 

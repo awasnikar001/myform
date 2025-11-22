@@ -102,49 +102,49 @@ const FormItem: FC<FormItemProps> = ({ form, isInTrash, onChange }) => {
     () =>
       isInTrash
         ? [
-            {
-              value: 'restore',
-              icon: <IconRestore className="h-4 w-4" />,
-              label: 'components.restore'
-            },
-            {
-              value: 'delete',
-              icon: <IconTrash className="h-4 w-4" />,
-              label: 'components.permanentlyDelete'
-            }
-          ]
+          {
+            value: 'restore',
+            icon: <IconRestore className="h-4 w-4" />,
+            label: 'components.restore'
+          },
+          {
+            value: 'delete',
+            icon: <IconTrash className="h-4 w-4" />,
+            label: 'components.permanentlyDelete'
+          }
+        ]
         : [
-            {
-              value: 'edit',
-              icon: <IconPencil className="h-4 w-4" />,
-              label: 'components.edit'
-            },
-            {
-              value: 'rename',
-              icon: <IconTag className="h-4 w-4" />,
-              label: 'components.rename'
-            },
-            {
-              value: 'share',
-              icon: <IconShare className="h-4 w-4" />,
-              label: 'components.share'
-            },
-            {
-              value: 'duplicate',
-              icon: <IconCopy className="h-4 w-4" />,
-              label: 'components.duplicate'
-            },
-            {
-              value: 'moveto',
-              icon: <IconMoveTo className="h-4 w-4" />,
-              label: 'components.moveto'
-            },
-            {
-              value: 'trash',
-              icon: <IconTrash className="h-4 w-4" />,
-              label: 'components.delete'
-            }
-          ],
+          {
+            value: 'edit',
+            icon: <IconPencil className="h-4 w-4" />,
+            label: 'components.edit'
+          },
+          {
+            value: 'rename',
+            icon: <IconTag className="h-4 w-4" />,
+            label: 'components.rename'
+          },
+          {
+            value: 'share',
+            icon: <IconShare className="h-4 w-4" />,
+            label: 'components.share'
+          },
+          {
+            value: 'duplicate',
+            icon: <IconCopy className="h-4 w-4" />,
+            label: 'components.duplicate'
+          },
+          {
+            value: 'moveto',
+            icon: <IconMoveTo className="h-4 w-4" />,
+            label: 'components.moveto'
+          },
+          {
+            value: 'trash',
+            icon: <IconTrash className="h-4 w-4" />,
+            label: 'components.delete'
+          }
+        ],
     [isInTrash]
   )
 
@@ -302,13 +302,13 @@ const FormItem: FC<FormItemProps> = ({ form, isInTrash, onChange }) => {
 
   return (
     <FormItemLink
-      className="first-of-type:border-accent-light last-of-type:border-accent-light group flex min-w-0 items-center justify-between gap-6 py-4 transition-colors first-of-type:border-t last-of-type:border-b hover:bg-white/50 hover:backdrop-blur-md has-[[data-state=open]]:bg-white/50 dark:hover:bg-slate-900/50 dark:has-[[data-state=open]]:bg-slate-900/50"
+      className="first-of-type:border-accent-light last-of-type:border-accent-light group flex min-w-0 items-center justify-between gap-6 py-4 transition-colors first-of-type:border-t last-of-type:border-b hover:bg-white/50 hover:backdrop-blur-md has-[[data-state=open]]:bg-white/50 dark:hover:bg-white/[0.03] dark:has-[[data-state=open]]:bg-white/[0.03]"
       to={`/workspace/${form.teamId}/project/${form.projectId}/form/${form.id}/analytics`}
       isInTrash={isInTrash}
       isSuspended={form.suspended}
     >
       <div className="flex min-w-0 flex-1 items-start gap-3 pl-2">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/40 bg-white/60 backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/30">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/40 bg-white/60 backdrop-blur-sm dark:border-white/10 dark:bg-white/5">
           <IconFileText className="h-5 w-5 text-slate-500 dark:text-slate-400" strokeWidth={1.75} />
         </div>
         <div className="min-w-0 flex-1 overflow-hidden">
@@ -316,13 +316,13 @@ const FormItem: FC<FormItemProps> = ({ form, isInTrash, onChange }) => {
           <div className="text-secondary truncate text-sm/6">
             {isInTrash
               ? t('form.metadata2', {
-                  count: form.submissionCount,
-                  date: timeToNow(form.retentionAt, i18n.language)
-                })
+                count: form.submissionCount,
+                date: timeToNow(form.retentionAt, i18n.language)
+              })
               : t('form.metadata', {
-                  count: form.submissionCount,
-                  date: timeFromNow(form.updatedAt, i18n.language)
-                })}
+                count: form.submissionCount,
+                date: timeFromNow(form.updatedAt, i18n.language)
+              })}
           </div>
         </div>
       </div>

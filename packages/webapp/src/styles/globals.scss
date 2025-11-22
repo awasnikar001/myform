@@ -15,7 +15,7 @@
     --hf-accent: 226, 232, 240;
     --hf-accent-light: 15, 23, 42, 4%;
     --hf-error: 220, 38, 38;
-    
+
     /* Slate color palette */
     --hf-slate-50: 248, 250, 252;
     --hf-slate-100: 241, 245, 249;
@@ -23,7 +23,7 @@
     --hf-slate-600: 71, 85, 105;
     --hf-slate-700: 51, 65, 85;
     --hf-slate-800: 30, 41, 59;
-    
+
     /* Icon accent colors - slightly more vibrant */
     --hf-icon-blue: 59, 130, 246;
     --hf-icon-purple: 147, 51, 234;
@@ -32,79 +32,125 @@
   }
 
   .dark {
-    --hf-background: 9, 9, 11;
-    --hf-foreground: 24, 24, 27;
-    --hf-input: 255, 255, 255, 10%;
+    /* Obsidian Theme - Deepest Dark Mode */
+    --hf-background: 5, 5, 5;
+    /* #050505 - Near Black */
+    --hf-foreground: 237, 237, 237;
+    /* #EDEDED - High Contrast Text */
+
+    /* Surface Colors - Subtle hierarchy */
+    --hf-input: 255, 255, 255, 5%;
     --hf-primary: 255, 255, 255;
-    --hf-primary-light: 24, 24, 27;
+    --hf-primary-light: 10, 10, 10;
+
+    /* Secondary/Muted */
     --hf-secondary: 161, 161, 170;
-    --hf-secondary-light: 255, 255, 255, 2.5%;
-    --hf-accent: 230, 230, 230;
-    --hf-accent-light: 255, 255, 255, 5%;
-    --hf-error: 220, 38, 38;
-    
-    /* Slate color palette (dark mode) */
-    --hf-slate-50: 15, 23, 42;
-    --hf-slate-100: 30, 41, 59;
-    --hf-slate-200: 51, 65, 85;
-    --hf-slate-600: 148, 163, 184;
-    --hf-slate-700: 203, 213, 225;
-    --hf-slate-800: 226, 232, 240;
+    --hf-secondary-light: 255, 255, 255, 3%;
+
+    /* Borders - Extremely subtle */
+    --hf-accent: 38, 38, 38;
+    /* #262626 */
+    --hf-accent-light: 255, 255, 255, 4%;
+
+    --hf-error: 248, 113, 113;
+
+    /* Slate color palette (dark mode) - Shifted darker */
+    --hf-slate-50: 10, 10, 10;
+    --hf-slate-100: 23, 23, 23;
+    --hf-slate-200: 38, 38, 38;
+    --hf-slate-600: 115, 115, 115;
+    --hf-slate-700: 163, 163, 163;
+    --hf-slate-800: 212, 212, 212;
+  }
+}
+
+@layer base {
+  /* Premium Font Integration */
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+  :root {
+    --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+  }
+
+  body {
+    font-family: var(--font-sans);
   }
 }
 
 html {
   scroll-behavior: smooth;
-  @apply bg-foreground;
+  @apply bg-background;
 }
 
 body {
-  @apply text-primary antialiased bg-foreground;
+  @apply text-primary antialiased bg-background;
 }
 
 @layer components {
+
   /* Glass effect utility classes */
+  /* Glassmorphism 3.0 - "Frosted Steel" */
   .glass-card {
-    @apply bg-white/40 backdrop-blur-2xl border border-white/60 shadow-2xl shadow-slate-300/60;
+    @apply bg-white/80 backdrop-blur-2xl border border-white/20 shadow-xl shadow-black/5 dark:bg-[#0A0A0A]/80 dark:backdrop-blur-3xl dark:border-white/[0.08] dark:shadow-2xl dark:shadow-black/50;
+    /* Noise texture overlay could be added here via pseudo-element if asset available */
   }
-  
+
   .glass-card-subtle {
-    @apply bg-white/30 backdrop-blur-xl border border-white/50;
+    @apply bg-white/50 backdrop-blur-xl border border-white/10 dark:bg-[#0A0A0A]/40 dark:backdrop-blur-2xl dark:border-white/[0.04];
   }
-  
+
+  .glass-panel {
+    @apply bg-white/90 backdrop-blur-3xl border border-white/20 shadow-2xl dark:bg-[#050505]/90 dark:backdrop-blur-3xl dark:border-white/[0.06] dark:shadow-black/80;
+  }
+
+  /* New Utility: Spotlight Gradient Border */
+  .border-gradient-subtle {
+    border: 1px solid transparent;
+    background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02)) border-box;
+    -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  .premium-gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-violet-600 dark:from-blue-400 dark:to-violet-400;
+  }
+
+  .premium-button {
+    @apply bg-gradient-to-r from-slate-900 to-slate-800 text-white shadow-lg shadow-slate-900/20 hover:shadow-slate-900/40 hover:-translate-y-0.5 transition-all duration-300 dark:from-white dark:to-slate-200 dark:text-slate-900;
+  }
+
   /* Enhanced gradient background for stronger glass effect - light mode only */
   .glass-background {
     position: relative;
   }
-  
+
   @media (prefers-color-scheme: light) {
     .glass-background {
-      background: linear-gradient(135deg, 
-        #e8f0fe 0%, 
-        #f0f4f8 25%, 
-        #faf5ff 50%, 
-        #f0f9ff 75%, 
-        #f5f3ff 100%
-      );
+      background: linear-gradient(135deg,
+          #e8f0fe 0%,
+          #f0f4f8 25%,
+          #faf5ff 50%,
+          #f0f9ff 75%,
+          #f5f3ff 100%);
     }
   }
-  
+
   /* Light mode - stronger gradient with multiple colors */
   html:not(.dark) .glass-background {
-    background: linear-gradient(135deg, 
-      #e8f0fe 0%, 
-      #f0f4f8 25%, 
-      #faf5ff 50%, 
-      #f0f9ff 75%, 
-      #f5f3ff 100%
-    );
+    background: linear-gradient(135deg,
+        #e8f0fe 0%,
+        #f0f4f8 25%,
+        #faf5ff 50%,
+        #f0f9ff 75%,
+        #f5f3ff 100%);
   }
-  
+
   /* Dark mode - ensure transparent */
   html.dark .glass-background {
     background: transparent !important;
   }
-  
+
   /* Enhanced mesh pattern with more visibility */
   .mesh-pattern::before {
     content: '';
@@ -115,13 +161,13 @@ body {
     pointer-events: none;
     z-index: 0;
   }
-  
+
   /* Hide mesh in dark mode */
   html.dark .mesh-pattern::before {
     content: none;
     display: none;
   }
-  
+
   .scrollbar {
     overflow-y: auto;
 
@@ -265,9 +311,11 @@ body {
   0% {
     opacity: 0.2;
   }
+
   20% {
     opacity: 1;
   }
+
   100% {
     opacity: 0.2;
   }
@@ -301,9 +349,12 @@ body {
 }
 
 @keyframes gradient-shift {
-  0%, 100% {
+
+  0%,
+  100% {
     background-position: 0% 50%;
   }
+
   50% {
     background-position: 100% 50%;
   }

@@ -437,7 +437,7 @@ function CodeModal() {
         }}
         onOpenChange={onOpenChange}
       >
-        <pre className="bg-primary text-foreground my-6 overflow-x-auto rounded p-4 text-sm">
+        <pre className="bg-slate-100 text-slate-900 dark:bg-slate-900 dark:text-white my-6 overflow-x-auto rounded p-4 text-sm">
           <code>{payload?.code}</code>
         </pre>
 
@@ -459,7 +459,7 @@ export default function EmbedModal() {
         }}
         contentProps={{
           className:
-            'p-0 w-screen max-w-screen max-h-screen overflow-hidden h-screen bg-foreground focus:outline-none focus-visible:outline-none'
+            'p-0 w-screen max-w-screen max-h-screen overflow-hidden h-screen bg-background focus:outline-none focus-visible:outline-none'
         }}
         isCloseButtonShow={false}
         onOpenChange={onOpenChange}

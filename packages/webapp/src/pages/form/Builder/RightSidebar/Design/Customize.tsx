@@ -246,7 +246,7 @@ export default function Customize() {
           </Form.Item>
         </div>
 
-        <div className="border-accent-light bg-foreground sticky bottom-4 flex items-center gap-x-4 border-t pt-4">
+        <div className="border-accent-light bg-background sticky bottom-4 flex items-center gap-x-4 border-t pt-4">
           <Button.Ghost size="md" onClick={handleRevert}>
             {t('components.revert')}
           </Button.Ghost>

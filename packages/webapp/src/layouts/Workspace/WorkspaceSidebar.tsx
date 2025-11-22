@@ -98,7 +98,7 @@ const WorkspaceSidebarComponent = () => {
   const { workspace } = useWorkspaceStore()
 
   return (
-    <div className="max-lg:bg-foreground flex h-full flex-col max-lg:rounded-lg">
+    <div className="max-lg:bg-background flex h-full flex-col max-lg:rounded-lg">
       <div className="border-accent-light border-b p-4">
         <WorkspaceSwitcher />
       </div>
@@ -211,7 +211,7 @@ export const WorkspaceSidebarModal = () => {
     <Root open={isOpen} onOpenChange={onOpenChange}>
       <Portal>
         <Overlay className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-10 bg-black/60" />
-        <Content className="border-accent-light bg-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-left-0 data-[state=open]:slide-in-from-left-[80%] fixed bottom-2 left-2 top-2 z-10 w-72 rounded-lg border shadow-lg duration-200">
+        <Content className="border-accent-light bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-left-0 data-[state=open]:slide-in-from-left-[80%] fixed bottom-2 left-2 top-2 z-10 w-72 rounded-lg border shadow-lg duration-200">
           <Title>
             <VisuallyHidden />
           </Title>
@@ -228,7 +228,7 @@ export const WorkspaceSidebarModal = () => {
 const WorkspaceSidebar = () => {
   return (
     <div
-      className="bg-foreground fixed inset-y-0 left-0 z-20 w-64 transition-transform duration-300 max-lg:hidden"
+      className="bg-background fixed inset-y-0 left-0 z-20 w-64 transition-transform duration-300 max-lg:hidden"
       data-slot="layout-sidebar"
     >
       <WorkspaceSidebarComponent />

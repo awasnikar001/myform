@@ -50,7 +50,7 @@ export const QuestionIcon: FC<QuestionIconProps> = ({
   return (
     <div
       className={cn(
-        'border-input bg-foreground flex h-6 w-12 items-center justify-between rounded border px-1.5 [&_[data-slot=icon]]:-ml-0.5 [&_[data-slot=icon]]:h-4 [&_[data-slot=icon]]:w-4 [&_[data-slot=index]]:text-xs [&_[data-slot=index]]:font-medium',
+        'border-input bg-background flex h-6 w-12 items-center justify-between rounded border px-1.5 [&_[data-slot=icon]]:-ml-0.5 [&_[data-slot=icon]]:h-4 [&_[data-slot=icon]]:w-4 [&_[data-slot=index]]:text-xs [&_[data-slot=index]]:font-medium',
         className
       )}
       style={style}
