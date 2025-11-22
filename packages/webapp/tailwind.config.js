@@ -46,7 +46,9 @@ module.exports = {
         // Glass effect colors
         glass: {
           light: 'rgba(255, 255, 255, 0.7)',
-          border: 'rgba(255, 255, 255, 0.18)'
+          border: 'rgba(255, 255, 255, 0.18)',
+          dark: 'rgba(0, 0, 0, 0.6)',
+          'border-dark': 'rgba(255, 255, 255, 0.08)'
         }
       },
       backdropBlur: {
@@ -56,6 +58,31 @@ module.exports = {
       screens: {
         'builder-md': '1230px',
         'builder-lg': '1440px'
+      },
+      animation: {
+        'fade-in': 'fade-in 0.5s ease-out forwards',
+        'fade-in-up': 'fade-in-up 0.8s ease-out forwards',
+        float: 'float 6s ease-in-out infinite',
+        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        glow: 'glow 2s ease-in-out infinite alternate'
+      },
+      keyframes: {
+        'fade-in': {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' }
+        },
+        'fade-in-up': {
+          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' }
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-20px)' }
+        },
+        glow: {
+          '0%': { boxShadow: '0 0 5px rgba(var(--hf-primary), 0.2)' },
+          '100%': { boxShadow: '0 0 20px rgba(var(--hf-primary), 0.6)' }
+        }
       }
     }
   },

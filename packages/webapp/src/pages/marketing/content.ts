@@ -21,33 +21,51 @@ export const benefits: Benefit[] = [
   },
   {
     icon: 'IconGitBranch',
-    title: 'Smart Logic',
+    title: 'Logic Jumps & Branching',
     description:
-      'Create conditional branching and calculations that adapt based on user responses. Make your forms intelligent and dynamic.'
+      'Create personalized paths for your respondents. Show or hide fields based on previous answers to keep forms relevant.'
   },
   {
     icon: 'IconChartBar',
-    title: 'Real-Time Analytics',
+    title: 'Advanced Analytics',
     description:
-      'Track responses as they come in. Get insights into completion rates, drop-off points, and user behavior patterns.'
+      'Deep dive into your data with drop-off analysis, completion rates, and device tracking. Export to CSV or Google Sheets.'
   },
   {
     icon: 'IconPlug',
     title: '100+ Integrations',
     description:
-      'Connect to your favorite tools. Integrate with CRM, email marketing, payment processors, and more with one click.'
+      'Connect with Zapier, Slack, Notion, HubSpot, and more. Send data to your favorite tools instantly via Webhooks.'
   },
   {
     icon: 'IconTrendingUp',
-    title: 'Higher Conversions',
+    title: 'Calculations & Scoring',
     description:
-      'Beautiful forms that people love to fill out. Increase completion rates with our modern, mobile-responsive designs.'
+      'Build quizzes and order forms with built-in calculators. Assign values to answers and show custom scores or prices.'
   },
   {
     icon: 'IconShield',
     title: 'Enterprise Security',
     description:
-      'Bank-level encryption and compliance. Your data is protected with SOC 2, GDPR, and HIPAA compliance standards.'
+      'Bank-level encryption, spam protection with Akismet/Captcha, and GDPR compliance. Your data is safe with us.'
+  },
+  {
+    icon: 'IconTemplate',
+    title: 'Team Collaboration',
+    description:
+      'Invite team members to workspaces. Assign roles, share folders, and collaborate on form designs in real-time.'
+  },
+  {
+    icon: 'IconHandClick',
+    title: 'Stripe Payments',
+    description:
+      'Collect payments, donations, or subscriptions directly within your forms. Secure and seamless checkout experience.'
+  },
+  {
+    icon: 'IconShare',
+    title: 'Custom Domains',
+    description:
+      'Remove our branding and use your own domain. Customize meta tags and favicons for a fully white-labeled experience.'
   }
 ]
 

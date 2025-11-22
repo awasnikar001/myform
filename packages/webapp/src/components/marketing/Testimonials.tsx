@@ -15,18 +15,18 @@ export const Testimonials: FC = () => {
     <section
       id="testimonials"
       ref={ref}
-      className={cn('bg-slate-950 py-20 transition-all duration-700 lg:py-32', {
+      className={cn('bg-black py-20 transition-all duration-700 lg:py-32', {
         'translate-y-8 opacity-0': !isVisible,
         'translate-y-0 opacity-100': isVisible
       })}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-12 text-center">
-          <h2 className="mb-4 text-3xl font-bold text-white lg:text-4xl">
-            Loved by People Worldwide
+        <div className="mb-16 text-center">
+          <h2 className="mb-4 text-3xl font-bold text-white lg:text-5xl">
+            Loved by innovators worldwide
           </h2>
           <p className="text-lg text-slate-400">
-            See what our customers have to say about their experience
+            Don't just take our word for it. Here's what our community has to say.
           </p>
         </div>
 
@@ -34,10 +34,13 @@ export const Testimonials: FC = () => {
           {testimonials.map((testimonial, index) => (
             <div
               key={testimonial.name}
-              className={cn('transition-transform duration-300 hover:scale-105', {
-                'translate-y-8 opacity-0': !isVisible,
-                'translate-y-0 opacity-100': isVisible
-              })}
+              className={cn(
+                'group relative rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-sm transition-all duration-500 hover:-translate-y-2 hover:bg-white/10 hover:shadow-2xl hover:shadow-purple-500/10',
+                {
+                  'translate-y-8 opacity-0': !isVisible,
+                  'translate-y-0 opacity-100': isVisible
+                }
+              )}
               style={{
                 transitionDelay: isVisible ? `${index * ANIMATION_DELAYS.STAGGER_ITEM}ms` : '0ms'
               }}
